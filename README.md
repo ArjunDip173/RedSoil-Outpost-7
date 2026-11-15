@@ -102,10 +102,10 @@ coding assistant: it suggested rewriting our first version as this HTML5 game an
 sprites into sprite sheets, helped build LUNA's AI chat and voice, and helped us debug and add features. LUNA's chat
 answers are written live by Google Gemini and are labelled "AI answer" in the game. The art and audio are marked with
 a visible "SI-assisted art & audio" watermark in the game and with notes in each file's metadata. Details:
-[docs/SI_DISCLOSURE.md](docs/SI_DISCLOSURE.md).
+[For Developers/SI_DISCLOSURE.md](For%20Developers/SI_DISCLOSURE.md).
 
-Our answers for the Space Apps project form are in [docs/SUBMISSION.md](docs/SUBMISSION.md), and the demo video plan
-(shot list, script and editing guide) is in [docs/DEMO_VIDEO.md](docs/DEMO_VIDEO.md).
+Our answers for the Space Apps project form are in [For Developers/SUBMISSION.md](For%20Developers/SUBMISSION.md), and the demo video plan
+(shot list, script and editing guide) is in [For Developers/DEMO_VIDEO.md](For%20Developers/DEMO_VIDEO.md).
 
 ## Project structure
 
@@ -126,7 +126,7 @@ public/resources/data/   missions.json and nasa_facts.json (all mission text and
 server/             LUNA's AI server (a Cloudflare Worker) and its deploy script
 litellm/            optional local AI proxy
 tests/              automated checks (Vitest)
-docs/               Space Apps submission text, our SI disclosure and the demo video plan
+For Developers/     Space Apps submission text, our SI disclosure and the demo video plan
 scripts/package.sh  builds a clean submission zip
 scripts/mark-si-assets.py  writes the SI note into the sprite and sound files' metadata
 ```

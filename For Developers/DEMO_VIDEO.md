@@ -168,7 +168,7 @@ Fun, quick and playful, like the game itself:
   Code: https://github.com/ArjunDip173/RedSoil-Outpost-7
   SI disclosure: the game's sprites were drawn by us and later modified and enhanced with SI; most sound effects and
   the music were generated with AI; LUNA's chat answers are written by Google Gemini; Claude (Anthropic) helped with
-  the code. This video was edited with an AI video editor. Details: docs/SI_DISCLOSURE.md in the repository.
+  the code. This video was edited with an AI video editor. Details: "For Developers/SI_DISCLOSURE.md" in the repository.
   ```
 
 - Open the link in a private browser window to check it plays without logging in, then paste it into **Link to

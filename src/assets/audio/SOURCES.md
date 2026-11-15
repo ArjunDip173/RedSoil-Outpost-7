@@ -37,4 +37,4 @@ built-in text-to-speech.
 | `warn.wav` | SI-assisted (AI-generated or AI-edited) |
 | `wire_connect.wav` | SI-assisted (AI-generated or AI-edited) |
 
-See [docs/SI_DISCLOSURE.md](../../../docs/SI_DISCLOSURE.md) for how SI was used across the project.
+See [For Developers/SI_DISCLOSURE.md](../../../For%20Developers/SI_DISCLOSURE.md) for how SI was used across the project.

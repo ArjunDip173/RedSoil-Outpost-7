@@ -18,11 +18,11 @@ ROOT = Path(__file__).resolve().parent.parent
 MARK = "SI-assisted"
 ART_NOTE = (
     "SI-assisted art: pixel art drawn by SideLoaders for Red Soil: Outpost 7, "
-    "later modified and enhanced with SI (AI) tools. See docs/SI_DISCLOSURE.md."
+    "later modified and enhanced with SI (AI) tools. See For Developers/SI_DISCLOSURE.md."
 )
 AUDIO_NOTE = (
     "SI-assisted audio: generated or edited with AI audio tools for Red Soil: Outpost 7 "
-    "by SideLoaders. See docs/SI_DISCLOSURE.md."
+    "by SideLoaders. See For Developers/SI_DISCLOSURE.md."
 )
 
 
