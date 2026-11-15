@@ -1170,6 +1170,16 @@ canvas.patch,
 .cert-modal .row {
   justify-content: center;
 }
+/* visible SI watermark under the minimap (Space Apps rules for SI-assisted images and audio) */
+.si-mark {
+  position: absolute;
+  font-size: calc(15px * var(--ts));
+  line-height: 1;
+  padding: 1px 5px 2px;
+  background: rgba(14, 9, 14, 0.6);
+  color: rgba(240, 230, 220, 0.75);
+  pointer-events: none;
+}
 .confetti {
   position: fixed;
   inset: 0;

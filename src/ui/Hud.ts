@@ -75,6 +75,8 @@ export class Hud {
   private toolHintT = 0;
   private lastTool = -1;
   private tracker: HTMLDivElement;
+  /** Visible "SI-assisted art & audio" watermark (Space Apps rules for SI images and audio). */
+  private siMark: HTMLDivElement;
   private toastBox: HTMLDivElement;
   private prompt: HTMLDivElement;
   private toolHint: HTMLDivElement;
@@ -101,6 +103,7 @@ export class Hud {
   constructor(game: Game, root: HTMLElement) {
     this.game = game;
     this.tracker = el('div', 'tracker');
+    this.siMark = el('div', 'si-mark', 'SI-assisted art & audio');
     this.toastBox = el('div', 'toasts');
     this.prompt = el('div', 'prompt hidden');
     this.toolHint = el('div', 'tool-hint hidden');
@@ -108,7 +111,16 @@ export class Hud {
     this.banner.setAttribute('role', 'alert');
     this.actionBar = el('div', 'action-bar');
     this.watch = el('div', 'holo-watch hidden');
-    root.append(this.tracker, this.toastBox, this.prompt, this.toolHint, this.banner, this.watch, this.actionBar);
+    root.append(
+      this.tracker,
+      this.toastBox,
+      this.prompt,
+      this.toolHint,
+      this.banner,
+      this.watch,
+      this.actionBar,
+      this.siMark,
+    );
     this.buildActions();
     this.buildWatch();
     this.touchUi = new TouchControls(game, root);
@@ -222,6 +234,7 @@ export class Hud {
   destroy(): void {
     for (const n of [this.tracker, this.toastBox, this.prompt, this.toolHint, this.banner, this.watch, this.actionBar])
       n.remove();
+    this.siMark.remove();
     this.touchUi.destroy();
   }
 
@@ -978,6 +991,11 @@ export class Hud {
 
   private updateDom(): void {
     const game = this.game;
+    // the SI watermark sits just under the minimap
+    const map = this.minimapRect;
+    this.siMark.style.top = `${(map.y + map.h + 3) * game.hudScale}px`;
+    this.siMark.style.left = `${map.x * game.hudScale}px`;
+    this.siMark.classList.toggle('hidden', this.bigMap);
     // only the current mission step (keeps the screen calm)
     const mm = game.missions;
     const m = mm.active;

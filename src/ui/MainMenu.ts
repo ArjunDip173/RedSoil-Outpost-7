@@ -148,7 +148,11 @@ export class MainMenu {
       this.settings.muted ? 'ui_mute' : 'ui_sound',
     );
     col.appendChild(mute);
-    const foot = el('div', 'menu-foot', `Developed by ${TEAM_NAME} · 2026 NASA Space Apps Challenge`);
+    const foot = el(
+      'div',
+      'menu-foot',
+      `Developed by ${TEAM_NAME} · 2026 NASA Space Apps Challenge · SI-assisted art & audio`,
+    );
     this.root.append(title, col, foot);
   }
 
@@ -257,7 +261,7 @@ export class MainMenu {
         <li>NASA Mars Exploration Program missions: Phoenix, Spirit, Opportunity, Curiosity, Perseverance, InSight, MAVEN, Ingenuity.</li>
       </ul>
       <h3>Made with help from SI</h3>
-      <p>The game idea, missions, story and pixel art are by ${TEAM_NAME}. Claude (by Anthropic) helped us rewrite the game in HTML5, combine our sprites into sprite sheets, build LUNA's AI chat and voice, fix bugs and add features. LUNA's chat answers are written live by Google Gemini and are marked "AI answer". LUNA's voice is your browser's built-in text-to-speech.</p>
+      <p>The game idea, missions and story are by ${TEAM_NAME}: Arjun Dip Shrestha, Hardik Lamichhane, Aatish Karki, Aayushman Nidhi Tiwari and Sunny Kumar Gupta. We drew the original pixel art, which was later modified and enhanced with SI. Most of the sound effects and the music were generated with AI. Claude (by Anthropic) helped us rewrite the game in HTML5, combine our sprites into sprite sheets, build LUNA's AI chat and voice, fix bugs and add features. LUNA's chat answers are written live by Google Gemini and are marked "AI answer". LUNA's voice is your browser's built-in text-to-speech.</p>
       <h3>Fonts</h3>
       <p>Press Start 2P by CodeMan38 and VT323 by Peter Hull (SIL Open Font License).</p>
       <p class="muted small">Gameplay numbers are simplified and sped up for learning. ${GAME_TITLE} is a hackathon project and is not an official NASA product.</p>`;

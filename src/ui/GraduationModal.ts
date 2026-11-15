@@ -232,6 +232,12 @@ export function drawCertificate(art: Sprites, info: CertificateInfo): HTMLCanvas
     W / 2,
     H - 92,
   );
+  // SI watermark (Space Apps rules: SI-assisted images must say so visibly)
+  g.textAlign = 'right';
+  g.font = '22px VT323, monospace';
+  g.fillStyle = '#a07e6c';
+  g.fillText('SI-assisted art & audio', W - 80, 92);
+  g.textAlign = 'center';
   return c;
 }
 

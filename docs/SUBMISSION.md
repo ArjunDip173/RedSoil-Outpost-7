@@ -1,6 +1,8 @@
 # Red Soil: Outpost 7 · NASA Space Apps Challenge 2026
 
-Team **SideLoaders** · Challenge: **Build a Junior Astronaut Mission Trainer**
+Team **SideLoaders**: Arjun Dip Shrestha, Hardik Lamichhane, Aatish Karki, Aayushman Nidhi Tiwari, Sunny Kumar Gupta
+
+Challenge: **Build a Junior Astronaut Mission Trainer**
 
 This file holds our answers for each field of the Space Apps project form, in the same order, so they can be pasted
 in. Our use of Super Intelligence (SI) is described in full in [SI_DISCLOSURE.md](SI_DISCLOSURE.md).
@@ -24,7 +26,7 @@ phones, works offline, and needs no install or account, so a teacher can share o
 
 ## Link to Project Demo
 
-_To add: a 30-second video or a slide deck of at most 7 slides (see "Demo plan" at the end of this file)._
+_To add: the link to our 30-second demo video (shooting and editing plan in [DEMO_VIDEO.md](DEMO_VIDEO.md))._
 
 ## Link to Final Project
 
@@ -80,12 +82,16 @@ LUNA's chat; Claude by Anthropic as a coding assistant (see the SI section).
 
 Yes. The game idea, the missions, the story and the original pixel art are our own. We first built the game
 ourselves, but kept running into the same bugs. We then used Claude (by Anthropic) as a coding assistant. Claude
-suggested rewriting the game as an HTML5/TypeScript web game and helped us write that version. It also helped us
-combine our sprites into sprite sheets and recolour the astronaut, build LUNA's AI chat and text-to-speech voice, find
-and fix bugs, and add features such as touch controls, the guide path and foldable solar panels. Inside the game,
-LUNA's chat answers are generated live by Google Gemini and are labelled "AI answer". The full breakdown is in
-[SI_DISCLOSURE.md](SI_DISCLOSURE.md), and SI help is also acknowledged in the in-game Credits, the README and the
-page's metadata. No NASA logos or branding were generated or changed.
+suggested rewriting the game as an HTML5/TypeScript web game and helped us write that version. Our sprites were later
+modified and enhanced with SI, and Claude combined them into sprite sheets and set up recolouring for the astronaut.
+Most of the sound effects and the music were generated with AI audio tools. Claude also helped build LUNA's AI chat
+and text-to-speech voice, find and fix bugs, and add features such as touch controls, the guide path and foldable
+solar panels. Inside the game, LUNA's chat answers are generated live by Google Gemini and are labelled "AI answer".
+
+Where SI is marked: a visible "SI-assisted art & audio" watermark in the game, on the title screen, on the certificate
+and in our demo video; notes in the metadata of every sprite sheet and sound file; the in-game Credits, the README and
+the web page's metadata. The full breakdown is in [SI_DISCLOSURE.md](SI_DISCLOSURE.md). No NASA logos or branding were
+generated or changed.
 
 ## NASA Data
 
@@ -118,36 +124,16 @@ https://www.asc-csa.gc.ca/
 - Google Gemini API (free tier) for LUNA's chat answers; Cloudflare Workers to host LUNA's small server.
 - Web Speech API (built into the browser) for LUNA's voice.
 - Claude by Anthropic, used as a coding assistant (see [SI_DISCLOSURE.md](SI_DISCLOSURE.md)).
-- Sprites and pixel art: drawn by SideLoaders.
-- Sound effects and music: _[to add: where they came from and their licences]_.
+- Sprites and pixel art: drawn by SideLoaders, later modified and enhanced with SI (marked with a visible watermark).
+- Sound effects and music: mostly generated with AI audio tools (noted in each file's metadata and in
+  `src/assets/audio/SOURCES.md`).
 
 Gameplay numbers are simplified and sped up for learning. Red Soil: Outpost 7 is a hackathon project and not an
 official NASA product.
 
 ---
 
-## Demo plan
+## Demo
 
-Space Apps accepts either a video of **30 seconds or less** or a slide deck of **at most 7 slides**, in English, at a
-public link. The demo must not show anyone under 18, so record the screen only.
-
-**30-second video script**
-
-| Time | Show                                       | Say                                                                                                       |
-| ---- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| 0:00 | Title screen                               | "We're SideLoaders, and this is Red Soil: Outpost 7."                                                     |
-| 0:03 | Rocket landing                             | "Our challenge: build a junior astronaut mission trainer for kids aged 7 to 12."                          |
-| 0:07 | Brushing a dusty panel, the glowing path   | "Kids run a Mars base through six missions: power, ice, oxygen, plants, radiation and calling Earth."     |
-| 0:14 | Solar flare warning, hiding in the shelter | "Every mission uses real NASA science, like DONKI solar flare alerts and Curiosity's radiation readings." |
-| 0:20 | Asking LUNA a question on a tablet         | "LUNA, our helper drone, reads aloud and answers questions."                                              |
-| 0:25 | Certificate with confetti                  | "It runs in any browser, even offline. One link, and a whole class can train for Mars."                   |
-
-**7-slide outline**
-
-1. Title: Red Soil: Outpost 7, team SideLoaders (team members' names), challenge name.
-2. The problem: Mars survival is hard to picture for kids; science should be something they do.
-3. Our solution: a Mars base game with six missions (screenshot of the base).
-4. What kids learn: the mission table above, one line each.
-5. Made with NASA data: DONKI, Curiosity RAD, OSDR, Mars missions, CSA.
-6. How it works: one web page, touch and keyboard, LUNA (voice and AI chat), offline mode.
-7. What's next: teacher mode, more languages, tablet app; play link and QR code.
+Our demo is a 30-second video. The shooting plan, script, timestamps and editing instructions are in
+[DEMO_VIDEO.md](DEMO_VIDEO.md).
