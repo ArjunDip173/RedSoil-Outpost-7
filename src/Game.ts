@@ -1328,12 +1328,15 @@ export class Game {
 
   private clampCamera(): void {
     if (this.blackout) {
-      // indoors: keep the habitat framed (centred when it fits on screen)
+      // Indoors the camera follows the astronaut and may go up to a third of a screen past the
+      // walls (black there), so the minimap, mission box and buttons never hide a room.
       const f = this.base.footprint;
-      const x0 = f.x - 8;
-      const x1 = f.x + f.w + 8;
-      const y0 = f.y - 16;
-      const y1 = f.y + f.h + 8;
+      const padX = this.vw * 0.35;
+      const padY = this.vh * 0.35;
+      const x0 = f.x - 8 - padX;
+      const x1 = f.x + f.w + 8 + padX;
+      const y0 = f.y - 16 - padY;
+      const y1 = f.y + f.h + 8 + padY;
       this.camX = x1 - x0 <= this.vw ? (x0 + x1) / 2 - this.vw / 2 : Math.max(x0, Math.min(x1 - this.vw, this.camX));
       this.camY = y1 - y0 <= this.vh ? (y0 + y1) / 2 - this.vh / 2 : Math.max(y0, Math.min(y1 - this.vh, this.camY));
       return;

@@ -482,7 +482,7 @@ const PANEL_COLORS = {
  * tilted toward the sky; folded, it is a small silver box on a shorter mast.
  * (sx, sy) is the panel's left edge and ground line on screen.
  */
-function drawPanel(g: Ctx, p: SolarPanel, sx: number, sy: number, time: number): void {
+export function drawPanel(g: Ctx, p: SolarPanel, sx: number, sy: number, time: number): void {
   const c = PANEL_COLORS;
   const o = p.open;
   const mid = sx + PANEL_W / 2;

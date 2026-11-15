@@ -5,6 +5,7 @@ import {
   GAME_TITLE,
   HAIR_COLORS,
   LANDMARKS,
+  PANEL_W,
   SKIN_TONES,
   SUIT_COLORS,
   TEAM_NAME,
@@ -21,6 +22,7 @@ import { type CertificateInfo, showCertificate } from './GraduationModal';
 import { openScienceLog } from './ScienceLogModal';
 import { BaseHabitat } from '../world/BaseHabitat';
 import { TileMap } from '../world/TileMap';
+import { drawPanel } from '../world/WorldObjects';
 
 export interface MenuHandlers {
   onNew: (profile: Profile) => void;
@@ -254,6 +256,10 @@ export class MainMenu {
         <li><b>Canadian Space Agency</b>: Canadarm2, Phoenix’s weather station, Curiosity’s APXS, Artemis II.</li>
         <li>NASA Mars Exploration Program missions: Phoenix, Spirit, Opportunity, Curiosity, Perseverance, InSight, MAVEN, Ingenuity.</li>
       </ul>
+      <h3>Made with help from SI</h3>
+      <p>The game idea, missions, story and pixel art are by ${TEAM_NAME}. Claude (by Anthropic) helped us rewrite the game in HTML5, combine our sprites into sprite sheets, build LUNA's AI chat and voice, fix bugs and add features. LUNA's chat answers are written live by Google Gemini and are marked "AI answer". LUNA's voice is your browser's built-in text-to-speech.</p>
+      <h3>Fonts</h3>
+      <p>Press Start 2P by CodeMan38 and VT323 by Peter Hull (SIL Open Font License).</p>
       <p class="muted small">Gameplay numbers are simplified and sped up for learning. ${GAME_TITLE} is a hackathon project and is not an official NASA product.</p>`;
   }
 
@@ -271,9 +277,10 @@ export class MainMenu {
     // solar field
     const F = LANDMARKS.solarField;
     for (let k = 0; k < 6; k++) {
-      const x = (F.x + (k % F.cols) * F.dx) * TILE - 8;
+      const x = (F.x + (k % F.cols) * F.dx) * TILE + 9 - PANEL_W / 2;
       const y = (F.y + Math.floor(k / F.cols) * F.dy + 1) * TILE;
-      list.push({ y, draw: () => g.drawImage(art.get('solar'), x - camX, y - 26 - camY) });
+      const panel = { x, y, dust: 0.15, broken: false, folded: false, open: 1, wear: 0, shine: 0 };
+      list.push({ y, draw: () => drawPanel(g, panel, x - camX, y - camY, t) });
     }
     // rover driving back and forth south of the base
     const rp = (t * 0.08) % 2;

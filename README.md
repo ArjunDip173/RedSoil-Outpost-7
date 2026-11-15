@@ -92,6 +92,15 @@ For a local alternative, `litellm/` contains a LiteLLM proxy setup that the game
    `.gitignore` keeps `server/.env` (your key), `node_modules/` and build folders out of the repository.
 3. On GitHub: **Settings → Pages → Build and deployment → Deploy from a branch → `main` / `(root)`**. After a minute the game is live at `https://<your-name>.github.io/<repo>/` (the page opens `RedSoil-Outpost7.html` by itself).
 
+## Made with help from SI
+
+The idea, missions, story and pixel art are by SideLoaders. We used Claude (by Anthropic) as a coding assistant: it
+suggested rewriting our first version as this HTML5 game and helped write it, combined our sprites into sprite sheets,
+helped build LUNA's AI chat and voice, and helped us debug and add features. LUNA's chat answers are written live by
+Google Gemini and are labelled "AI answer" in the game. Details: [docs/SI_DISCLOSURE.md](docs/SI_DISCLOSURE.md).
+
+Our answers for the Space Apps project form are in [docs/SUBMISSION.md](docs/SUBMISSION.md).
+
 ## Project structure
 
 ```
@@ -111,6 +120,7 @@ public/resources/data/   missions.json and nasa_facts.json (all mission text and
 server/             LUNA's AI server (a Cloudflare Worker) and its deploy script
 litellm/            optional local AI proxy
 tests/              automated checks (Vitest)
+docs/               Space Apps submission text and our SI disclosure
 scripts/package.sh  builds a clean submission zip
 ```
 
