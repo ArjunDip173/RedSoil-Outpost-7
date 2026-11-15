@@ -2044,13 +2044,6 @@ code {
   height: min(100vh, calc(100vw * 9 / 16));
   image-rendering: pixelated;
 }
-.intro-skip {
-  position: absolute;
-  right: 16px;
-  bottom: 12px;
-  font-size: calc(18px * var(--ts));
-  color: rgba(232, 236, 242, 0.6);
-}
 
 /* ───────────── touch controls (phones and tablets) ───────────── */
 .touch-ui {

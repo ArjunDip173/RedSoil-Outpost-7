@@ -18,7 +18,7 @@
     {
       "who": "LUNA",
       "mood": "happy",
-      "text": "Walk with WASD or the arrow keys. Press E to use things. Follow the yellow arrow!"
+      "text": "Walk with WASD or the arrow keys. Press E to use things. Follow the glowing yellow path on the ground!"
     }
   ],
   "missions": [
@@ -428,7 +428,7 @@
         {
           "who": "LUNA",
           "mood": "think",
-          "text": "The storm scattered 3 dish parts far away. Take the ROVER and follow the yellow arrow."
+          "text": "The storm scattered 3 dish parts far away. Take the ROVER and follow the glowing yellow path."
         },
         {
           "who": "LUNA",
@@ -451,7 +451,7 @@
           "event": "antenna_part",
           "count": 3,
           "target": "nearest_part",
-          "hint": "Follow the yellow arrow. Just touch the glowing parts."
+          "hint": "Follow the glowing yellow path. Just touch the glowing parts."
         },
         {
           "id": "reach",

@@ -2,12 +2,11 @@
  * The opening cutscene for a new game: launch from Earth, the cruise through space,
  * landing next to Outpost 7, and the astronaut walking into the airlock.
  *
- * It draws into a 320×180 canvas that is scaled up with crisp pixels. Any key or click
- * skips it. All art comes from the sprite sheet (cs_* sprites).
+ * It draws into a 320×180 canvas that is scaled up with crisp pixels. It always plays to the end
+ * (no skipping), so every new astronaut sees the trip to Mars. All art comes from the sprite sheet (cs_* sprites).
  */
 import type { AudioEngine } from '../core/AudioEngine';
 import { makeCanvas, rect } from '../core/canvas';
-import { forTouch } from '../core/touch';
 import type { Sprites } from '../core/Sprites';
 import { el } from './Dom';
 
@@ -42,8 +41,7 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
     const root = el('div', 'intro');
     const [canvas, g] = makeCanvas(W, H);
     canvas.className = 'intro-canvas';
-    const skip = el('div', 'intro-skip', forTouch('Click or press any key to skip'));
-    root.append(canvas, skip);
+    root.append(canvas);
     host.appendChild(root);
 
     const rocketSide = rotate90(art.get('cs_rocket'));
@@ -66,21 +64,12 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
       if (done) return;
       done = true;
       audio.loop('thruster', 0);
-      window.removeEventListener('keydown', onSkip);
-      root.removeEventListener('mousedown', onSkip);
       root.classList.add('fade-out');
       setTimeout(() => {
         root.remove();
         resolve();
       }, 450);
     };
-    const onSkip = (e: Event) => {
-      if (performance.now() - start < 400) return;
-      e.preventDefault();
-      finish();
-    };
-    window.addEventListener('keydown', onSkip);
-    root.addEventListener('mousedown', onSkip);
 
     const caption = (text: string, sub?: string, alpha = 1) => {
       g.globalAlpha = alpha;

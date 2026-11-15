@@ -15,6 +15,7 @@ import { Rover } from './entities/Rover';
 import { Lighting } from './systems/Lighting';
 import { MissionManager } from './systems/MissionManager';
 import { ParticleSystem } from './systems/ParticleSystem';
+import { Guide, type GuideTarget } from './systems/Guide';
 import { ResourceManager } from './systems/ResourceManager';
 import { type ChatTurn, type GameContext, LunaAI } from './systems/LunaAI';
 import { WeatherSystem } from './systems/WeatherSystem';
@@ -82,6 +83,24 @@ const MORNING_TIPS = [
   'Morning! Remember: the rover refills your suit O2, so take it on long trips.',
 ];
 
+/** Names shown on the guide beacon and the screen-edge arrow. */
+const TARGET_LABEL: Record<string, string> = {
+  airlock: 'AIRLOCK',
+  airlock_out: 'AIRLOCK',
+  panels: 'SOLAR PANELS',
+  pdu: 'POWER UNIT',
+  console: 'MISSION CONSOLE',
+  melter: 'ICE MELTER',
+  fabricator: 'FABRICATOR',
+  beds: 'GREENHOUSE',
+  shelter: 'STORM SHELTER',
+  shelter_roof: 'SHIELD WALL',
+  ice: 'BURIED ICE',
+  rover: 'ROVER',
+  antenna: 'ANTENNA',
+  nearest_part: 'ANTENNA PART',
+};
+
 export class Game {
   vw = 640;
   vh = 360;
@@ -115,6 +134,8 @@ export class Game {
   particles = new ParticleSystem();
   lighting = new Lighting();
   hud: Hud;
+  /** Where to go next: the goal and a walkable route to it. */
+  guide: Guide;
   ui: UIManager;
   /** "Ask LUNA" chat (AI server or offline answers). */
   lunaAI: LunaAI;
@@ -163,6 +184,7 @@ export class Game {
     this.res = new ResourceManager(this);
     this.missions = new MissionManager(this);
     this.weather = new WeatherSystem(this);
+    this.guide = new Guide(this);
     this.ui = new UIManager(this, d.root, d.stack);
     this.hud = new Hud(this, d.root);
     this.luna = new LunaDrone(this, d.root);
@@ -540,7 +562,7 @@ export class Game {
     }
     if (a.state === 'broken') {
       if (this.antennaPartsHeld() < 3) {
-        this.hint('needparts', `We need 3 antenna parts — you have ${this.antennaPartsHeld()}. Follow the yellow arrow to find the rest!`, 'think', 6);
+        this.hint('needparts', `We need 3 antenna parts — you have ${this.antennaPartsHeld()}. Follow the glowing yellow path to find the rest!`, 'think', 6);
         return;
       }
       const labels = ['POWER', 'AMPLIFIER', 'RECEIVER', 'TRANSMITTER', 'FEED HORN'];
@@ -705,7 +727,7 @@ export class Game {
       this.particles.burst(pk.x + 7, pk.y + 7, 16, '#ffd166', 60);
       const have = this.antennaPartsHeld();
       this.toast(`Antenna part found! (${have}/3)`, '#ffd166', 'icon_part');
-      this.luna.say(have >= 3 ? 'That is all 3 parts! Now head EAST to the Deep Space Antenna on the ridge.' : `Antenna part ${have} of 3! Follow the arrow to the next one.`, 'wow', 2);
+      this.luna.say(have >= 3 ? 'That is all 3 parts! Now head EAST to the Deep Space Antenna on the ridge.' : `Antenna part ${have} of 3! Follow the glowing path to the next one.`, 'wow', 2);
     } else if (pk.kind === 'meteorite') {
       p.addItem('meteorite', 1);
       this.stats.meteoritesFound++;
@@ -793,7 +815,7 @@ export class Game {
     });
   }
 
-  // ───────────────────────── guide arrow targets ─────────────────────────
+  // ───────────────────────── guide targets ─────────────────────────
 
   /** True when the suit only has enough air left to walk home (with a safety margin). */
   turnBackNeeded(): boolean {
@@ -816,23 +838,25 @@ export class Game {
     return batterySec < (dist / (ROVER_MAX_SPEED * 0.6)) * 1.5 + 12;
   }
 
-  guideTarget(): { x: number; y: number } | null {
+  /** Where the guide should lead right now (null: nowhere in particular). */
+  guideTarget(): GuideTarget | null {
     // safety first: point home when the air or rover battery is running out
-    if (this.turnBackNeeded()) return { x: SPOTS.airlockOut.x, y: SPOTS.airlockOut.y - 18 };
+    if (this.turnBackNeeded()) return { x: SPOTS.airlockOut.x, y: SPOTS.airlockOut.y - 18, label: 'BASE · AIR LOW!', urgent: true };
     if (this.roverLowForTrip()) {
       const pad = this.rover.padCenter();
-      return { x: pad.x, y: pad.y };
+      return { x: pad.x, y: pad.y, label: 'CHARGING PAD', urgent: true };
     }
     const obj = this.missions.currentObjective();
     if (!obj?.target) return null;
     const inside = ['airlock', 'pdu', 'console', 'melter', 'beds', 'fabricator', 'shelter'];
     const targetInside = inside.includes(obj.target);
-    if (this.player.inBase && !targetInside) return { x: SPOTS.airlockIn.x, y: SPOTS.airlockIn.y - 4 };
+    if (this.player.inBase && !targetInside) return { x: SPOTS.airlockIn.x, y: SPOTS.airlockIn.y - 4, label: 'AIRLOCK · GO OUTSIDE' };
     if (!this.player.inBase && targetInside) {
-      if (this.rover.driving) return { x: SPOTS.charger.x - 40, y: SPOTS.charger.y };
-      return { x: SPOTS.airlockOut.x, y: SPOTS.airlockOut.y - 18 };
+      if (this.rover.driving) return { x: SPOTS.charger.x - 40, y: SPOTS.charger.y, label: 'ROVER PAD' };
+      return { x: SPOTS.airlockOut.x, y: SPOTS.airlockOut.y - 18, label: 'AIRLOCK · GO INSIDE' };
     }
-    return this.resolveTarget(obj.target);
+    const at = this.resolveTarget(obj.target);
+    return at ? { ...at, label: TARGET_LABEL[obj.target] ?? 'GO HERE' } : null;
   }
 
   private resolveTarget(name: string): { x: number; y: number } | null {
@@ -1013,6 +1037,7 @@ export class Game {
       this.rover.update(dt);
     }
     this.computeFocus();
+    this.guide.update(dt);
     this.brickAssist();
     if (input.pressed('e') && this.focus) {
       this.focus.act();
@@ -1080,7 +1105,7 @@ export class Game {
       const horiz = Math.abs(dx) < 2 ? '' : `${Math.abs(dx)} m ${dx > 0 ? 'EAST (right)' : 'WEST (left)'}`;
       const vert = Math.abs(dy) < 2 ? '' : `${Math.abs(dy)} m ${dy > 0 ? 'SOUTH (down)' : 'NORTH (up)'}`;
       this.luna.say(`Scan complete! I found ice under the soil ${[horiz, vert].filter(Boolean).join(' and ') || 'right here'}. It glows blue now — dig it with the Mining Laser!`, 'wow', 2);
-    } else if (ice) this.luna.say('Scan complete! No buried ice right here, but I can see ice further away. Follow the arrow!', 'think', 2);
+    } else if (ice) this.luna.say('Scan complete! No buried ice right here, but I can see ice further away. Follow the glowing path!', 'think', 2);
     else this.luna.say('Scan complete! No ice close by. Try somewhere else — ice is more common toward the poles (north and south).', 'think', 2);
   }
 

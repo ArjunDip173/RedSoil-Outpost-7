@@ -79,7 +79,8 @@ export class TouchControls {
 
   update(): void {
     const g = this.game;
-    const on = touch.active && !g.ui.blocking && !g.evacuatingNow;
+    // hidden while a window or the big map is open (the MAP button still closes the map)
+    const on = touch.active && !g.ui.blocking && !g.evacuatingNow && !g.hud.bigMap;
     this.layer.classList.toggle('hidden', !on);
     if (!on) return;
     const r = stickRadius();

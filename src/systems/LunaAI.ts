@@ -47,8 +47,8 @@ const HELP: { keys: string[]; text: string }[] = [
   { keys: ['radiation', 'flare', 'shelter', 'geiger', 'donki', 'storm', 'shield', 'wall'], text: 'When a SOLAR FLARE warning flashes, hide in the Storm Shelter room (bottom-right of the base) or deep in the lava tube cave. Rock, soil and water block radiation.' },
   { keys: ['brick', 'build', 'fabricator', 'upgrade', 'craft', 'glowing', 'square'], text: 'The Fabricator (3D printer in the Algae Lab) turns regolith into bricks and builds upgrades. For the shield wall, walk to the glowing squares on the right side of the base and click each one while carrying bricks.' },
   { keys: ['rover', 'drive', 'car', 'driving', 'home'], text: 'The rover is on the landing pad to the left of the base. Press E next to it to drive with WASD. Standing next to it refills your suit air, and the GO HOME button (or R) drives it back to the pad by itself.' },
-  { keys: ['antenna', 'earth', 'call', 'radio', 'signal', 'part', 'dish'], text: 'The Deep Space Antenna is far up and to the right on a rocky ridge. In Mission 6 you find 3 parts by following the yellow arrow, fix its wires and turn the dish toward the blue Earth.' },
-  { keys: ['move', 'walk', 'control', 'key', 'sprint', 'run', 'play', 'button', 'stuck', 'lost'], text: 'Walk with WASD or the arrow keys. Press E to use the thing you are next to, and hold the mouse to use your tool. Follow the yellow arrow and the mission box at the top-right. The buttons in the bottom-right are Scan, Map, Log, Ask LUNA, Base Ops and Fast.' },
+  { keys: ['antenna', 'earth', 'call', 'radio', 'signal', 'part', 'dish'], text: 'The Deep Space Antenna is far up and to the right on a rocky ridge. In Mission 6 you find 3 parts by following the glowing yellow path, fix its wires and turn the dish toward the blue Earth.' },
+  { keys: ['move', 'walk', 'control', 'key', 'sprint', 'run', 'play', 'button', 'stuck', 'lost'], text: 'Walk with WASD or the arrow keys. Press E to use the thing you are next to, and hold the mouse to use your tool. Follow the glowing yellow path on the ground (and the big arrow next to you) and the mission box at the top-right. The buttons in the bottom-right are Scan, Map, Log, Ask LUNA, Base Ops and Fast.' },
   { keys: ['fast', 'wait', 'waiting', 'time', 'night', 'slow', 'speed'], text: 'Inside the base, hold the FAST button to speed up time when you are safe. During training missions the night is skipped.' },
   { keys: ['sample', 'rock', 'sparkly', 'mineral', 'science', 'log'], text: 'Sparkly rocks are science samples! Pick the Dust Brush in your tool bar and hold the mouse on them to add them to your Science Log.' },
 ];
@@ -180,7 +180,7 @@ export class LunaAI {
     if (/\b(bye|goodbye|see you|see ya|cya|good night)\b/.test(q)) return 'Bye for now! Fly safe, astronaut!';
     if (/\b(love you|you are (cool|awesome|great|smart|nice)|you're (cool|awesome|great|smart|nice))\b/.test(q)) return "Aww, thank you! You're a super astronaut too!";
     if (/what (should|do|can) i do|what now|what next|next step|what's next|what is next|i'm stuck|im stuck|i am stuck/.test(q))
-      return ctx && ctx.objective && ctx.objective !== 'none' ? `Your next step: ${ctx.objective}. Follow the yellow arrow and I'll help along the way!` : 'Follow the yellow arrow and check the mission box in the top-right corner!';
+      return ctx && ctx.objective && ctx.objective !== 'none' ? `Your next step: ${ctx.objective}. Follow the glowing yellow path and I'll help along the way!` : 'Follow the glowing yellow path on the ground and check the mission box in the top-right corner!';
     return null;
   }
 
@@ -218,7 +218,7 @@ export class LunaAI {
       '- Never ask for or repeat personal information such as a real name, age, school, address or photos. If the child shares some, gently remind them not to share personal details online.',
       '- Keep it kind and safe: nothing scary, violent or grown-up. If the child seems upset or unsafe, encourage them to talk to a parent, teacher or another trusted adult.',
       '- You cannot change the game or give items; give tips instead.',
-      '- For questions about how to play, ONLY use the game guide below. Never invent buttons, keys, places or steps. If the guide does not cover it, say you are not sure and suggest following the yellow arrow or the mission box at the top-right.',
+      '- For questions about how to play, ONLY use the game guide below. Never invent buttons, keys, places or steps. If the guide does not cover it, say you are not sure and suggest following the glowing yellow path or the mission box at the top-right.',
       '',
       'Game guide:',
       ...HELP.map((h) => `- ${h.text}`),

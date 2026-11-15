@@ -52,7 +52,9 @@ After Mission 6 the player graduates and gets a printable certificate signed by 
 - Short, simple instructions; LUNA reads them aloud (browser speech, can be turned off) and only talks when it matters.
 - Big pixel text with a text-size setting, a hologram watch instead of a busy top bar, one message at a time.
 - Auto power: kids just switch machines on or off. Older players can turn on Expert power in Settings.
-- Flashing warnings for low battery, air, water and food, radiation and solar flares, plus a "time to head back" warning with an arrow home.
+- Always know where to go: a glowing path of dots on the ground leads to the next mission step, walking around walls and rocks. An arrow next to the astronaut points the way, the goal gets a bouncing beacon with its name, an arrow at the screen edge shows where it is and how far ("ANTENNA · 89m"), and the route shows on the minimap.
+- Flashing warnings for low battery, air, water and food, radiation and solar flares, plus a "time to head back" warning; the path then turns red and leads home.
+- The rocket trip to Mars plays in full at the start of every new game, so every astronaut sees how they got there.
 - No long waits during training (nights are skipped, crops grow faster, and the Fast button speeds up time).
 - If something goes wrong, the med-evac screen explains what happened and what to try next.
 

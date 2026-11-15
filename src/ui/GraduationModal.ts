@@ -249,7 +249,7 @@ export function showMedEvac(game: Game, cause: EvacCause, lost: number, onDone: 
     oxygen: {
       what: 'Your suit ran out of air!',
       why: 'Mars has almost no oxygen, so your suit carries a small tank. It empties while you are outside.',
-      next: ['Watch the blue ring in the bottom-left corner.', 'When it is half empty, follow the arrow home.', 'Standing next to the rover refills your suit.'],
+      next: ['Watch the blue ring in the bottom-left corner.', 'When it is half empty, follow the glowing path home.', 'Standing next to the rover refills your suit.'],
     },
     radiation: {
       what: 'You got too much space radiation today!',

@@ -10,10 +10,31 @@ import { BASE_WATER_CAP, CROPS, ITEMS, LANDMARKS, O, PACK_CAP, SOL_DOSE_BUDGET, 
 import { type Ctx, rect } from '../core/canvas';
 import { forTouch, touch } from '../core/touch';
 import type { Game } from '../Game';
+import { pointAlong } from '../world/pathfind';
 import { el, icon, spriteCanvas } from './Dom';
 import { TouchControls } from './TouchControls';
 
 const FONT = '8px "Press Start 2P", monospace';
+
+/** A chunky arrow pointing along `ang`, its tip `size` px ahead of (x, y), with a dark outline. */
+function drawArrow(g: Ctx, x: number, y: number, ang: number, size: number, color: string): void {
+  g.save();
+  g.translate(Math.round(x), Math.round(y));
+  g.rotate(ang);
+  g.beginPath();
+  g.moveTo(size, 0);
+  g.lineTo(-size * 0.7, -size * 0.8);
+  g.lineTo(-size * 0.3, 0);
+  g.lineTo(-size * 0.7, size * 0.8);
+  g.closePath();
+  g.lineJoin = 'round';
+  g.lineWidth = 2;
+  g.strokeStyle = 'rgba(20,10,12,0.85)';
+  g.stroke();
+  g.fillStyle = color;
+  g.fill();
+  g.restore();
+}
 
 interface RingPx {
   x: number;
@@ -414,7 +435,7 @@ export class Hud {
       });
     } else if (w.flare.phase === 'warning') out.push({ id: 'flarewarn', level: 'bad', icon: 'icon_rad', text: `Solar flare in ${Math.ceil(w.flare.t)} s! Go to the Storm Shelter!` });
     if (!p.inBase && p.o2 / p.o2Max < 0.25 && !g.rover.tetherReach(p)) out.push({ id: 'suit', level: 'bad', icon: 'icon_o2', text: 'SUIT OXYGEN LOW! Go inside or to the rover.' });
-    else if (g.turnBackNeeded()) out.push({ id: 'turnback', level: 'warn', icon: 'ui_hourglass', text: 'Time to head back! Follow the arrow home.' });
+    else if (g.turnBackNeeded()) out.push({ id: 'turnback', level: 'warn', icon: 'ui_hourglass', text: 'Time to head back! Follow the red path home.' });
     if (p.health < 30) out.push({ id: 'health', level: 'bad', icon: 'icon_heart', text: 'HEALTH LOW! Go inside, or eat a Meal Pack.' });
     if (w.solDoseOver() && w.doseRate > 1.5) out.push({ id: 'dose', level: 'bad', icon: 'icon_rad', text: 'Too much radiation! Go inside.' });
     if (r.o2 < 25) out.push({ id: 'air', level: 'bad', icon: 'icon_o2', text: 'BASE AIR LOW! Switch on the O2 Maker.' });
@@ -471,20 +492,83 @@ export class Hud {
 
   // ───────────────────────── world layer ─────────────────────────
 
-  /** Things that belong to the world: tile cursor and the bouncing target arrow. */
+  /** Things that belong to the world: tile cursor and the "where to go" guide. */
   renderWorld(g: Ctx, time: number): void {
     const game = this.game;
     if (game.ui.blocking || this.bigMap) return;
     this.drawCursor(g, time);
-    const t = game.guideTarget();
+    this.drawGuide(g, time);
+  }
+
+  /**
+   * The guide, drawn on top of everything (also at night): glowing dots along the walking route
+   * that flow toward the goal, an arrow next to the astronaut pointing the way, and a bouncing
+   * beacon on the goal itself.
+   */
+  private drawGuide(g: Ctx, time: number): void {
+    const game = this.game;
+    const gd = game.guide;
+    const t = gd.target;
     if (!t) return;
-    const sx = t.x - game.camX;
-    const sy = t.y - game.camY;
-    if (sx > 12 && sx < game.vw - 12 && sy > 12 && sy < game.vh - 12) {
-      const ax = Math.round(sx);
-      const ay = Math.round(sy - 20 + Math.sin(time * 5) * 3);
-      for (let i = 0; i < 5; i++) rect(g, ax - 4 + i, ay + i, 9 - i * 2, 1, '#ffd166');
-      rect(g, ax - 1, ay - 5, 3, 5, '#ffd166');
+    const color = t.urgent ? '#ff6a4a' : '#ffd166';
+    const bright = t.urgent ? '#ffe2d8' : '#fffbe6';
+    const camX = Math.round(game.camX);
+    const camY = Math.round(game.camY);
+    const fresh = gd.sinceNew < 3; // a new goal: bigger dots for a moment
+    const pts = gd.path;
+    if (!gd.arrived && pts.length > 1) {
+      const SPACING = 10;
+      let d = 0;
+      let next = 14 + ((time * 22) % SPACING);
+      let drawn = 0;
+      for (let i = 1; i < pts.length && drawn < 110; i++) {
+        const a = pts[i - 1];
+        const b = pts[i];
+        const seg = Math.hypot(b.x - a.x, b.y - a.y);
+        while (next <= d + seg && drawn < 110) {
+          if (next > gd.distance - 8) break;
+          const k = seg ? (next - d) / seg : 0;
+          const x = Math.round(a.x + (b.x - a.x) * k - camX);
+          const y = Math.round(a.y + (b.y - a.y) * k - camY);
+          if (x > -4 && y > -4 && x < game.vw + 4 && y < game.vh + 4) {
+            // a bright pulse runs along the dots toward the goal
+            const wave = (((next - time * 70) % 70) + 70) % 70 < 14;
+            const r = fresh || wave ? 2 : 1;
+            g.fillStyle = 'rgba(20,10,12,0.6)';
+            g.fillRect(x - r - 1, y - r - 1, r * 2 + 3, r * 2 + 3);
+            g.fillStyle = wave ? bright : color;
+            g.fillRect(x - r, y - r, r * 2 + 1, r * 2 + 1);
+          }
+          drawn++;
+          next += SPACING;
+        }
+        d += seg;
+      }
+      // the arrow next to the astronaut: which way to walk right now
+      if (gd.distance > 40) {
+        const body = game.rover.driving ? game.rover : game.player;
+        const bx = body.x + body.w / 2;
+        const by = body.y + body.h / 2;
+        const ahead = gd.ahead(game.rover.driving ? 52 : 34);
+        if (ahead) {
+          const ang = Math.atan2(ahead.y - by, ahead.x - bx);
+          const r = (game.rover.driving ? 26 : 16) + 2 + Math.sin(time * 7) * 2;
+          drawArrow(g, bx + Math.cos(ang) * r - camX, by - 2 + Math.sin(ang) * r - camY, ang, 7, color);
+        }
+      }
+    }
+    // the beacon on the goal
+    const sx = t.x - camX;
+    const sy = t.y - camY;
+    if (sx > -20 && sx < game.vw + 20 && sy > -30 && sy < game.vh + 20) {
+      const ph = (time * 0.8) % 1;
+      g.strokeStyle = t.urgent ? `rgba(255,106,74,${1 - ph})` : `rgba(255,209,102,${1 - ph})`;
+      g.lineWidth = 1;
+      g.beginPath();
+      g.ellipse(Math.round(sx) + 0.5, Math.round(sy) + 2.5, 3 + ph * 14, (3 + ph * 14) * 0.5, 0, 0, Math.PI * 2);
+      g.stroke();
+      const bounce = Math.abs(Math.sin(time * 4)) * 5;
+      drawArrow(g, sx, sy - 12 - bounce, Math.PI / 2, 8, color);
     }
   }
 
@@ -524,7 +608,7 @@ export class Hud {
     if (this.game.rover.driving) this.drawRoverHud(g, time);
     else this.drawHotbar(g);
     this.drawMinimap(g, time);
-    this.drawEdgeArrow(g, time); // on top, so the minimap never hides it
+    this.drawGuideHud(g, time); // on top, so the minimap never hides it
     if (this.bigMap) this.drawBigMap(g, time);
     this.updateDom();
   }
@@ -644,6 +728,16 @@ export class Hud {
       rect(g, x0 + mx - (size >> 1), y0 + my - (size >> 1), size, size, color);
     };
     for (const f of game.objects.flags) mark(f.x, f.y - 8, game.profile.suitColor);
+    // the route to the goal, and the goal itself
+    const gd = game.guide;
+    if (gd.target) {
+      const col = gd.target.urgent ? '#ff6a4a' : '#ffd166';
+      for (let d = TILE; d < gd.distance; d += TILE * 1.5) {
+        const pt = pointAlong(gd.path, d);
+        if (pt) mark(pt.x, pt.y, col, 1);
+      }
+      if (Math.sin(time * 8) > -0.3) mark(gd.target.x, gd.target.y, col, 4);
+    }
     for (const pk of game.objects.partsRemaining()) if (Math.sin(time * 8) > 0) mark(pk.x, pk.y, '#ffd166', 3);
     mark(game.objects.antenna.x, game.objects.antenna.y - 20, '#7fe3ff', 3);
     if (!game.rover.driving) mark(game.rover.cx, game.rover.y, '#ffd166', 3);
@@ -673,6 +767,8 @@ export class Hud {
     mark(game.base.interior.x + game.base.interior.w / 2, game.base.interior.y, '#5fd068', 'BASE');
     mark(game.objects.antenna.x, game.objects.antenna.y - 20, '#7fe3ff', 'ANTENNA');
     mark(game.objects.lander.x + 20, game.objects.lander.y - 10, '#e8b58a', 'LANDER');
+    const goal = game.guide.target;
+    if (goal && Math.sin(time * 6) > -0.4) mark(goal.x, goal.y, goal.urgent ? '#ff6a4a' : '#ffd166', `▶ ${goal.label}`);
     mark((LANDMARKS.cave.x + 8) * TILE, (LANDMARKS.cave.y + 4) * TILE, '#9be36a', 'LAVA TUBE');
     mark(LANDMARKS.crater.x * TILE, (LANDMARKS.crater.y - LANDMARKS.crater.r) * TILE, '#ff9a3a', 'CRATER');
     if (!game.rover.driving) mark(game.rover.cx, game.rover.y, '#ffd166', 'ROVER');
@@ -683,36 +779,62 @@ export class Hud {
     this.text(g, forTouch('MAP · press M to close'), W / 2, H - 16, '#ffd166', 'center');
   }
 
-  /** When the goal is off-screen, an arrow at the screen edge points to it. */
-  private drawEdgeArrow(g: Ctx, time: number): void {
+  /**
+   * The goal's name above its beacon when it is on screen; when it is off screen, a big arrow at
+   * the screen edge points to it with its name and how far it is to walk.
+   */
+  private drawGuideHud(g: Ctx, time: number): void {
     const game = this.game;
     if (game.ui.blocking || this.bigMap) return;
-    const t = game.guideTarget();
+    const gd = game.guide;
+    const t = gd.target;
     if (!t) return;
-    const wsx = t.x - game.camX;
-    const wsy = t.y - game.camY;
-    if (wsx > 12 && wsx < game.vw - 12 && wsy > 12 && wsy < game.vh - 12) return; // on screen: drawn in the world layer
+    const color = t.urgent ? '#ff6a4a' : '#ffd166';
     const k = game.scale / game.hudScale; // world px → HUD px
     const W = this.W;
     const H = this.H;
-    const margin = 22;
+    const wsx = t.x - game.camX;
+    const wsy = t.y - game.camY;
+    const meters = Math.max(1, Math.round(gd.distance / TILE));
+    if (wsx > 4 && wsx < game.vw - 4 && wsy > 4 && wsy < game.vh - 4) {
+      if (gd.arrived) return; // the "[E] …" label takes over
+      this.tag(g, t.label, Math.round(wsx * k), Math.round((wsy - 30) * k) - 12, color);
+      return;
+    }
+    const margin = 26;
     const cx = W / 2;
     const cy = H / 2;
     const ang = Math.atan2(wsy * k - cy, wsx * k - cx);
     const ex = Math.max(margin, Math.min(W - margin, cx + Math.cos(ang) * W));
     // keep clear of the corners (minimap, mission box, gauges and buttons)
-    const ey = Math.max(Math.max(24 + margin, H * 0.26), Math.min(H - 80, cy + Math.sin(ang) * H));
-    g.save();
-    g.translate(Math.round(ex), Math.round(ey));
-    g.rotate(ang);
-    g.fillStyle = 'rgba(14,9,14,0.7)';
-    g.fillRect(-9, -8, 18, 16);
-    g.fillStyle = Math.sin(time * 6) > -0.5 ? '#ffd166' : '#fff6d0';
-    for (let i = 0; i < 6; i++) g.fillRect(-3 + i, -5 + i, 1, 11 - i * 2);
-    g.fillRect(-8, -1, 6, 3);
-    g.restore();
-    const dist = Math.round(Math.hypot(t.x - game.player.cx, t.y - game.player.cy) / TILE);
-    this.text(g, `${dist}m`, Math.round(ex), Math.round(ey) + 10, '#ffd166', 'center');
+    const ey = Math.max(Math.max(24 + margin, H * 0.26), Math.min(H - 84, cy + Math.sin(ang) * H));
+    const pulse = 1 + Math.max(0, Math.sin(time * 6)) * 0.15;
+    g.fillStyle = 'rgba(14,9,14,0.75)';
+    g.beginPath();
+    g.arc(Math.round(ex), Math.round(ey), 15, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = color;
+    g.lineWidth = 2;
+    g.stroke();
+    drawArrow(g, ex, ey, ang, 10 * pulse, color);
+    // name and distance, nudged toward the middle of the screen so it never leaves it
+    const label = `${t.label} · ${meters}m`;
+    g.font = FONT;
+    const tw = g.measureText(label).width;
+    const lx = Math.max(6 + tw / 2, Math.min(W - 6 - tw / 2, ex - Math.cos(ang) * 4));
+    const ly = ey + (Math.sin(ang) > 0.5 ? -34 : 20);
+    this.tag(g, label, Math.round(lx), Math.round(ly), color);
+  }
+
+  /** A small dark name tag with coloured text, centred on x. */
+  private tag(g: Ctx, s: string, x: number, y: number, color: string): void {
+    g.font = FONT;
+    const w = Math.ceil(g.measureText(s).width);
+    g.fillStyle = 'rgba(14,9,14,0.82)';
+    g.fillRect(x - w / 2 - 4, y - 3, w + 8, 14);
+    g.fillStyle = color;
+    g.fillRect(x - w / 2 - 4, y + 10, w + 8, 1);
+    this.text(g, s, x, y, color, 'center');
   }
 
   private drawVignette(g: Ctx, time: number): void {
