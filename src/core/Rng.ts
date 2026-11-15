@@ -25,12 +25,6 @@ export function hash2(x: number, y: number, seed = 0): number {
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-export function noise1(x: number, seed = 0): number {
-  const xi = Math.floor(x);
-  const t = smooth(x - xi);
-  return lerp(hash2(xi, 0, seed), hash2(xi + 1, 0, seed), t);
-}
-
 export function noise2(x: number, y: number, seed = 0): number {
   const xi = Math.floor(x);
   const yi = Math.floor(y);

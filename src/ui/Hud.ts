@@ -1,10 +1,10 @@
 /**
  * Kid-friendly heads-up display.
  *
- * Two layers: world overlays (tile cursor, the bouncing "go here" arrow) are drawn on the
- * zoomed-in world view; everything else (top bar, radial gauges, hotbar, minimap) is drawn on
- * a separate, less-zoomed HUD layer so it stays small and tidy. Text-heavy bits (current
- * mission step, toasts, prompts, flashing warnings) are crisp DOM overlays.
+ * Two layers: world overlays (tile cursor, the guide's glowing path and goal beacon) are drawn on
+ * the zoomed-in world view; everything else (radial gauges, hotbar, minimap, the guide arrow at
+ * the screen edge) is drawn on a separate, less-zoomed HUD layer so it stays small and tidy.
+ * Text-heavy bits (current mission step, toasts, prompts, flashing warnings) are DOM overlays.
  */
 import { BASE_WATER_CAP, CROPS, ITEMS, LANDMARKS, O, PACK_CAP, SOL_DOSE_BUDGET, TILE, TOOLS } from '../config';
 import { type Ctx, rect } from '../core/canvas';
@@ -42,14 +42,6 @@ interface RingPx {
   a: number;
 }
 
-interface Btn {
-  id: 'mute' | 'pause' | 'map';
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
 interface ToastEl {
   node: HTMLDivElement;
   life: number;
@@ -78,7 +70,6 @@ export class Hud {
   bigMap = false;
   alerts: Alert[] = [];
   private ringCache = new Map<string, RingPx[]>();
-  private buttons: Btn[] = [];
   private hotbarRect = { x: 0, y: 0, w: 0, h: 0 };
   private minimapRect = { x: 0, y: 0, w: 0, h: 0 };
   private toolHintT = 0;
@@ -135,9 +126,30 @@ export class Hud {
     const g = this.game;
     const defs: ActionDef[] = [
       { id: 'ff', icon: 'ui_ff', label: 'FAST', key: '', show: () => g.player.inBase, hold: true },
-      { id: 'ops', icon: 'icon_power', label: 'BASE OPS', key: 'B', show: () => g.player.inBase, act: () => g.ui.openBaseOps('power') },
-      { id: 'scan', icon: 'ui_scan', label: 'SCAN', key: 'Q', show: () => !g.player.inBase && !g.rover.driving, act: () => g.doScan() },
-      { id: 'home', icon: 'ui_home', label: 'GO HOME', key: 'R', show: () => g.rover.driving, act: () => g.rover.autopilotHome() },
+      {
+        id: 'ops',
+        icon: 'icon_power',
+        label: 'BASE OPS',
+        key: 'B',
+        show: () => g.player.inBase,
+        act: () => g.ui.openBaseOps('power'),
+      },
+      {
+        id: 'scan',
+        icon: 'ui_scan',
+        label: 'SCAN',
+        key: 'Q',
+        show: () => !g.player.inBase && !g.rover.driving,
+        act: () => g.doScan(),
+      },
+      {
+        id: 'home',
+        icon: 'ui_home',
+        label: 'GO HOME',
+        key: 'R',
+        show: () => g.rover.driving,
+        act: () => g.rover.autopilotHome(),
+      },
       { id: 'map', icon: 'ui_map', label: 'MAP', key: 'M', show: () => true, act: () => (this.bigMap = !this.bigMap) },
       { id: 'ask', icon: 'ui_chat', label: 'ASK LUNA', key: 'T', show: () => true, act: () => g.ui.openAskLuna() },
       { id: 'watch', icon: 'ui_watch', label: 'WATCH', key: 'TAB', show: () => true, act: () => this.toggleWatch() },
@@ -208,11 +220,12 @@ export class Hud {
   }
 
   destroy(): void {
-    for (const n of [this.tracker, this.toastBox, this.prompt, this.toolHint, this.banner, this.watch, this.actionBar]) n.remove();
+    for (const n of [this.tracker, this.toastBox, this.prompt, this.toolHint, this.banner, this.watch, this.actionBar])
+      n.remove();
     this.touchUi.destroy();
   }
 
-  // ───────────────────────── hologram watch ─────────────────────────
+  // Hologram watch
 
   private buildWatch(): void {
     const art = this.game.art;
@@ -276,7 +289,8 @@ export class Hud {
       x.fill.style.width = `${Math.round(Math.max(0, Math.min(1, frac)) * 100)}%`;
       x.val.textContent = text;
     };
-    const lvl = (v: number, bad: number, warn: number): '' | 'warn' | 'bad' => (v < bad ? 'bad' : v < warn ? 'warn' : '');
+    const lvl = (v: number, bad: number, warn: number): '' | 'warn' | 'bad' =>
+      v < bad ? 'bad' : v < warn ? 'warn' : '';
     this.watchHead.textContent = `SOL ${w.sol} · ${w.clock}`;
     const pct = r.batteryPct;
     set('batt', pct / 100, `${Math.round(pct)}% ${r.net >= 0 ? '▲' : '▼'}`, lvl(pct, 20, 45));
@@ -287,10 +301,21 @@ export class Hud {
     set('suit', suit / 100, p.inBase ? 'FULL' : `${Math.round(suit)}%`, p.inBase ? '' : lvl(suit, 25, 50));
     set('hp', p.health / 100, `${Math.round(p.health)}%`, lvl(p.health, 30, 60));
     const dose = w.solDose / SOL_DOSE_BUDGET;
-    set('rad', dose, dose > 1 ? 'TOO HIGH!' : dose > 0.6 ? 'HIGH' : dose > 0.3 ? 'MEDIUM' : 'LOW', dose > 1 ? 'bad' : dose > 0.6 ? 'warn' : '');
+    set(
+      'rad',
+      dose,
+      dose > 1 ? 'TOO HIGH!' : dose > 0.6 ? 'HIGH' : dose > 0.3 ? 'MEDIUM' : 'LOW',
+      dose > 1 ? 'bad' : dose > 0.6 ? 'warn' : '',
+    );
     const pc = p.packCount();
     set('bag', pc / PACK_CAP, `${pc}/${PACK_CAP}`, pc >= PACK_CAP ? 'bad' : pc >= PACK_CAP * 0.8 ? 'warn' : '');
-    set('rover', g.rover.battery / 100, `${Math.round(g.rover.battery)}%`, lvl(g.rover.battery, 15, 35), g.rover.driving);
+    set(
+      'rover',
+      g.rover.battery / 100,
+      `${Math.round(g.rover.battery)}%`,
+      lvl(g.rover.battery, 15, 35),
+      g.rover.driving,
+    );
     const [wIcon, wText] =
       w.flare.phase === 'active'
         ? ['icon_rad', 'SOLAR FLARE! Stay in the shelter']
@@ -298,9 +323,11 @@ export class Hud {
           ? ['icon_rad', 'Solar flare coming! Go to the shelter']
           : w.storm.active
             ? ['icon_storm', 'Dust storm: less sunlight']
-            : w.isNight
-              ? ['ui_moon', 'Night: no sunlight']
-              : ['ui_sun', 'Clear skies'];
+            : w.stormComing
+              ? ['icon_storm', 'Dust storm coming: fold the panels!']
+              : w.isNight
+                ? ['ui_moon', 'Night: no sunlight']
+                : ['ui_sun', 'Clear skies'];
     if (this.watchWeather.dataset.key !== wText) {
       this.watchWeather.dataset.key = wText;
       this.watchWeather.replaceChildren(icon(wIcon), document.createTextNode(wText));
@@ -308,7 +335,7 @@ export class Hud {
     this.watchWeather.className = `holo-weather ${w.flare.phase !== 'none' ? 'bad' : ''}`;
   }
 
-  // ───────────────────────── messages (one at a time) ─────────────────────────
+  // Messages (one at a time)
 
   toast(text: string, color: string, icon?: string): void {
     if (this.pending.some((q) => q.text === text) || this.toasts.some((t) => t.text === text)) return;
@@ -336,31 +363,21 @@ export class Hud {
 
   /** Is this HUD-pixel point on top of a HUD widget (so clicks shouldn't dig)? */
   isOverUi(mx: number, my: number): boolean {
-    const inR = (r: { x: number; y: number; w: number; h: number }) => mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h;
+    const inR = (r: { x: number; y: number; w: number; h: number }) =>
+      mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h;
     if (inR(this.hotbarRect) || inR(this.minimapRect)) return true;
     return mx < 96 && my > this.H - 70;
   }
 
   /** HUD widgets a finger taps (tool bar, minimap): a touch there must not start the joystick. */
   isTapTarget(mx: number, my: number): boolean {
-    const inR = (r: { x: number; y: number; w: number; h: number }) => r.w > 0 && mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h;
-    return inR(this.hotbarRect) || inR(this.minimapRect) || this.buttons.some(inR);
+    const inR = (r: { x: number; y: number; w: number; h: number }) =>
+      r.w > 0 && mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h;
+    return inR(this.hotbarRect) || inR(this.minimapRect);
   }
 
   handleClick(mx: number, my: number): boolean {
     const g = this.game;
-    for (const b of this.buttons) {
-      if (mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) {
-        if (b.id === 'mute') {
-          g.settings.muted = !g.settings.muted;
-          g.audio.setMuted(g.settings.muted);
-        } else if (b.id === 'pause') g.openPause();
-        else if (b.id === 'map') this.bigMap = !this.bigMap;
-        g.storage.saveSettings(g.settings);
-        g.audio.blip();
-        return true;
-      }
-    }
     const h = this.hotbarRect;
     if (!g.rover.driving && mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h) {
       const i = Math.floor((mx - h.x - 2) / 22);
@@ -417,7 +434,7 @@ export class Hud {
     this.seenAlerts = new Set(this.alerts.map((a) => a.id));
   }
 
-  // ───────────────────────── warnings ─────────────────────────
+  // Warnings
 
   private computeAlerts(): Alert[] {
     const g = this.game;
@@ -431,25 +448,95 @@ export class Hud {
         id: 'flare',
         level: safe ? 'warn' : 'bad',
         icon: 'icon_rad',
-        text: safe ? `Solar flare: ${Math.max(0, Math.ceil(w.flare.duration - w.flare.t))} s left. You are safe here!` : 'SOLAR FLARE! Hide in the Storm Shelter or the lava tube!',
+        text: safe
+          ? `Solar flare: ${Math.max(0, Math.ceil(w.flare.duration - w.flare.t))} s left. You are safe here!`
+          : 'SOLAR FLARE! Hide in the Storm Shelter or the lava tube!',
       });
-    } else if (w.flare.phase === 'warning') out.push({ id: 'flarewarn', level: 'bad', icon: 'icon_rad', text: `Solar flare in ${Math.ceil(w.flare.t)} s! Go to the Storm Shelter!` });
-    if (!p.inBase && p.o2 / p.o2Max < 0.25 && !g.rover.tetherReach(p)) out.push({ id: 'suit', level: 'bad', icon: 'icon_o2', text: 'SUIT OXYGEN LOW! Go inside or to the rover.' });
-    else if (g.turnBackNeeded()) out.push({ id: 'turnback', level: 'warn', icon: 'ui_hourglass', text: 'Time to head back! Follow the red path home.' });
-    if (p.health < 30) out.push({ id: 'health', level: 'bad', icon: 'icon_heart', text: 'HEALTH LOW! Go inside, or eat a Meal Pack.' });
-    if (w.solDoseOver() && w.doseRate > 1.5) out.push({ id: 'dose', level: 'bad', icon: 'icon_rad', text: 'Too much radiation! Go inside.' });
-    if (r.o2 < 25) out.push({ id: 'air', level: 'bad', icon: 'icon_o2', text: 'BASE AIR LOW! Switch on the O2 Maker.' });
+    } else if (w.flare.phase === 'warning')
+      out.push({
+        id: 'flarewarn',
+        level: 'bad',
+        icon: 'icon_rad',
+        text: `Solar flare in ${Math.ceil(w.flare.t)} s! Go to the Storm Shelter!`,
+      });
+    const panelsOpen = g.objects.anyPanelOpen;
+    if (w.stormComing && panelsOpen)
+      out.push({
+        id: 'stormwarn',
+        level: 'bad',
+        icon: 'icon_storm',
+        text: `DUST STORM in ${Math.ceil(w.storm.warn)} s! Fold the solar panels (Base Ops, Power).`,
+      });
+    else if (w.storm.active && panelsOpen)
+      out.push({
+        id: 'stormopen',
+        level: 'bad',
+        icon: 'icon_storm',
+        text: 'STORM! The open solar panels are getting damaged. Fold them!',
+      });
+    else if (w.stormComing)
+      out.push({
+        id: 'stormready',
+        level: 'warn',
+        icon: 'icon_storm',
+        text: `Dust storm in ${Math.ceil(w.storm.warn)} s. Panels folded: well done!`,
+      });
+    else if (!w.storm.active && g.objects.allPanelsFolded && !w.isNight)
+      out.push({
+        id: 'panelsfolded',
+        level: 'warn',
+        icon: 'icon_solar',
+        text: 'Solar panels are folded: no solar power. Open them in Base Ops.',
+      });
+    if (!p.inBase && p.o2 / p.o2Max < 0.25 && !g.rover.tetherReach(p))
+      out.push({ id: 'suit', level: 'bad', icon: 'icon_o2', text: 'SUIT OXYGEN LOW! Go inside or to the rover.' });
+    else if (g.turnBackNeeded())
+      out.push({
+        id: 'turnback',
+        level: 'warn',
+        icon: 'ui_hourglass',
+        text: 'Time to head back! Follow the red path home.',
+      });
+    if (p.health < 30)
+      out.push({ id: 'health', level: 'bad', icon: 'icon_heart', text: 'HEALTH LOW! Go inside, or eat a Meal Pack.' });
+    if (w.solDoseOver() && w.doseRate > 1.5)
+      out.push({ id: 'dose', level: 'bad', icon: 'icon_rad', text: 'Too much radiation! Go inside.' });
+    if (r.o2 < 25)
+      out.push({ id: 'air', level: 'bad', icon: 'icon_o2', text: 'BASE AIR LOW! Switch on the O2 Maker.' });
     if (r.batteryPct < 20 && !g.objects.pduBroken)
-      out.push({ id: 'battery', level: 'bad', icon: 'icon_battery', text: r.autoPower ? 'BATTERY LOW! Brush the solar panels clean.' : 'BATTERY LOW! Switch machines off.' });
+      out.push({
+        id: 'battery',
+        level: 'bad',
+        icon: 'icon_battery',
+        text: r.autoPower ? 'BATTERY LOW! Brush the solar panels clean.' : 'BATTERY LOW! Switch machines off.',
+      });
     const thirsty = r.water < 5 && (r.effectiveLevel('electrolysis') > 0 || r.beds.some((b) => b.crop && b.growth < 1));
     if (thirsty) out.push({ id: 'water', level: 'warn', icon: 'icon_water', text: 'WATER LOW: dig ice and melt it.' });
-    if (r.food < 2) out.push({ id: 'food', level: 'warn', icon: 'icon_food', text: 'FOOD LOW: harvest crops or switch on the algae.' });
-    if (g.rover.driving && (g.rover.battery < 15 || g.roverLowForTrip())) out.push({ id: 'rover', level: 'bad', icon: 'icon_rover', text: 'ROVER BATTERY LOW! Press R to auto-drive home.' });
-    if (g.objects.panels.some((pn) => pn.broken)) out.push({ id: 'panel', level: 'warn', icon: 'ui_wrench', text: 'A solar panel is cracked: press E next to it.' });
+    if (r.food < 2)
+      out.push({
+        id: 'food',
+        level: 'warn',
+        icon: 'icon_food',
+        text: 'FOOD LOW: harvest crops or switch on the algae.',
+      });
+    if (g.rover.driving && (g.rover.battery < 15 || g.roverLowForTrip()))
+      out.push({
+        id: 'rover',
+        level: 'bad',
+        icon: 'icon_rover',
+        text: 'ROVER BATTERY LOW! Press R to auto-drive home.',
+      });
+    if (g.objects.panels.some((pn) => pn.broken))
+      out.push({
+        id: 'panel',
+        level: 'warn',
+        icon: 'ui_wrench',
+        text: 'A solar panel is cracked: press E next to it.',
+      });
     return out;
   }
 
-  // ───────────────────────── helpers ─────────────────────────
+  // Helpers
 
   private ring(r: number, th: number): RingPx[] {
     const key = `${r}_${th}`;
@@ -459,14 +546,24 @@ export class Hud {
     for (let y = -r; y <= r; y++) {
       for (let x = -r; x <= r; x++) {
         const d = Math.sqrt(x * x + y * y);
-        if (d <= r + 0.3 && d >= r - th + 0.3) list.push({ x, y, a: ((Math.atan2(y, x) + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2)) / (Math.PI * 2) });
+        if (d <= r + 0.3 && d >= r - th + 0.3)
+          list.push({ x, y, a: ((Math.atan2(y, x) + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2)) / (Math.PI * 2) });
       }
     }
     this.ringCache.set(key, list);
     return list;
   }
 
-  private drawRing(g: Ctx, cx: number, cy: number, r: number, th: number, frac: number, color: string, back = 'rgba(10,8,14,0.75)'): void {
+  private drawRing(
+    g: Ctx,
+    cx: number,
+    cy: number,
+    r: number,
+    th: number,
+    frac: number,
+    color: string,
+    back = 'rgba(10,8,14,0.75)',
+  ): void {
     const px = this.ring(r, th);
     g.fillStyle = back;
     for (const p of px) if (p.a > frac) g.fillRect(cx + p.x, cy + p.y, 1, 1);
@@ -490,7 +587,7 @@ export class Hud {
     return Math.floor(time * 2.5) % 2 === 0;
   }
 
-  // ───────────────────────── world layer ─────────────────────────
+  // World layer
 
   /** Things that belong to the world: tile cursor and the "where to go" guide. */
   renderWorld(g: Ctx, time: number): void {
@@ -584,7 +681,11 @@ export class Hud {
     const { tx, ty } = p.pickTile(game.input.worldX + game.camX, game.input.worldY + game.camY);
     const inReach = Math.hypot(tx * TILE + 8 - p.cx, ty * TILE + 8 - (p.cy - 6)) <= 4.5 * TILE;
     const valid = tool.id === 'laser' ? game.map.canMine(tx, ty) : game.map.canPlace(tx, ty);
-    const color = !inReach ? 'rgba(255,90,90,0.55)' : valid ? `rgba(255,255,255,${0.6 + 0.3 * Math.sin(time * 8)})` : 'rgba(255,255,255,0.25)';
+    const color = !inReach
+      ? 'rgba(255,90,90,0.55)'
+      : valid
+        ? `rgba(255,255,255,${0.6 + 0.3 * Math.sin(time * 8)})`
+        : 'rgba(255,255,255,0.25)';
     const sx = tx * TILE - Math.round(game.camX);
     const sy = ty * TILE - Math.round(game.camY);
     g.fillStyle = color;
@@ -600,7 +701,7 @@ export class Hud {
     }
   }
 
-  // ───────────────────────── HUD layer ─────────────────────────
+  // HUD layer
 
   render(g: Ctx, time: number): void {
     this.drawVignette(g, time);
@@ -645,7 +746,14 @@ export class Hud {
     }
     // backpack: only mention it when it is nearly full
     const pc = p.packCount();
-    if (!p.inBase && pc >= PACK_CAP * 0.8) this.text(g, pc >= PACK_CAP ? 'BAG FULL!' : 'BAG ALMOST FULL', 100, H - 12, pc >= PACK_CAP ? '#ff5a5a' : '#ffd166');
+    if (!p.inBase && pc >= PACK_CAP * 0.8)
+      this.text(
+        g,
+        pc >= PACK_CAP ? 'BAG FULL!' : 'BAG ALMOST FULL',
+        100,
+        H - 12,
+        pc >= PACK_CAP ? '#ff5a5a' : '#ffd166',
+      );
   }
 
   private drawHotbar(g: Ctx): void {
@@ -701,15 +809,21 @@ export class Hud {
       rect(g, x0 + 52, y + 1, 70, 6, '#2a2230');
       rect(g, x0 + 52, y + 1, Math.round(70 * Math.max(0, frac)), 6, color);
     };
-    barRow('BAT', r.battery / 100, r.battery < 15 && this.flashing(time) ? '#ff2a3a' : r.battery < 20 ? '#ff5a5a' : '#5fd068', y0 + 4);
+    barRow(
+      'BAT',
+      r.battery / 100,
+      r.battery < 15 && this.flashing(time) ? '#ff2a3a' : r.battery < 20 ? '#ff5a5a' : '#5fd068',
+      y0 + 4,
+    );
     barRow('O2', r.o2 / r.o2Max, '#7fe3ff', y0 + 15);
     this.text(g, `BOX ${r.trunkCount()}`, x0 + 128, y0 + 10, '#e8b58a');
   }
 
   private drawMinimap(g: Ctx, time: number): void {
     const game = this.game;
-    const mw = 96;
-    const mh = 44;
+    // about a quarter of the screen width, and never tiny on phones
+    const mw = Math.round(Math.max(112, Math.min(168, this.W * 0.24)));
+    const mh = Math.round(mw * 0.56);
     const x0 = 4;
     const y0 = 4;
     this.minimapRect = { x: x0, y: y0, w: mw, h: mh };
@@ -796,6 +910,14 @@ export class Hud {
     const wsx = t.x - game.camX;
     const wsy = t.y - game.camY;
     const meters = Math.max(1, Math.round(gd.distance / TILE));
+    if (gd.parkAndWalk) {
+      // the rover can't fit the whole way: show where to stop and walk
+      const end = gd.path[gd.path.length - 1];
+      const ex = end.x - game.camX;
+      const ey = end.y - game.camY;
+      if (ex > 4 && ex < game.vw - 4 && ey > 4 && ey < game.vh - 4)
+        this.tag(g, 'P · PARK HERE, THEN WALK', Math.round(ex * k), Math.round((ey - 20) * k) - 12, '#7fe3ff');
+    }
     if (wsx > 4 && wsx < game.vw - 4 && wsy > 4 && wsy < game.vh - 4) {
       if (gd.arrived) return; // the "[E] …" label takes over
       this.tag(g, t.label, Math.round(wsx * k), Math.round((wsy - 30) * k) - 12, color);
@@ -807,7 +929,8 @@ export class Hud {
     const ang = Math.atan2(wsy * k - cy, wsx * k - cx);
     const ex = Math.max(margin, Math.min(W - margin, cx + Math.cos(ang) * W));
     // keep clear of the corners (minimap, mission box, gauges and buttons)
-    const ey = Math.max(Math.max(24 + margin, H * 0.26), Math.min(H - 84, cy + Math.sin(ang) * H));
+    const mm = this.minimapRect;
+    const ey = Math.max(24 + margin, H * 0.26, mm.y + mm.h + 22, Math.min(H - 84, cy + Math.sin(ang) * H));
     const pulse = 1 + Math.max(0, Math.sin(time * 6)) * 0.15;
     g.fillStyle = 'rgba(14,9,14,0.75)';
     g.beginPath();
@@ -818,7 +941,7 @@ export class Hud {
     g.stroke();
     drawArrow(g, ex, ey, ang, 10 * pulse, color);
     // name and distance, nudged toward the middle of the screen so it never leaves it
-    const label = `${t.label} · ${meters}m`;
+    const label = `${t.label} · ${gd.parkAndWalk ? 'park in ' : ''}${meters}m`;
     g.font = FONT;
     const tw = g.measureText(label).width;
     const lx = Math.max(6 + tw / 2, Math.min(W - 6 - tw / 2, ex - Math.cos(ang) * 4));
@@ -826,10 +949,11 @@ export class Hud {
     this.tag(g, label, Math.round(lx), Math.round(ly), color);
   }
 
-  /** A small dark name tag with coloured text, centred on x. */
+  /** A small dark name tag with coloured text, centred on x (but always fully on screen). */
   private tag(g: Ctx, s: string, x: number, y: number, color: string): void {
     g.font = FONT;
     const w = Math.ceil(g.measureText(s).width);
+    x = Math.round(Math.max(w / 2 + 6, Math.min(this.W - w / 2 - 6, x)));
     g.fillStyle = 'rgba(14,9,14,0.82)';
     g.fillRect(x - w / 2 - 4, y - 3, w + 8, 14);
     g.fillStyle = color;
@@ -850,14 +974,18 @@ export class Hud {
     g.fillRect(0, 0, W, H);
   }
 
-  // ───────────────────────── DOM overlays ─────────────────────────
+  // DOM overlays
 
   private updateDom(): void {
     const game = this.game;
     // only the current mission step (keeps the screen calm)
     const mm = game.missions;
     const m = mm.active;
-    const key = `${touch.active}|` + (m ? `${m.id}|${m.objectives.map((o) => `${mm.value(o)}`).join(',')}` : `b|${mm.bounties.map((b) => `${b.id}${b.have}`).join(',')}`);
+    const key =
+      `${touch.active}|` +
+      (m
+        ? `${m.id}|${m.objectives.map((o) => `${mm.value(o)}`).join(',')}`
+        : `b|${mm.bounties.map((b) => `${b.id}${b.have}`).join(',')}`);
     if (key !== this.trackerKey) {
       this.trackerKey = key;
       this.tracker.innerHTML = '';
@@ -867,15 +995,23 @@ export class Hud {
         this.tracker.appendChild(el('div', 'tr-title', `MISSION ${m.id} · ${m.title}`));
         if (cur) {
           const n = cur.count ?? 1;
-          this.tracker.appendChild(el('div', 'tr-obj cur', `▶ ${forTouch(cur.text)}${n > 1 ? ` (${Math.floor(mm.value(cur))}/${n})` : ''}`));
+          this.tracker.appendChild(
+            el('div', 'tr-obj cur', `▶ ${forTouch(cur.text)}${n > 1 ? ` (${Math.floor(mm.value(cur))}/${n})` : ''}`),
+          );
         }
         this.tracker.appendChild(el('div', 'tr-step', `Step ${idx + 1} of ${m.objectives.length}`));
       } else if (mm.bounties.length) {
         this.tracker.appendChild(el('div', 'tr-title', '★ BONUS JOBS'));
-        for (const b of mm.bounties) this.tracker.appendChild(el('div', `tr-obj ${b.have >= b.need ? 'done' : ''}`, `★ ${b.text} ${Math.floor(b.have)}/${b.need}`));
+        for (const b of mm.bounties)
+          this.tracker.appendChild(
+            el('div', `tr-obj ${b.have >= b.need ? 'done' : ''}`, `★ ${b.text} ${Math.floor(b.have)}/${b.need}`),
+          );
       }
     }
-    this.tracker.classList.toggle('hidden', this.bigMap || game.ui.dialogue.active || this.tracker.childElementCount === 0);
+    this.tracker.classList.toggle(
+      'hidden',
+      this.bigMap || game.ui.dialogue.active || this.tracker.childElementCount === 0,
+    );
     // "[E] …" prompt next to whatever you can use
     const it = game.focus;
     if (it && !game.ui.blocking && !this.bigMap) {
@@ -889,7 +1025,7 @@ export class Hud {
     // tool hint above the hotbar for a moment after switching tools
     if (this.toolHintT > 0 && !game.rover.driving && !game.ui.blocking) {
       const t = TOOLS[game.player.hotbar];
-      const extra = t.id === 'seeds' ? ` — ${CROPS[game.player.seed].name}` : t.uses ? ` (${ITEMS[t.uses].name})` : '';
+      const extra = t.id === 'seeds' ? `: ${CROPS[game.player.seed].name}` : t.uses ? ` (${ITEMS[t.uses].name})` : '';
       this.toolHint.textContent = `${t.name}${extra}: ${forTouch(t.hint)}`;
       this.toolHint.classList.remove('hidden');
       this.toolHint.style.bottom = `${30 * game.hudScale}px`;
@@ -901,7 +1037,10 @@ export class Hud {
       this.alertKey = aKey;
       if (top) {
         this.banner.className = `banner ${top.level}`;
-        this.banner.replaceChildren(icon(top.icon, 2), document.createTextNode(forTouch(top.text) + (this.alerts.length > 1 ? `  +${this.alerts.length - 1}` : '')));
+        this.banner.replaceChildren(
+          icon(top.icon, 2),
+          document.createTextNode(forTouch(top.text) + (this.alerts.length > 1 ? `  +${this.alerts.length - 1}` : '')),
+        );
       } else this.banner.className = 'banner hidden';
     }
     this.banner.classList.toggle('hidden', !top || game.ui.blocking || this.bigMap);

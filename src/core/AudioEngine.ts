@@ -9,7 +9,11 @@
  * because browsers block sound until the player interacts with the page.
  */
 
-const FILES = import.meta.glob('../assets/audio/*.{wav,mp3}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+const FILES = import.meta.glob('../assets/audio/*.{wav,mp3}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>;
 
 type LoopName = 'thruster' | 'laser' | 'rover' | 'wind' | 'brush';
 type Mood = 'calm' | 'tense';
@@ -45,7 +49,10 @@ export class AudioEngine {
     const decoder = new OfflineAudioContext(1, 1, 44100);
     await Promise.all(
       Object.entries(FILES).map(async ([path, url]) => {
-        const name = path.split('/').pop()!.replace(/\.(wav|mp3)$/, '');
+        const name = path
+          .split('/')
+          .pop()!
+          .replace(/\.(wav|mp3)$/, '');
         try {
           const data = await (await fetch(url)).arrayBuffer();
           this.buffers.set(name, await decoder.decodeAudioData(data));
@@ -62,7 +69,8 @@ export class AudioEngine {
       if (this.ctx.state === 'suspended') void this.ctx.resume();
       return;
     }
-    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AC =
+      window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AC) return;
     const ctx = new AC();
     this.ctx = ctx;
@@ -115,7 +123,7 @@ export class AudioEngine {
     src.start();
   }
 
-  // ───────────── one-shot effects ─────────────
+  // One-shot effects
 
   blip(): void {
     this.play('blip');
@@ -174,6 +182,12 @@ export class AudioEngine {
   victory(): void {
     this.play('victory');
   }
+  /** Graduation: the victory jingle with confetti pops, then three rising chimes. */
+  celebrate(): void {
+    this.play('victory');
+    for (let i = 0; i < 6; i++) setTimeout(() => this.play('pickup', 1.1 + Math.random() * 0.7), 120 + i * 130);
+    for (let i = 0; i < 3; i++) setTimeout(() => this.play('chime', 1 + i * 0.15), 1300 + i * 320);
+  }
   meteor(): void {
     this.play('meteor');
   }
@@ -187,7 +201,7 @@ export class AudioEngine {
     this.play('craft');
   }
 
-  // ───────────── held loops ─────────────
+  // Held loops
 
   /** Set a held sound's level (0 = silent). `pitch` (0..1) speeds up the rover engine and the wind. */
   loop(name: LoopName, level: number, pitch = 0.5): void {
@@ -210,14 +224,15 @@ export class AudioEngine {
       this.loops.set(name, l);
     }
     l.gain.gain.setTargetAtTime(Math.max(0, level), ctx.currentTime, 0.06);
-    if (name === 'rover' || name === 'wind') l.src.playbackRate.setTargetAtTime(0.75 + pitch * 0.6, ctx.currentTime, 0.15);
+    if (name === 'rover' || name === 'wind')
+      l.src.playbackRate.setTargetAtTime(0.75 + pitch * 0.6, ctx.currentTime, 0.15);
   }
 
   stopAllLoops(): void {
     for (const name of this.loops.keys()) this.loop(name, 0);
   }
 
-  // ───────────── music ─────────────
+  // Music
 
   /** Call every frame: starts the music once and cross-fades between the calm and tense loops. */
   updateMusic(_dt: number, mood: Mood = 'calm'): void {

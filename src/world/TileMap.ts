@@ -7,7 +7,21 @@
  *   buried  - hidden subsurface ice under the soil (LUNA's scan reveals it; dig the ground to collect it)
  * Player edits are stored as a small diff so saves stay tiny.
  */
-import { BASE_H, BASE_W, BASE_X, BASE_Y, G, GROUND_INFO, LANDMARKS, O, OBJ_INFO, TILE, WORLD_H, WORLD_SEED, WORLD_W } from '../config';
+import {
+  BASE_H,
+  BASE_W,
+  BASE_X,
+  BASE_Y,
+  G,
+  GROUND_INFO,
+  LANDMARKS,
+  O,
+  OBJ_INFO,
+  TILE,
+  WORLD_H,
+  WORLD_SEED,
+  WORLD_W,
+} from '../config';
 import { type Ctx } from '../core/canvas';
 import { type Sprites } from '../core/Sprites';
 import { clamp, fbm2, hash2, mulberry32 } from '../core/Rng';
@@ -175,14 +189,19 @@ export class TileMap {
     return found;
   }
 
-  // ───────────────────────── generation ─────────────────────────
+  // Generation
 
   private generate(): void {
     const S = WORLD_SEED;
     const r = mulberry32(S);
     const W = this.w;
     const H = this.h;
-    const clear = { x0: LANDMARKS.roverPad.x - 5, y0: BASE_Y - 5, x1: BASE_X + BASE_W + 6, y1: LANDMARKS.solarField.y + LANDMARKS.solarField.dy * 2 + 5 };
+    const clear = {
+      x0: LANDMARKS.roverPad.x - 5,
+      y0: BASE_Y - 5,
+      x1: BASE_X + BASE_W + 6,
+      y1: LANDMARKS.solarField.y + LANDMARKS.solarField.dy * 2 + 5,
+    };
     const inClear = (x: number, y: number) => x >= clear.x0 && x <= clear.x1 && y >= clear.y0 && y <= clear.y1;
     const distBase = (x: number, y: number) => Math.hypot(x - (BASE_X + BASE_W / 2), y - (BASE_Y + BASE_H / 2));
 
@@ -231,7 +250,8 @@ export class TileMap {
     // 4) the big crater (exposed ice in the middle)
     const C = LANDMARKS.crater;
     this.crater(C.x, C.y, C.r, true);
-    for (let y = C.y - 2; y <= C.y + 2; y++) for (let x = C.x - 1; x <= C.x + 4; x++) if (hash2(x, y, 4) < 0.55) this.obj[y * W + x] = O.ICE;
+    for (let y = C.y - 2; y <= C.y + 2; y++)
+      for (let x = C.x - 1; x <= C.x + 4; x++) if (hash2(x, y, 4) < 0.55) this.obj[y * W + x] = O.ICE;
 
     // 5) lava tube cave: solid lava rock with a winding tunnel carved through it
     const cv = LANDMARKS.cave;
@@ -250,7 +270,9 @@ export class TileMap {
       ty = clamp(ty, cv.y + 4, cv.y + cv.h - 5);
       for (let dy = -2; dy <= 2; dy++) for (let dx = 0; dx <= 1; dx++) this.carveCave(x + dx, ty + dy);
     }
-    for (let y = -4; y <= 4; y++) for (let x = -5; x <= 5; x++) if (x * x + y * y * 1.6 <= 26) this.carveCave(LANDMARKS.cavePart.x + x, LANDMARKS.cavePart.y + y);
+    for (let y = -4; y <= 4; y++)
+      for (let x = -5; x <= 5; x++)
+        if (x * x + y * y * 1.6 <= 26) this.carveCave(LANDMARKS.cavePart.x + x, LANDMARKS.cavePart.y + y);
     for (let y = cv.y; y < cv.y + cv.h; y++) {
       for (let x = cv.x; x < cv.x + cv.w; x++) {
         const i = y * W + x;
@@ -276,7 +298,8 @@ export class TileMap {
 
     // 7) clear zones: lander site and the outpost itself
     const L = LANDMARKS.lander;
-    for (let y = L.y - 6; y <= L.y + 6; y++) for (let x = L.x - 7; x <= L.x + 7; x++) if (this.inBounds(x, y)) this.obj[y * W + x] = O.NONE;
+    for (let y = L.y - 6; y <= L.y + 6; y++)
+      for (let x = L.x - 7; x <= L.x + 7; x++) if (this.inBounds(x, y)) this.obj[y * W + x] = O.NONE;
     for (let y = clear.y0; y <= clear.y1; y++) {
       for (let x = clear.x0; x <= clear.x1; x++) {
         const i = y * W + x;
@@ -316,7 +339,8 @@ export class TileMap {
     cluster(BASE_X - 10, BASE_Y + 40, O.BASALT, 6);
 
     // 9) canyon walls around the edge of the world
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (x < 2 || y < 2 || x >= W - 2 || y >= H - 2) this.obj[y * W + x] = O.BEDROCK;
+    for (let y = 0; y < H; y++)
+      for (let x = 0; x < W; x++) if (x < 2 || y < 2 || x >= W - 2 || y >= H - 2) this.obj[y * W + x] = O.BEDROCK;
   }
 
   private carveCave(x: number, y: number): void {
@@ -340,7 +364,8 @@ export class TileMap {
         } else if (d <= rad + 1.5) {
           this.ground[i] = G.ROCKY;
           // rocky rim with a gap on the west side so you can walk in
-          if (big && hash2(x, y, 7) < 0.55 && !(Math.abs(y - cy) < 3 && x < cx)) this.obj[i] = hash2(x, y, 8) < 0.5 ? O.BOULDER : O.BASALT;
+          if (big && hash2(x, y, 7) < 0.55 && !(Math.abs(y - cy) < 3 && x < cx))
+            this.obj[i] = hash2(x, y, 8) < 0.5 ? O.BOULDER : O.BASALT;
         }
       }
     }
@@ -369,7 +394,9 @@ export class TileMap {
     for (let y = Math.max(0, cy - radius); y < Math.min(this.h, cy + radius); y++) {
       for (let x = Math.max(0, cx - radius); x < Math.min(this.w, cx + radius); x++) {
         const i = y * this.w + x;
-        const isIce = this.obj[i] === O.ICE || (this.buried[i] === 1 && (!revealedOnly || this.revealed[i] === 1) && this.obj[i] === O.NONE);
+        const isIce =
+          this.obj[i] === O.ICE ||
+          (this.buried[i] === 1 && (!revealedOnly || this.revealed[i] === 1) && this.obj[i] === O.NONE);
         if (!isIce) continue;
         const d = (x - cx) ** 2 + (y - cy) ** 2;
         if (d < bd) {
@@ -381,7 +408,7 @@ export class TileMap {
     return best;
   }
 
-  // ───────────────────────── rendering ─────────────────────────
+  // Rendering
 
   renderGround(g: Ctx, art: Sprites, camX: number, camY: number, vw: number, vh: number, time: number): void {
     const x0 = Math.max(0, Math.floor(camX / TILE));
@@ -446,7 +473,12 @@ export class TileMap {
     if (dmg) this.drawCracks(g, sx, sy + 4, dmg, tx, ty);
     if (time < this.scanUntil && (id === O.ICE || id === O.CRYSTAL || id === O.HEMATITE)) {
       const pulse = 0.25 + 0.25 * Math.sin(time * 6 + tx);
-      g.fillStyle = id === O.ICE ? `rgba(160,240,255,${pulse})` : id === O.CRYSTAL ? `rgba(180,255,120,${pulse})` : `rgba(220,220,255,${pulse})`;
+      g.fillStyle =
+        id === O.ICE
+          ? `rgba(160,240,255,${pulse})`
+          : id === O.CRYSTAL
+            ? `rgba(180,255,120,${pulse})`
+            : `rgba(220,220,255,${pulse})`;
       g.fillRect(sx + 1, sy + 1, 14, 22);
     }
   }
@@ -457,7 +489,8 @@ export class TileMap {
     const y0 = Math.max(0, Math.floor(camY / TILE));
     const x1 = Math.min(this.w - 1, Math.floor((camX + vw) / TILE));
     const y1 = Math.min(this.h - 1, Math.floor((camY + vh) / TILE) + 1);
-    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) if (this.obj[ty * this.w + tx] !== O.NONE) fn(tx, ty);
+    for (let ty = y0; ty <= y1; ty++)
+      for (let tx = x0; tx <= x1; tx++) if (this.obj[ty * this.w + tx] !== O.NONE) fn(tx, ty);
   }
 
   /** Darkness for the lighting pass: night outside, always dark in the lava tube, bright inside the hab. */

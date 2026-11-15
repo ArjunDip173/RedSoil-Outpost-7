@@ -1,4 +1,4 @@
-/* Red Soil: Outpost 7 — pixel-styled UI. Fonts are bundled locally via @fontsource. */
+/* Red Soil: Outpost 7, pixel-styled UI. Fonts are bundled locally via @fontsource. */
 :root {
   --bg: #120a0a;
   --panel: #1c1218;
@@ -84,7 +84,7 @@ canvas.patch,
   image-rendering: pixelated;
 }
 
-/* ───────────── buttons ───────────── */
+/* Buttons */
 .btn,
 .tab {
   font-family: var(--title);
@@ -187,7 +187,7 @@ canvas.patch,
   color: var(--gold);
 }
 
-/* ───────────── modals ───────────── */
+/* Modals */
 .modal-backdrop {
   position: absolute;
   inset: 0;
@@ -333,7 +333,7 @@ canvas.patch,
   text-shadow: 2px 2px 0 #000;
 }
 
-/* ───────────── loading ───────────── */
+/* Loading */
 .loading {
   position: absolute;
   inset: 0;
@@ -415,7 +415,7 @@ canvas.patch,
   }
 }
 
-/* ───────────── main menu ───────────── */
+/* Main menu */
 .menu {
   position: absolute;
   inset: 0;
@@ -550,7 +550,7 @@ canvas.patch,
   accent-color: var(--mars);
 }
 
-/* ───────────── in-game HUD (DOM) ───────────── */
+/* In-game HUD (DOM) */
 .tracker {
   position: absolute;
   right: 10px;
@@ -669,21 +669,33 @@ canvas.patch,
   color: #fff;
   box-shadow: 0 0 0 3px var(--red);
 }
+/* LUNA talks in a caption above the tool bar: see-through, so the world stays visible */
 .luna-bubble {
   position: absolute;
-  left: 0;
-  top: 0;
-  max-width: min(440px, 60vw);
-  background: #f2f4f8;
-  color: #1b1b22;
-  padding: 6px 12px 8px;
-  font-size: calc(22px * var(--ts));
+  left: 50%;
+  bottom: calc(var(--px) * 30 + 40px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  max-width: min(600px, 60vw);
+  background: rgba(242, 244, 248, 0.72);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  color: #15151c;
+  padding: 5px 12px 6px 6px;
+  border-radius: 6px;
+  font-size: calc(20px * var(--ts));
   line-height: 1.05;
-  box-shadow:
-    0 0 0 3px #23242b,
-    4px 4px 0 3px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 2px rgba(35, 36, 43, 0.85);
   pointer-events: none;
   z-index: 12;
+  animation: fadein 0.2s ease-out;
+}
+.luna-face {
+  flex: 0 0 auto;
+  image-rendering: pixelated;
 }
 .luna-bubble b {
   display: block;
@@ -693,7 +705,8 @@ canvas.patch,
   margin-bottom: 2px;
 }
 .luna-bubble[data-mood='alert'] {
-  background: #ffe1e1;
+  background: rgba(255, 225, 225, 0.82);
+  box-shadow: 0 0 0 2px #c0443a;
 }
 .luna-bubble[data-mood='alert'] b {
   color: #c0443a;
@@ -777,7 +790,7 @@ canvas.patch,
   animation: blink 1s steps(2) infinite;
 }
 
-/* ───────────── airlock ───────────── */
+/* Airlock */
 .checklist {
   display: flex;
   flex-direction: column;
@@ -852,7 +865,7 @@ canvas.patch,
   color: var(--gold);
 }
 
-/* ───────────── wiring / dish ───────────── */
+/* Wiring / dish */
 .wiring-canvas,
 .dish-canvas,
 .earth-canvas {
@@ -1135,8 +1148,34 @@ canvas.patch,
   }
 }
 
-/* certificate, evac */
-.cert-canvas,
+/* the certificate is drawn at print size (1600×1130) and scaled to fit the window */
+.cert-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: contain;
+  margin: 0 auto 14px;
+  box-shadow:
+    0 0 0 3px #3a2328,
+    0 10px 30px rgba(0, 0, 0, 0.55);
+  animation: cert-in 0.7s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes cert-in {
+  from {
+    transform: scale(0.6) rotate(-3deg);
+    opacity: 0;
+  }
+}
+.cert-modal .row {
+  justify-content: center;
+}
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+}
 .evac-art {
   height: 60px;
   background: repeating-linear-gradient(45deg, #c0443a 0 16px, #fff 16px 32px);
@@ -1175,6 +1214,10 @@ code {
   body {
     font-size: calc(18px * var(--ts));
   }
+  .luna-bubble {
+    max-width: 86vw;
+    font-size: calc(17px * var(--ts));
+  }
   .stats-grid {
     grid-template-columns: 1fr;
   }
@@ -1204,7 +1247,7 @@ code {
   max-width: 90vw;
 }
 
-/* ───────────── Ask LUNA chat ───────────── */
+/* Ask LUNA chat */
 .ask-head {
   display: flex;
   gap: 14px;
@@ -1341,7 +1384,7 @@ code {
   min-width: 0;
 }
 
-/* ───────────── simpler Base Ops ───────────── */
+/* Simpler Base Ops */
 .ops-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1418,6 +1461,30 @@ code {
     0 0 0 3px #0c0608;
 }
 .auto-btn {
+  font-size: calc(12px * var(--ts));
+  padding: 12px 14px;
+  flex: 0 0 auto;
+}
+/* fold / open the solar panels (dust storms) */
+.fold-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0 14px;
+  background: #1c1a24;
+  padding: 10px 14px;
+  box-shadow: 0 0 0 3px #3a3550;
+}
+.fold-row.alarm {
+  background: #3a1418;
+  box-shadow: 0 0 0 3px var(--red);
+  animation: alarmglow 1s ease-in-out infinite;
+}
+.fold-text {
+  flex: 1;
+  line-height: 1.1;
+}
+.fold-btn {
   font-size: calc(12px * var(--ts));
   padding: 12px 14px;
   flex: 0 0 auto;
@@ -1500,7 +1567,7 @@ code {
   justify-content: flex-end;
 }
 
-/* ───────────── calmer HUD ───────────── */
+/* Calmer HUD */
 .tr-step {
   color: var(--muted);
   font-size: calc(18px * var(--ts));
@@ -1574,7 +1641,7 @@ code {
   justify-content: flex-start;
 }
 
-/* ───────────── kid-friendly additions ───────────── */
+/* Kid-friendly additions */
 /* big on-screen action buttons (bottom-right) */
 .action-bar {
   position: absolute;
@@ -1599,14 +1666,18 @@ code {
   border: none;
   border-radius: 10px;
   background: rgba(28, 18, 24, 0.88);
-  box-shadow: 0 0 0 2px #4a2a2a, 0 3px 0 #000;
+  box-shadow:
+    0 0 0 2px #4a2a2a,
+    0 3px 0 #000;
   color: var(--text);
   cursor: pointer;
   font-family: var(--body);
 }
 .act-btn:hover {
   background: #3a2430;
-  box-shadow: 0 0 0 2px var(--gold), 0 3px 0 #000;
+  box-shadow:
+    0 0 0 2px var(--gold),
+    0 3px 0 #000;
 }
 .act-btn:active {
   transform: translateY(2px);
@@ -1628,11 +1699,15 @@ code {
 }
 .act-ff.active {
   background: #1f4d2b;
-  box-shadow: 0 0 0 3px var(--green), 0 3px 0 #000;
+  box-shadow:
+    0 0 0 3px var(--green),
+    0 3px 0 #000;
   animation: ff-pulse 0.5s steps(2) infinite;
 }
 .act-ff.blocked {
-  box-shadow: 0 0 0 3px var(--red), 0 3px 0 #000;
+  box-shadow:
+    0 0 0 3px var(--red),
+    0 3px 0 #000;
 }
 @keyframes ff-pulse {
   50% {
@@ -1732,12 +1807,16 @@ code {
   flex: none;
   padding: 10px;
   background: #0e080c;
-  box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(255, 209, 102, 0.45);
+  box-shadow:
+    0 0 0 3px var(--gold),
+    0 0 18px rgba(255, 209, 102, 0.45);
   animation: newtool-glow 1s steps(2) infinite;
 }
 @keyframes newtool-glow {
   50% {
-    box-shadow: 0 0 0 3px #fff6d0, 0 0 26px rgba(255, 209, 102, 0.7);
+    box-shadow:
+      0 0 0 3px #fff6d0,
+      0 0 26px rgba(255, 209, 102, 0.7);
   }
 }
 .newtool-name {
@@ -1766,16 +1845,22 @@ code {
 }
 .act-watch.active {
   background: #12343f;
-  box-shadow: 0 0 0 3px var(--cyan), 0 0 14px rgba(127, 227, 255, 0.6), 0 3px 0 #000;
+  box-shadow:
+    0 0 0 3px var(--cyan),
+    0 0 14px rgba(127, 227, 255, 0.6),
+    0 3px 0 #000;
 }
 @keyframes watch-alarm {
   50% {
     background: #8a1020;
-    box-shadow: 0 0 0 3px #ff5a5a, 0 0 16px rgba(255, 90, 90, 0.8), 0 3px 0 #000;
+    box-shadow:
+      0 0 0 3px #ff5a5a,
+      0 0 16px rgba(255, 90, 90, 0.8),
+      0 3px 0 #000;
   }
 }
 
-/* ───────────── hologram watch (TAB / ⌚) ───────────── */
+/* Hologram watch (TAB) */
 .holo-watch {
   position: absolute;
   left: 18px;
@@ -1955,7 +2040,7 @@ code {
   }
 }
 
-/* ───────────── pixel frames from the sprite sheet (9-slice, 8 px corners ×3) ───────────── */
+/* Pixel frames from the sprite sheet (9-slice, 8 px corners ×3) */
 .panel {
   background: none;
   border: 24px solid transparent;
@@ -2023,7 +2108,7 @@ code {
   display: block;
 }
 
-/* ───────────── intro cutscene ───────────── */
+/* Intro cutscene */
 .intro {
   position: absolute;
   inset: 0;
@@ -2045,7 +2130,7 @@ code {
   image-rendering: pixelated;
 }
 
-/* ───────────── touch controls (phones and tablets) ───────────── */
+/* Touch controls (phones and tablets) */
 .touch-ui {
   position: absolute;
   inset: 0;
@@ -2060,7 +2145,9 @@ code {
   height: calc(var(--stick) * 2);
   border-radius: 50%;
   background: rgba(18, 10, 14, 0.35);
-  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.35), 0 0 0 2px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.35),
+    0 0 0 2px rgba(0, 0, 0, 0.35);
 }
 /* resting joystick: shows where to put your thumb */
 .touch-stick.ghost {
@@ -2076,7 +2163,9 @@ code {
   height: var(--stick);
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #ffe7a8, var(--gold) 45%, #c48a1f);
-  box-shadow: 0 3px 0 #6b4a10, 0 0 0 2px #000;
+  box-shadow:
+    0 3px 0 #6b4a10,
+    0 0 0 2px #000;
 }
 .touch-knob.live {
   position: absolute;
@@ -2119,16 +2208,24 @@ code {
   height: 96px;
   padding: 6px;
   background: rgba(40, 26, 32, 0.8);
-  box-shadow: 0 0 0 3px #6a4a3a, 0 4px 0 #000;
+  box-shadow:
+    0 0 0 3px #6a4a3a,
+    0 4px 0 #000;
 }
 .touch-use.ready {
   background: rgba(193, 68, 14, 0.92);
-  box-shadow: 0 0 0 3px var(--gold), 0 4px 0 #000, 0 0 18px rgba(255, 209, 102, 0.6);
+  box-shadow:
+    0 0 0 3px var(--gold),
+    0 4px 0 #000,
+    0 0 18px rgba(255, 209, 102, 0.6);
   animation: use-pulse 0.9s ease-in-out infinite;
 }
 @keyframes use-pulse {
   50% {
-    box-shadow: 0 0 0 3px var(--gold), 0 4px 0 #000, 0 0 30px rgba(255, 209, 102, 0.95);
+    box-shadow:
+      0 0 0 3px var(--gold),
+      0 4px 0 #000,
+      0 0 30px rgba(255, 209, 102, 0.95);
   }
 }
 .touch-key {
@@ -2148,7 +2245,9 @@ code {
   width: 64px;
   height: 64px;
   background: rgba(31, 77, 107, 0.82);
-  box-shadow: 0 0 0 3px #7fe3ff, 0 4px 0 #000;
+  box-shadow:
+    0 0 0 3px #7fe3ff,
+    0 4px 0 #000;
 }
 .touch-run.down {
   background: rgba(47, 125, 209, 0.95);
@@ -2228,8 +2327,13 @@ body.touch .act-key {
     pointer-events: auto;
   }
 }
+/* a phone outline that tips over sideways */
 .rotate-icon {
-  font-size: 56px;
+  width: 34px;
+  height: 58px;
+  border: 4px solid var(--text);
+  border-radius: 7px;
+  box-shadow: inset 0 -6px 0 -2px var(--text);
   animation: rotate-wiggle 1.6s ease-in-out infinite;
 }
 @keyframes rotate-wiggle {

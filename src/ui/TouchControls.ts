@@ -43,7 +43,7 @@ export class TouchControls {
 
     this.layer.append(this.ghost, this.base, this.knob, this.run, this.use);
     this.rotate = el('div', 'rotate-hint');
-    this.rotate.append(el('div', 'rotate-icon', '📱↻'), el('p', '', 'Turn your device sideways to play!'));
+    this.rotate.append(el('div', 'rotate-icon'), el('p', '', 'Turn your device sideways to play!'));
     root.append(this.layer, this.rotate);
   }
 
@@ -117,21 +117,23 @@ export class TouchControls {
   }
 }
 
-const VERB = /^(go|see|open|fill|build|plant|read|harvest|check|repair|fix|use|drive|hop|brush|pick|talk|sleep|switch|turn)\b/i;
+const VERB =
+  /^(go|see|open|fill|build|plant|read|harvest|check|repair|fix|use|drive|hop|brush|pick|talk|sleep|switch|turn)\b/i;
 
 /**
  * What the USE button will do, short enough for a round button:
  * "Science Station: open SCIENCE LOG" → "OPEN SCIENCE LOG", "Ice Melter: 3 ice waiting" → "ICE MELTER",
- * "Old robotic lander — read the plaque" → "READ THE PLAQUE".
+ * "Old robotic lander: read the plaque" → "READ THE PLAQUE".
  */
 export function shortLabel(label: string): string {
-  let t = label.replace(/\s*\(.*?\)/g, '').split(' · ')[0].trim();
-  for (const sep of [' — ', ': ']) {
-    const i = t.indexOf(sep);
-    if (i > 0) {
-      const after = t.slice(i + sep.length).trim();
-      t = VERB.test(after) ? after : t.slice(0, i);
-    }
+  let t = label
+    .replace(/\s*\(.*?\)/g, '')
+    .split(' · ')[0]
+    .trim();
+  const colon = t.indexOf(': ');
+  if (colon > 0) {
+    const after = t.slice(colon + 2).trim();
+    t = VERB.test(after) ? after : t.slice(0, colon);
   }
   t = t.trim();
   return (t.length > 22 ? `${t.slice(0, 21).trimEnd()}…` : t).toUpperCase();

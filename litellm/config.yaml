@@ -20,4 +20,4 @@ model_list:
       reasoning_effort: low
 
 router_settings:
-  fallbacks: [{ "luna": ["luna-backup"] }]
+  fallbacks: [{ 'luna': ['luna-backup'] }]

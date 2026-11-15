@@ -29,7 +29,14 @@ export interface WiringOptions {
   right?: string[];
 }
 
-function drawShape(g: CanvasRenderingContext2D, shape: WireDef['shape'], x: number, y: number, r: number, color: string): void {
+function drawShape(
+  g: CanvasRenderingContext2D,
+  shape: WireDef['shape'],
+  x: number,
+  y: number,
+  r: number,
+  color: string,
+): void {
   g.fillStyle = color;
   g.strokeStyle = '#1b1012';
   g.lineWidth = 3;
@@ -72,7 +79,13 @@ function drawShape(g: CanvasRenderingContext2D, shape: WireDef['shape'], x: numb
   g.stroke();
 }
 
-export function openWiring(stack: ModalStack, audio: AudioEngine, opts: WiringOptions, onSuccess: () => void, onCancel?: () => void): void {
+export function openWiring(
+  stack: ModalStack,
+  audio: AudioEngine,
+  opts: WiringOptions,
+  onSuccess: () => void,
+  onCancel?: () => void,
+): void {
   let solved = false;
   const m = stack.open({ title: opts.title, size: 'lg', cls: 'wiring-modal', onClose: () => !solved && onCancel?.() });
   const sub = el('p', 'muted', opts.subtitle);
@@ -169,7 +182,8 @@ export function openWiring(stack: ModalStack, audio: AudioEngine, opts: WiringOp
     }
     if (sparkAt && sparkAt.t > 0) {
       g.fillStyle = `rgba(255,240,150,${sparkAt.t})`;
-      for (let k = 0; k < 10; k++) g.fillRect(sparkAt.x + (Math.random() - 0.5) * 40, sparkAt.y + (Math.random() - 0.5) * 40, 4, 4);
+      for (let k = 0; k < 10; k++)
+        g.fillRect(sparkAt.x + (Math.random() - 0.5) * 40, sparkAt.y + (Math.random() - 0.5) * 40, 4, 4);
     }
     if (flash > 0) {
       g.fillStyle = `rgba(95,208,104,${flash * 0.35})`;
@@ -236,7 +250,7 @@ export function openWiring(stack: ModalStack, audio: AudioEngine, opts: WiringOp
         sparkAt = { x: rp.x + 16, y: rp.y, t: 1 };
         audio.spark();
         audio.error();
-        status.textContent = 'Zap! Wrong plug — match the colour AND the shape.';
+        status.textContent = 'Zap! Wrong plug. Match the colour AND the shape.';
       }
     }
     drag = null;

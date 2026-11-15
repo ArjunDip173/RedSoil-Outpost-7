@@ -7,7 +7,11 @@ type Handler = { fetch(req: Request, env: Record<string, string>): Promise<Respo
 const server = worker as Handler;
 
 let ipCounter = 0;
-function ask(env: Record<string, string>, body: unknown = { model: 'luna', messages: [{ role: 'user', content: 'Why is Mars red?' }] }, ip = `10.0.0.${++ipCounter}`) {
+function ask(
+  env: Record<string, string>,
+  body: unknown = { model: 'luna', messages: [{ role: 'user', content: 'Why is Mars red?' }] },
+  ip = `10.0.0.${++ipCounter}`,
+) {
   return server.fetch(
     new Request('https://luna-ai.example.workers.dev/chat/completions', {
       method: 'POST',
@@ -18,8 +22,12 @@ function ask(env: Record<string, string>, body: unknown = { model: 'luna', messa
   );
 }
 
-const geminiOk = (text: string) => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text }] }, finishReason: 'STOP' }] }), { status: 200 });
-const geminiErr = (status: number, code: string, message = '') => new Response(JSON.stringify({ error: { code: status, status: code, message } }), { status });
+const geminiOk = (text: string) =>
+  new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text }] }, finishReason: 'STOP' }] }), {
+    status: 200,
+  });
+const geminiErr = (status: number, code: string, message = '') =>
+  new Response(JSON.stringify({ error: { code: status, status: code, message } }), { status });
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -51,7 +59,13 @@ describe('LUNA AI server', () => {
   });
 
   it('moves on to the next model when one is used up or retired', async () => {
-    const fetchMock = vi.fn(async (url: string) => (url.includes('/b-1:') ? geminiErr(429, 'RESOURCE_EXHAUSTED') : url.includes('/b-2:') ? geminiErr(404, 'NOT_FOUND') : geminiOk('Hi from b-3')));
+    const fetchMock = vi.fn(async (url: string) =>
+      url.includes('/b-1:')
+        ? geminiErr(429, 'RESOURCE_EXHAUSTED')
+        : url.includes('/b-2:')
+          ? geminiErr(404, 'NOT_FOUND')
+          : geminiOk('Hi from b-3'),
+    );
     vi.stubGlobal('fetch', fetchMock);
     const res = await ask({ GEMINI_API_KEY: 'k', MODELS: 'b-1, b-2, b-3' });
     expect((await res.json()).choices[0].message.content).toBe('Hi from b-3');
@@ -66,7 +80,13 @@ describe('LUNA AI server', () => {
     vi.stubGlobal('fetch', async (_url: string, init: RequestInit) => {
       const level = JSON.parse(String(init.body)).generationConfig.thinkingConfig?.thinkingLevel;
       levels.push(level);
-      return level ? geminiErr(400, 'INVALID_ARGUMENT', `Thinking level ${String(level).toUpperCase()} is not supported for this model.`) : geminiOk('ok');
+      return level
+        ? geminiErr(
+            400,
+            'INVALID_ARGUMENT',
+            `Thinking level ${String(level).toUpperCase()} is not supported for this model.`,
+          )
+        : geminiOk('ok');
     });
     const res = await ask({ GEMINI_API_KEY: 'k', MODELS: 'c-old' });
     expect((await res.json()).choices[0].message.content).toBe('ok');
@@ -78,7 +98,9 @@ describe('LUNA AI server', () => {
 
   it('asks the next model too when one is slow, and answers with whichever is first', async () => {
     vi.stubGlobal('fetch', (url: string) =>
-      url.includes('/h-slow:') ? new Promise<Response>((r) => setTimeout(() => r(geminiOk('slow answer')), 3000)) : Promise.resolve(geminiOk('fast answer')),
+      url.includes('/h-slow:')
+        ? new Promise<Response>((r) => setTimeout(() => r(geminiOk('slow answer')), 3000))
+        : Promise.resolve(geminiOk('fast answer')),
     );
     const t0 = Date.now();
     const res = await ask({ GEMINI_API_KEY: 'k', MODELS: 'h-slow,h-fast', HEDGE_MS: '50' });
@@ -89,7 +111,10 @@ describe('LUNA AI server', () => {
 
   it('shares a used-up daily limit with every copy of the server', async () => {
     const store = new Map<string, string>();
-    const STATE = { get: async (k: string) => (store.has(k) ? JSON.parse(store.get(k)!) : null), put: async (k: string, v: string) => void store.set(k, v) };
+    const STATE = {
+      get: async (k: string) => (store.has(k) ? JSON.parse(store.get(k)!) : null),
+      put: async (k: string, v: string) => void store.set(k, v),
+    };
     const perDay = () =>
       new Response(
         JSON.stringify({
@@ -98,7 +123,10 @@ describe('LUNA AI server', () => {
             status: 'RESOURCE_EXHAUSTED',
             message: 'You exceeded your current quota',
             details: [
-              { '@type': 'type.googleapis.com/google.rpc.QuotaFailure', violations: [{ quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier' }] },
+              {
+                '@type': 'type.googleapis.com/google.rpc.QuotaFailure',
+                violations: [{ quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier' }],
+              },
               { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '11063s' },
             ],
           },
@@ -119,7 +147,11 @@ describe('LUNA AI server', () => {
     const fresh = (await import('../server/index.mjs')).default as Handler;
     calls.length = 0;
     const res = await fresh.fetch(
-      new Request('https://x/chat/completions', { method: 'POST', headers: { 'CF-Connecting-IP': '10.9.9.9' }, body: JSON.stringify({ messages: [{ role: 'user', content: 'hi' }] }) }),
+      new Request('https://x/chat/completions', {
+        method: 'POST',
+        headers: { 'CF-Connecting-IP': '10.9.9.9' },
+        body: JSON.stringify({ messages: [{ role: 'user', content: 'hi' }] }),
+      }),
       env,
     );
     expect((await res.json()).choices[0].message.content).toBe('from k-2');
@@ -134,14 +166,19 @@ describe('LUNA AI server', () => {
   });
 
   it('reports a bad key so the game can say so', async () => {
-    vi.stubGlobal('fetch', async () => geminiErr(400, 'INVALID_ARGUMENT', 'API key not valid. Please pass a valid API key. [API_KEY_INVALID]'));
+    vi.stubGlobal('fetch', async () =>
+      geminiErr(400, 'INVALID_ARGUMENT', 'API key not valid. Please pass a valid API key. [API_KEY_INVALID]'),
+    );
     const res = await ask({ GEMINI_API_KEY: 'bad', MODELS: 'e-1' });
     expect(res.status).toBe(502);
     expect((await res.text()).toLowerCase()).toContain('api key not valid');
   });
 
   it('gives a kind redirect when Gemini blocks an answer', async () => {
-    vi.stubGlobal('fetch', async () => new Response(JSON.stringify({ promptFeedback: { blockReason: 'SAFETY' } }), { status: 200 }));
+    vi.stubGlobal(
+      'fetch',
+      async () => new Response(JSON.stringify({ promptFeedback: { blockReason: 'SAFETY' } }), { status: 200 }),
+    );
     const res = await ask({ GEMINI_API_KEY: 'k', MODELS: 'f-1' });
     expect((await res.json()).choices[0].message.content).toMatch(/space/i);
   });

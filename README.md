@@ -2,7 +2,7 @@
 
 A top-down pixel-art game where kids aged 7–12 train as junior astronauts on Mars: they keep a small base alive by managing power, water, air, food and radiation, then fix the radio and call Earth.
 
-Developed by **SideLoaders** for the **2026 NASA Space Apps Challenge**: *Build a Junior Astronaut Mission Trainer*.
+Developed by **SideLoaders** for the **2026 NASA Space Apps Challenge**: _Build a Junior Astronaut Mission Trainer_.
 
 ## Play
 
@@ -12,38 +12,38 @@ Online, the same file is served by GitHub Pages (see [Put it on GitHub](#put-it-
 
 ## How to play
 
-| Key | What it does |
-| --- | --- |
-| W A S D / arrows | Walk (or drive the rover) |
-| E | Use the thing you are next to |
-| Mouse (hold) | Use your tool: brush, dig, build |
+| Key                      | What it does                                         |
+| ------------------------ | ---------------------------------------------------- |
+| W A S D / arrows         | Walk (or drive the rover)                            |
+| E                        | Use the thing you are next to                        |
+| Mouse (hold)             | Use your tool: brush, dig, build                     |
 | 1–4 / click the tool bar | Pick a tool (tools appear as the missions need them) |
-| Esc | Menu |
+| Esc                      | Menu                                                 |
 
 Big buttons in the bottom-right do everything else: **Watch** (Tab) for all your stats, **Ask LUNA** (T), **Map** (M), **Scan** (Q, outside), **Base Ops** (B, inside), **Go Home** (R, in the rover) and **Fast** (hold inside the base to speed up time).
 
 **On a phone or tablet** the touch controls appear by themselves (hold a phone sideways):
 
-| Touch | What it does |
-| --- | --- |
-| Thumb on the left side | A joystick appears under it: drag to walk or drive (a small push walks slowly) |
-| Touch and hold a spot | Use your tool there: brush, dig, build |
-| **E · USE** button | Use the thing you are next to; it lights up and says what it will do (the yellow label can be tapped too) |
-| **RUN** (hold) | Sprint |
-| Tap the tool bar | Pick a tool |
+| Touch                  | What it does                                                                                              |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| Thumb on the left side | A joystick appears under it: drag to walk or drive (a small push walks slowly)                            |
+| Touch and hold a spot  | Use your tool there: brush, dig, build                                                                    |
+| **E · USE** button     | Use the thing you are next to; it lights up and says what it will do (the yellow label can be tapped too) |
+| **RUN** (hold)         | Sprint                                                                                                    |
+| Tap the tool bar       | Pick a tool                                                                                               |
 
 The game's instructions switch to touch words too ("tap USE" instead of "press E"). Clicking with a mouse switches back to keyboard and mouse.
 
 ## The six training missions
 
-| Mission | What happens | What it teaches |
-| --- | --- | --- |
-| 1. First Steps on Red Soil | Airlock safety checklist, brush dust off the solar panels | Spacewalk safety; dust blocks sunlight |
-| 2. Power to the Outpost | Rewire the power unit, switch on the greenhouse lights | Every machine needs power; the Sun only gives so much |
-| 3. Ice, Ice, Mars-y | Scan for buried ice, dig it up, melt it | Mars has water, frozen underground |
-| 4. Split It or Sip It? | Plant seeds, share water between oxygen and plants | Water can become air (electrolysis) or food |
-| 5. Solar Storm Shelter | Build a brick shield wall, hide from a solar flare | Space radiation and how rock and water block it |
-| 6. Call Home | Drive the rover, find antenna parts, aim the dish at Earth | Radio signals take minutes to cross to Earth |
+| Mission                    | What happens                                               | What it teaches                                       |
+| -------------------------- | ---------------------------------------------------------- | ----------------------------------------------------- |
+| 1. First Steps on Red Soil | Airlock safety checklist, brush dust off the solar panels  | Spacewalk safety; dust blocks sunlight                |
+| 2. Power to the Outpost    | Rewire the power unit, switch on the greenhouse lights     | Every machine needs power; the Sun only gives so much |
+| 3. Ice, Ice, Mars-y        | Scan for buried ice, dig it up, melt it                    | Mars has water, frozen underground                    |
+| 4. Split It or Sip It?     | Plant seeds, share water between oxygen and plants         | Water can become air (electrolysis) or food           |
+| 5. Solar Storm Shelter     | Build a brick shield wall, hide from a solar flare         | Space radiation and how rock and water block it       |
+| 6. Call Home               | Drive the rover, find antenna parts, aim the dish at Earth | Radio signals take minutes to cross to Earth          |
 
 After Mission 6 the player graduates and gets a printable certificate signed by SideLoaders, and Mission Control keeps sending bonus jobs.
 
@@ -54,6 +54,7 @@ After Mission 6 the player graduates and gets a printable certificate signed by 
 - Auto power: kids just switch machines on or off. Older players can turn on Expert power in Settings.
 - Always know where to go: a glowing path of dots on the ground leads to the next mission step, walking around walls and rocks. An arrow next to the astronaut points the way, the goal gets a bouncing beacon with its name, an arrow at the screen edge shows where it is and how far ("ANTENNA · 89m"), and the route shows on the minimap.
 - Flashing warnings for low battery, air, water and food, radiation and solar flares, plus a "time to head back" warning; the path then turns red and leads home.
+- Dust storms are forecast 40 seconds ahead: fold the solar panels (Base Ops → Power, or next to a panel) or the wind cracks them. Folded panels are safe but make no power, so open them again afterwards.
 - The rocket trip to Mars plays in full at the start of every new game, so every astronaut sees how they got there.
 - No long waits during training (nights are skipped, crops grow faster, and the Fast button speeds up time).
 - If something goes wrong, the med-evac screen explains what happened and what to try next.
@@ -122,10 +123,13 @@ npm install
 npm run dev       # play at http://localhost:5173 while editing
 npm test          # data and logic checks
 npm run build     # type-check, then rebuild RedSoil-Outpost7.html
+npm run format    # format the code with Prettier (CI checks this)
 npm run package   # build + clean zip in release/ (no keys, no node_modules)
 ```
 
-Built with TypeScript, Vite and the HTML5 Canvas. The build inlines everything into one HTML file so it can be submitted and opened without a server.
+Built with TypeScript, Vite and the HTML5 Canvas. The build inlines everything into one HTML file so it can be submitted and opened without a server. Every push runs the type-check, the tests and a formatting check on GitHub Actions (`.github/workflows/ci.yml`).
+
+Remember to run `npm run build` before committing gameplay changes, so `RedSoil-Outpost7.html` (the file people play) is up to date.
 
 ## Science sources
 

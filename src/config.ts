@@ -8,7 +8,7 @@
  */
 import type { BadgeDef, CropId, ItemId, PowerSystemId, ToolId } from './types';
 
-// ───────────────────────── World & rendering ─────────────────────────
+// World & rendering
 export const TILE = 16; // world pixels per tile
 export const WORLD_W = 240; // tiles (east–west)
 export const WORLD_H = 180; // tiles (north–south)
@@ -97,7 +97,14 @@ export const OBJ_INFO: Record<number, ObjInfo> = {
   [O.BOULDER]: { name: 'Boulder', hardness: 0.6, drop: 'regolith', drops: 2, map: '#7b3c22', height: 8 },
   [O.BASALT]: { name: 'Basalt rock', hardness: 0.9, drop: 'basalt', map: '#4b3a3a', height: 9 },
   [O.HEMATITE]: { name: 'Hematite rock', hardness: 0.85, drop: 'iron', map: '#6a6d84', height: 8 },
-  [O.CRYSTAL]: { name: 'Olivine crystals', hardness: 1.0, drop: 'crystal', map: '#9be36a', glow: '#b6ff7a', height: 10 },
+  [O.CRYSTAL]: {
+    name: 'Olivine crystals',
+    hardness: 1.0,
+    drop: 'crystal',
+    map: '#9be36a',
+    glow: '#b6ff7a',
+    height: 10,
+  },
   [O.ICE]: { name: 'Ice block', hardness: 0.55, drop: 'ice', drops: 2, map: '#9fe8ff', glow: '#7fe3ff', height: 9 },
   [O.BRICK]: { name: 'Brick wall', hardness: 0.45, drop: 'brick', map: '#c4703f', height: 10 },
   [O.MOUND]: { name: 'Regolith mound', hardness: 0.3, drop: 'regolith', map: '#c0643a', height: 7 },
@@ -109,13 +116,13 @@ export const OBJ_INFO: Record<number, ObjInfo> = {
   [O.DOOR]: { name: 'Airlock door', hardness: Infinity, map: '#ffd166', height: 12 },
 };
 
-// ───────────────────────── Time ─────────────────────────
+// Time
 export const SOL_SECONDS = 480; // one Sol = 8 real minutes
 export const GAME_HOURS_PER_SOL = 24.66;
 export const HOURS_PER_SECOND = GAME_HOURS_PER_SOL / SOL_SECONDS;
 export const START_TIME_OF_SOL = 0.31; // just after sunrise
 
-// ───────────────────────── Movement (world px, seconds) ─────────────────────────
+// Movement (world px, seconds)
 export const WALK_SPEED = 78;
 export const SPRINT_MULT = 1.65;
 export const ACCEL = 900;
@@ -129,7 +136,7 @@ export const ROVER_CHARGE = 9; // % per second on the garage pad
 export const ROVER_TETHER_RANGE = 3.2 * TILE;
 export const ROVER_TRUNK_CAP = 160;
 
-// ───────────────────────── Astronaut ─────────────────────────
+// Astronaut
 export const SUIT_O2_MAX = 100;
 export const SUIT_O2_DRAIN = 0.42; // per second outside
 export const SUIT_O2_EXERTION = 0.22; // extra per second while sprinting / mining
@@ -139,7 +146,7 @@ export const REACH = 4.5 * TILE; // mining / building reach
 export const LASER_POWER = 1;
 export const SNACK_HEAL = 35;
 
-// ───────────────────────── Radiation (mSv) ─────────────────────────
+// Radiation (mSv)
 /** Curiosity's RAD instrument measured roughly 0.64–0.7 mSv per Sol on the surface. */
 export const SURFACE_DOSE_RATE = 0.67; // mSv/Sol
 export const FLARE_PEAK_RATE = 120; // mSv/Sol at the peak of an in-game SEP event
@@ -149,12 +156,16 @@ export const SHIELD_ROVER = 0.6;
 export const SHIELD_LAVA_TUBE = 0.08; // a lava tube's rock roof is a great natural shelter
 export const SHELTER_SLOTS = 8;
 
-// ───────────────────────── Base resources ─────────────────────────
+// Base resources
 export const BATTERY_START_KWH = 32;
 export const BATTERY_BASE_KWH = 40;
 export const BATTERY_UPGRADE_KWH = 30;
 export const PANEL_PEAK_KW = 2.2;
 export const PANEL_DUST_RATE = 0.0022; // dust per second
+export const PANEL_W = 52; // px; panels are drawn in code so they can fold
+export const PANEL_FOLD_SPEED = 0.9; // share of a full fold per second
+export const STORM_WARNING = 40; // seconds between the storm warning and the storm
+export const STORM_PANEL_BREAK = 18; // seconds of full storm an open panel survives
 export const LIFE_SUPPORT_KW = 2;
 export const KILOPOWER_KW = 5;
 
@@ -166,10 +177,34 @@ export interface PowerSystemDef {
   icon: string;
 }
 export const POWER_SYSTEMS: PowerSystemDef[] = [
-  { id: 'greenhouse', name: 'Greenhouse Lights', kwPerLevel: 1.5, blurb: 'Grow lights help crops grow faster.', icon: 'icon_seed_lettuce' },
-  { id: 'electrolysis', name: 'O2 Maker (Electrolysis)', kwPerLevel: 2, blurb: 'Splits water (H2O) into oxygen + hydrogen.', icon: 'icon_o2' },
-  { id: 'melter', name: 'Ice Melter (Water Filter)', kwPerLevel: 1, blurb: 'Melts and cleans ice into drinkable water.', icon: 'icon_ice' },
-  { id: 'algae', name: 'Algae Lab Lights', kwPerLevel: 0.8, blurb: 'Spirulina algae makes O2 and food from light.', icon: 'icon_algae' },
+  {
+    id: 'greenhouse',
+    name: 'Greenhouse Lights',
+    kwPerLevel: 1.5,
+    blurb: 'Grow lights help crops grow faster.',
+    icon: 'icon_seed_lettuce',
+  },
+  {
+    id: 'electrolysis',
+    name: 'O2 Maker (Electrolysis)',
+    kwPerLevel: 2,
+    blurb: 'Splits water (H2O) into oxygen + hydrogen.',
+    icon: 'icon_o2',
+  },
+  {
+    id: 'melter',
+    name: 'Ice Melter (Water Filter)',
+    kwPerLevel: 1,
+    blurb: 'Melts and cleans ice into drinkable water.',
+    icon: 'icon_ice',
+  },
+  {
+    id: 'algae',
+    name: 'Algae Lab Lights',
+    kwPerLevel: 0.8,
+    blurb: 'Spirulina algae makes O2 and food from light.',
+    icon: 'icon_algae',
+  },
 ];
 export const MAX_POWER_LEVEL = 3;
 
@@ -191,7 +226,7 @@ export const WATER_PER_ICE = 6; // L
 export const SUIT_REFILL_COST = 0.12; // base % per suit O2 unit
 export const BED_WATER_NEED = 0.015; // L/s per growing bed
 
-// ───────────────────────── Crops ─────────────────────────
+// Crops
 export interface CropDef {
   id: CropId;
   name: string;
@@ -203,14 +238,50 @@ export interface CropDef {
   note: string;
 }
 export const CROPS: Record<CropId, CropDef> = {
-  lettuce: { id: 'lettuce', name: 'Red Romaine Lettuce', growSeconds: 110, meals: 2, seedsBack: [1, 2], seedItem: 'seed_lettuce', color: '#c9504f', note: 'Astronauts first ate space-grown red romaine lettuce on the ISS in 2015.' },
-  tomato: { id: 'tomato', name: 'Dwarf Tomato', growSeconds: 170, meals: 3, seedsBack: [1, 2], seedItem: 'seed_tomato', color: '#e0413a', note: 'Dwarf "Red Robin" tomatoes were grown on the ISS in the Veggie garden.' },
-  pepper: { id: 'pepper', name: 'Chile Pepper', growSeconds: 190, meals: 3, seedsBack: [1, 2], seedItem: 'seed_pepper', color: '#3fa34d', note: 'In 2021, ISS astronauts grew and tasted chile peppers — a first in space!' },
-  potato: { id: 'potato', name: 'Potato', growSeconds: 250, meals: 5, seedsBack: [1, 3], seedItem: 'seed_potato', color: '#b98b52', note: 'Potatoes pack lots of energy and are studied for growing in Mars-like soils.' },
+  lettuce: {
+    id: 'lettuce',
+    name: 'Red Romaine Lettuce',
+    growSeconds: 110,
+    meals: 2,
+    seedsBack: [1, 2],
+    seedItem: 'seed_lettuce',
+    color: '#c9504f',
+    note: 'Astronauts first ate space-grown red romaine lettuce on the ISS in 2015.',
+  },
+  tomato: {
+    id: 'tomato',
+    name: 'Dwarf Tomato',
+    growSeconds: 170,
+    meals: 3,
+    seedsBack: [1, 2],
+    seedItem: 'seed_tomato',
+    color: '#e0413a',
+    note: 'Dwarf "Red Robin" tomatoes were grown on the ISS in the Veggie garden.',
+  },
+  pepper: {
+    id: 'pepper',
+    name: 'Chile Pepper',
+    growSeconds: 190,
+    meals: 3,
+    seedsBack: [1, 2],
+    seedItem: 'seed_pepper',
+    color: '#3fa34d',
+    note: 'In 2021, ISS astronauts grew and tasted chile peppers, a first in space!',
+  },
+  potato: {
+    id: 'potato',
+    name: 'Potato',
+    growSeconds: 250,
+    meals: 5,
+    seedsBack: [1, 3],
+    seedItem: 'seed_potato',
+    color: '#b98b52',
+    note: 'Potatoes pack lots of energy and are studied for growing in Mars-like soils.',
+  },
 };
 export const CROP_ORDER: CropId[] = ['lettuce', 'tomato', 'pepper', 'potato'];
 
-// ───────────────────────── Items ─────────────────────────
+// Items
 export interface ItemDef {
   id: ItemId;
   name: string;
@@ -226,7 +297,13 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   crystal: { id: 'crystal', name: 'Olivine Crystal', icon: 'icon_crystal', color: '#9be36a', bulky: true },
   brick: { id: 'brick', name: 'Regolith Brick', icon: 'icon_brick', color: '#c4703f', bulky: true },
   meteorite: { id: 'meteorite', name: 'Iron Meteorite', icon: 'icon_meteorite', color: '#6e6a7a', bulky: false },
-  seed_lettuce: { id: 'seed_lettuce', name: 'Lettuce Seeds', icon: 'icon_seed_lettuce', color: '#c9504f', bulky: false },
+  seed_lettuce: {
+    id: 'seed_lettuce',
+    name: 'Lettuce Seeds',
+    icon: 'icon_seed_lettuce',
+    color: '#c9504f',
+    bulky: false,
+  },
   seed_tomato: { id: 'seed_tomato', name: 'Tomato Seeds', icon: 'icon_seed_tomato', color: '#e0413a', bulky: false },
   seed_pepper: { id: 'seed_pepper', name: 'Pepper Seeds', icon: 'icon_seed_pepper', color: '#3fa34d', bulky: false },
   seed_potato: { id: 'seed_potato', name: 'Potato Seeds', icon: 'icon_seed_potato', color: '#b98b52', bulky: false },
@@ -235,7 +312,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
 };
 export const BULKY_ITEMS: ItemId[] = ['regolith', 'ice', 'iron', 'basalt', 'crystal', 'brick'];
 
-// ───────────────────────── Hotbar tools ─────────────────────────
+// Hotbar tools
 export interface ToolDef {
   id: ToolId;
   name: string;
@@ -247,18 +324,65 @@ export interface ToolDef {
 }
 /** Tools appear one by one, in this order, as the missions need them. */
 export const TOOLS: ToolDef[] = [
-  { id: 'brush', name: 'Dust Brush', icon: 'icon_brush', hint: 'Hold the mouse on dusty solar panels or sparkly rocks', unlock: 1 },
-  { id: 'snack', name: 'Meal Pack', icon: 'icon_food', hint: 'Click to eat and heal (+35 health)', uses: 'food', unlock: 2 },
-  { id: 'laser', name: 'Mining Laser', icon: 'icon_laser', hint: 'Hold the mouse on rocks or glowing blue ice to dig', unlock: 3 },
-  { id: 'brick', name: 'Bricks', icon: 'icon_brick', hint: 'Click a glowing square to build a shield wall', uses: 'brick', unlock: 5 },
+  {
+    id: 'brush',
+    name: 'Dust Brush',
+    icon: 'icon_brush',
+    hint: 'Hold the mouse on dusty solar panels or sparkly rocks',
+    unlock: 1,
+  },
+  {
+    id: 'snack',
+    name: 'Meal Pack',
+    icon: 'icon_food',
+    hint: 'Click to eat and heal (+35 health)',
+    uses: 'food',
+    unlock: 2,
+  },
+  {
+    id: 'laser',
+    name: 'Mining Laser',
+    icon: 'icon_laser',
+    hint: 'Hold the mouse on rocks or glowing blue ice to dig',
+    unlock: 3,
+  },
+  {
+    id: 'brick',
+    name: 'Bricks',
+    icon: 'icon_brick',
+    hint: 'Click a glowing square to build a shield wall',
+    uses: 'brick',
+    unlock: 5,
+  },
   { id: 'flag', name: 'Explorer Flag', icon: 'icon_flag', hint: 'Click to plant a flag on the map', unlock: 7 },
-  { id: 'regolith', name: 'Dirt Mound', icon: 'icon_regolith', hint: 'Click a tile to pile up dirt', uses: 'regolith', unlock: 7 },
-  { id: 'ice', name: 'Ice Block', icon: 'icon_ice', hint: 'Click a tile to place ice. Water blocks radiation!', uses: 'ice', unlock: 7 },
-  { id: 'seeds', name: 'Seed Pouch', icon: 'icon_seed_lettuce', hint: 'Stand by a Greenhouse tray and press E to plant', unlock: 99 },
+  {
+    id: 'regolith',
+    name: 'Dirt Mound',
+    icon: 'icon_regolith',
+    hint: 'Click a tile to pile up dirt',
+    uses: 'regolith',
+    unlock: 7,
+  },
+  {
+    id: 'ice',
+    name: 'Ice Block',
+    icon: 'icon_ice',
+    hint: 'Click a tile to place ice. Water blocks radiation!',
+    uses: 'ice',
+    unlock: 7,
+  },
+  {
+    id: 'seeds',
+    name: 'Seed Pouch',
+    icon: 'icon_seed_lettuce',
+    hint: 'Stand by a Greenhouse tray and press E to plant',
+    unlock: 99,
+  },
 ];
 
-// ───────────────────────── Fabricator recipes ─────────────────────────
-export type UpgradeId = 'brick' | 'solar_panel' | 'battery' | 'o2_tank' | 'jet_booster' | 'laser_upgrade' | 'rover_battery' | 'kilopower';
+// Fabricator recipes
+export type UpgradeId =
+  'brick' | 'solar_panel' | 'battery' | 'o2_tank' | 'jet_booster' | 'laser_upgrade' | 'rover_battery' | 'kilopower';
 export interface RecipeDef {
   id: UpgradeId;
   name: string;
@@ -270,17 +394,82 @@ export interface RecipeDef {
   icon: string;
 }
 export const RECIPES: RecipeDef[] = [
-  { id: 'brick', name: '4 Regolith Bricks', cost: { regolith: 2 }, gives: '+4 bricks for shielding & building', max: Infinity, fact: 'NASA tests 3D-printing habitats from Mars-like regolith so astronauts can build with local dirt.', icon: 'icon_brick' },
-  { id: 'solar_panel', name: 'Extra Solar Panel', cost: { iron: 5, basalt: 3, crystal: 1 }, gives: '+1 panel (+2.2 kW at noon)', max: 4, fact: 'Solar panels on Mars get only about 43% of the sunlight they would on Earth.', icon: 'icon_solar' },
-  { id: 'battery', name: 'Battery Bank', cost: { iron: 5, basalt: 5 }, gives: '+30 kWh storage for the night', max: 3, fact: 'Batteries store daytime solar energy so the base keeps running through the cold Martian night.', icon: 'icon_battery' },
-  { id: 'o2_tank', name: 'Big O2 Tank', cost: { iron: 6, crystal: 2 }, gives: 'Suit O2 capacity +50%', max: 1, fact: 'Spacesuits carry their own oxygen supply — on the ISS a spacewalk can last 6–8 hours.', icon: 'icon_o2' },
-  { id: 'jet_booster', name: 'Sprint Boots', cost: { iron: 5, crystal: 2 }, gives: 'Sprint 50% longer and faster', max: 1, fact: 'Apollo astronauts found that a bouncy "bunny hop" was often the easiest way to move in low gravity.', icon: 'icon_boot' },
-  { id: 'laser_upgrade', name: 'Laser Focus Lens', cost: { iron: 4, crystal: 3 }, gives: 'Dig 60% faster', max: 1, fact: 'Curiosity has a laser called ChemCam that zaps rocks from up to 7 metres away to learn what they are made of.', icon: 'icon_laser' },
-  { id: 'rover_battery', name: 'Rover Power Pack', cost: { iron: 6, basalt: 4 }, gives: 'Rover drives 60% longer', max: 1, fact: 'NASA’s three Apollo Lunar Roving Vehicles ran on batteries and together drove about 90 km on the Moon.', icon: 'icon_battery' },
-  { id: 'kilopower', name: 'Kilopower Reactor', cost: { iron: 12, basalt: 8, crystal: 6 }, gives: '+5 kW day AND night (no sunlight needed)', max: 1, requiresMission: 5, fact: 'NASA’s Kilopower project tested a small fission reactor that could power a Mars base through dust storms.', icon: 'icon_reactor' },
+  {
+    id: 'brick',
+    name: '4 Regolith Bricks',
+    cost: { regolith: 2 },
+    gives: '+4 bricks for shielding & building',
+    max: Infinity,
+    fact: 'NASA tests 3D-printing habitats from Mars-like regolith so astronauts can build with local dirt.',
+    icon: 'icon_brick',
+  },
+  {
+    id: 'solar_panel',
+    name: 'Extra Solar Panel',
+    cost: { iron: 5, basalt: 3, crystal: 1 },
+    gives: '+1 panel (+2.2 kW at noon)',
+    max: 4,
+    fact: 'Solar panels on Mars get only about 43% of the sunlight they would on Earth.',
+    icon: 'icon_solar',
+  },
+  {
+    id: 'battery',
+    name: 'Battery Bank',
+    cost: { iron: 5, basalt: 5 },
+    gives: '+30 kWh storage for the night',
+    max: 3,
+    fact: 'Batteries store daytime solar energy so the base keeps running through the cold Martian night.',
+    icon: 'icon_battery',
+  },
+  {
+    id: 'o2_tank',
+    name: 'Big O2 Tank',
+    cost: { iron: 6, crystal: 2 },
+    gives: 'Suit O2 capacity +50%',
+    max: 1,
+    fact: 'Spacesuits carry their own oxygen supply. On the ISS a spacewalk can last 6–8 hours.',
+    icon: 'icon_o2',
+  },
+  {
+    id: 'jet_booster',
+    name: 'Sprint Boots',
+    cost: { iron: 5, crystal: 2 },
+    gives: 'Sprint 50% longer and faster',
+    max: 1,
+    fact: 'Apollo astronauts found that a bouncy "bunny hop" was often the easiest way to move in low gravity.',
+    icon: 'icon_boot',
+  },
+  {
+    id: 'laser_upgrade',
+    name: 'Laser Focus Lens',
+    cost: { iron: 4, crystal: 3 },
+    gives: 'Dig 60% faster',
+    max: 1,
+    fact: 'Curiosity has a laser called ChemCam that zaps rocks from up to 7 metres away to learn what they are made of.',
+    icon: 'icon_laser',
+  },
+  {
+    id: 'rover_battery',
+    name: 'Rover Power Pack',
+    cost: { iron: 6, basalt: 4 },
+    gives: 'Rover drives 60% longer',
+    max: 1,
+    fact: 'NASA’s three Apollo Lunar Roving Vehicles ran on batteries and together drove about 90 km on the Moon.',
+    icon: 'icon_battery',
+  },
+  {
+    id: 'kilopower',
+    name: 'Kilopower Reactor',
+    cost: { iron: 12, basalt: 8, crystal: 6 },
+    gives: '+5 kW day AND night (no sunlight needed)',
+    max: 1,
+    requiresMission: 5,
+    fact: 'NASA’s Kilopower project tested a small fission reactor that could power a Mars base through dust storms.',
+    icon: 'icon_reactor',
+  },
 ];
 
-// ───────────────────────── Progression ─────────────────────────
+// Progression
 export const RANKS: { xp: number; title: string }[] = [
   { xp: 0, title: 'Cadet' },
   { xp: 300, title: 'Junior Astronaut' },
@@ -292,21 +481,105 @@ export const RANKS: { xp: number; title: string }[] = [
 
 /** Mission patches and achievement badges (art lives in the sprite sheet). */
 export const BADGES: BadgeDef[] = [
-  { id: 'patch_m1', name: 'First Steps', text: 'Completed Mission 1: suited up safely and cleaned the solar panels.', art: 'patch_m1', color: '#e07a3f' },
-  { id: 'patch_m2', name: 'Power Engineer', text: 'Completed Mission 2: repaired the PDU and balanced the grid.', art: 'patch_m2', color: '#e0c02c' },
-  { id: 'patch_m3', name: 'Ice Miner', text: 'Completed Mission 3: found subsurface ice and made water.', art: 'patch_m3', color: '#4fb3ff' },
-  { id: 'patch_m4', name: 'Life Support Pro', text: 'Completed Mission 4: balanced oxygen and food.', art: 'patch_m4', color: '#5fd068' },
-  { id: 'patch_m5', name: 'Storm Survivor', text: 'Completed Mission 5: built a radiation shelter and rode out a solar flare.', art: 'patch_m5', color: '#ff5a5a' },
-  { id: 'patch_m6', name: 'Comms Officer', text: 'Completed Mission 6: restored contact with Earth.', art: 'patch_m6', color: '#8fb5ff' },
-  { id: 'badge_graduate', name: 'Junior Astronaut', text: 'Graduated from Outpost 7 training!', art: 'badge_graduate', color: '#ffd166' },
-  { id: 'badge_geologist', name: 'Geologist', text: 'Brushed up all 12 science samples.', art: 'badge_geologist', color: '#9be36a' },
-  { id: 'badge_driver', name: 'Road Tripper', text: 'Drove the rover 1,000 metres.', art: 'badge_driver', color: '#e98a1f' },
-  { id: 'badge_deep', name: 'Excavator', text: 'Dug 40 pits in the Martian soil.', art: 'badge_deep', color: '#a5532b' },
-  { id: 'badge_meteor', name: 'Meteor Hunter', text: 'Picked up a meteorite after an impact.', art: 'badge_meteor', color: '#b9b5c8' },
-  { id: 'badge_rocket', name: 'Marathon Martian', text: 'Sprinted for 60 seconds in total.', art: 'badge_rocket', color: '#ffd166' },
+  {
+    id: 'patch_m1',
+    name: 'First Steps',
+    text: 'Completed Mission 1: suited up safely and cleaned the solar panels.',
+    art: 'patch_m1',
+    color: '#e07a3f',
+  },
+  {
+    id: 'patch_m2',
+    name: 'Power Engineer',
+    text: 'Completed Mission 2: repaired the PDU and balanced the grid.',
+    art: 'patch_m2',
+    color: '#e0c02c',
+  },
+  {
+    id: 'patch_m3',
+    name: 'Ice Miner',
+    text: 'Completed Mission 3: found subsurface ice and made water.',
+    art: 'patch_m3',
+    color: '#4fb3ff',
+  },
+  {
+    id: 'patch_m4',
+    name: 'Life Support Pro',
+    text: 'Completed Mission 4: balanced oxygen and food.',
+    art: 'patch_m4',
+    color: '#5fd068',
+  },
+  {
+    id: 'patch_m5',
+    name: 'Storm Survivor',
+    text: 'Completed Mission 5: built a radiation shelter and rode out a solar flare.',
+    art: 'patch_m5',
+    color: '#ff5a5a',
+  },
+  {
+    id: 'patch_m6',
+    name: 'Comms Officer',
+    text: 'Completed Mission 6: restored contact with Earth.',
+    art: 'patch_m6',
+    color: '#8fb5ff',
+  },
+  {
+    id: 'badge_graduate',
+    name: 'Junior Astronaut',
+    text: 'Graduated from Outpost 7 training!',
+    art: 'badge_graduate',
+    color: '#ffd166',
+  },
+  {
+    id: 'badge_geologist',
+    name: 'Geologist',
+    text: 'Brushed up all 12 science samples.',
+    art: 'badge_geologist',
+    color: '#9be36a',
+  },
+  {
+    id: 'badge_driver',
+    name: 'Road Tripper',
+    text: 'Drove the rover 1,000 metres.',
+    art: 'badge_driver',
+    color: '#e98a1f',
+  },
+  {
+    id: 'badge_deep',
+    name: 'Excavator',
+    text: 'Dug 40 pits in the Martian soil.',
+    art: 'badge_deep',
+    color: '#a5532b',
+  },
+  {
+    id: 'badge_meteor',
+    name: 'Meteor Hunter',
+    text: 'Picked up a meteorite after an impact.',
+    art: 'badge_meteor',
+    color: '#b9b5c8',
+  },
+  {
+    id: 'badge_rocket',
+    name: 'Marathon Martian',
+    text: 'Sprinted for 60 seconds in total.',
+    art: 'badge_rocket',
+    color: '#ffd166',
+  },
   { id: 'badge_flag', name: 'Trailblazer', text: 'Planted 5 explorer flags.', art: 'badge_flag', color: '#e055a0' },
-  { id: 'badge_storm', name: 'Storm Chaser', text: 'Survived a Martian dust storm.', art: 'badge_storm', color: '#c98a5b' },
-  { id: 'badge_quiz', name: 'Quiz Whiz', text: "Answered 5 of LUNA's quiz questions correctly.", art: 'badge_quiz', color: '#7fe3ff' },
+  {
+    id: 'badge_storm',
+    name: 'Storm Chaser',
+    text: 'Survived a Martian dust storm.',
+    art: 'badge_storm',
+    color: '#c98a5b',
+  },
+  {
+    id: 'badge_quiz',
+    name: 'Quiz Whiz',
+    text: "Answered 5 of LUNA's quiz questions correctly.",
+    art: 'badge_quiz',
+    color: '#7fe3ff',
+  },
   { id: 'badge_farmer', name: 'Space Farmer', text: 'Harvested 10 crops.', art: 'badge_farmer', color: '#3fa34d' },
 ];
 

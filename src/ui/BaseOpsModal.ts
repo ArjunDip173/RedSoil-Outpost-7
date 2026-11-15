@@ -22,7 +22,12 @@ function bar(cls = ''): { root: HTMLDivElement; fill: HTMLDivElement; label: HTM
   return { root, fill, label };
 }
 
-function bigCard(iconName: string): { root: HTMLDivElement; title: HTMLDivElement; value: HTMLDivElement; sub: HTMLDivElement } {
+function bigCard(iconName: string): {
+  root: HTMLDivElement;
+  title: HTMLDivElement;
+  value: HTMLDivElement;
+  sub: HTMLDivElement;
+} {
   const root = el('div', 'big-card');
   const title = el('div', 'bc-title');
   const value = el('div', 'bc-value');
@@ -39,8 +44,16 @@ export function openBaseOps(game: Game, tab: OpsTab = 'power'): void {
   const m = game.ui.stack.open({ title: 'BASE OPS', size: 'lg', pauses: false, cls: 'ops-modal' });
   game.emit('opened_ops');
   const tabs = el('div', 'tabs');
-  const pages: Record<OpsTab, HTMLDivElement> = { power: el('div', 'page'), water: el('div', 'page'), status: el('div', 'page') };
-  const names: Record<OpsTab, [string, string]> = { power: ['POWER', 'icon_power'], water: ['WATER', 'icon_water'], status: ['STORAGE', 'ui_box'] };
+  const pages: Record<OpsTab, HTMLDivElement> = {
+    power: el('div', 'page'),
+    water: el('div', 'page'),
+    status: el('div', 'page'),
+  };
+  const names: Record<OpsTab, [string, string]> = {
+    power: ['POWER', 'icon_power'],
+    water: ['WATER', 'icon_water'],
+    status: ['STORAGE', 'ui_box'],
+  };
   const tabBtns: Partial<Record<OpsTab, HTMLButtonElement>> = {};
   const show = (t: OpsTab) => {
     for (const k of Object.keys(pages) as OpsTab[]) {
@@ -58,23 +71,43 @@ export function openBaseOps(game: Game, tab: OpsTab = 'power'): void {
   const updaters: (() => void)[] = [];
   const res = game.res;
 
-  // ───────────── POWER ─────────────
+  // Power
   {
     const p = pages.power;
     const expert = () => game.settings.expertPower;
-    const pduWarn = el('div', 'callout bad hidden', 'The Power Unit is broken! Fix the wires first: it is the yellow box in the Command room.');
+    const pduWarn = el(
+      'div',
+      'callout bad hidden',
+      'The Power Unit is broken! Fix the wires first: it is the yellow box in the Command room.',
+    );
     const cards = el('div', 'ops-cards two');
     const sun = bigCard('ui_sun');
     const batt = bigCard('icon_battery');
     const use = bigCard('ui_home');
     cards.append(sun.root, batt.root, use.root);
     const hint = el('div', 'kid-hint', 'Switch machines ON or OFF. The base shares the power for you!');
+    // fold the solar panels away before a dust storm, open them again afterwards
+    const foldRow = el('div', 'fold-row');
+    const foldText = el('div', 'fold-text');
+    const foldBtn = button(
+      '',
+      () => {
+        if (game.setPanelsFolded(!game.objects.allPanelsFolded)) game.audio.select();
+        refresh();
+      },
+      'switch fold-btn',
+    );
+    foldRow.append(spriteCanvas(game.art.get('icon_solar'), 3), foldText, foldBtn);
     const autoRow = el('div', 'auto-row');
-    const autoBtn = button('', () => {
-      res.setAutoPower(!res.autoPower);
-      game.audio.select();
-      refresh();
-    }, 'auto-btn');
+    const autoBtn = button(
+      '',
+      () => {
+        res.setAutoPower(!res.autoPower);
+        game.audio.select();
+        refresh();
+      },
+      'auto-btn',
+    );
     const autoText = el('div', 'auto-text');
     autoRow.append(autoBtn, autoText);
     const grid = el('div', 'machine-grid');
@@ -85,22 +118,34 @@ export function openBaseOps(game: Game, tab: OpsTab = 'power'): void {
       top.append(spriteCanvas(game.art.get(sys.icon), 3), el('div', 'machine-name', sys.name.replace(/ \(.*\)/, '')));
       const blurb = el('div', 'machine-blurb', sys.blurb);
       const status = el('div', 'machine-status');
-      const sw = button('', () => {
-        res.setSwitch(sys.id, !res.isOn(sys.id));
-        game.audio.select();
-        refresh();
-      }, 'switch');
+      const sw = button(
+        '',
+        () => {
+          res.setSwitch(sys.id, !res.isOn(sys.id));
+          game.audio.select();
+          refresh();
+        },
+        'switch',
+      );
       const manual = el('div', 'machine-manual');
-      const minus = button('−', () => {
-        res.setPower(sys.id, res.power[sys.id] - 1);
-        game.audio.blip();
-        refresh();
-      }, 'btn small');
-      const plus = button('+', () => {
-        res.setPower(sys.id, res.power[sys.id] + 1);
-        game.audio.select();
-        refresh();
-      }, 'btn small');
+      const minus = button(
+        '−',
+        () => {
+          res.setPower(sys.id, res.power[sys.id] - 1);
+          game.audio.blip();
+          refresh();
+        },
+        'btn small',
+      );
+      const plus = button(
+        '+',
+        () => {
+          res.setPower(sys.id, res.power[sys.id] + 1);
+          game.audio.select();
+          refresh();
+        },
+        'btn small',
+      );
       const pips = el('div', 'pips');
       const pipEls = Array.from({ length: MAX_POWER_LEVEL }, () => pips.appendChild(el('span', 'pip')));
       manual.append(minus, pips, plus);
@@ -119,14 +164,23 @@ export function openBaseOps(game: Game, tab: OpsTab = 'power'): void {
         let text: string;
         if (game.objects.pduBroken) text = 'No power';
         else if (res.autoPower) text = res.autoReason[sys.id];
-        else text = !on ? 'Off' : res.shed.has(sys.id) ? 'Battery empty!' : lvl >= 3 ? 'Full speed' : lvl === 2 ? 'Running' : 'Running slowly';
+        else
+          text = !on
+            ? 'Off'
+            : res.shed.has(sys.id)
+              ? 'Battery empty!'
+              : lvl >= 3
+                ? 'Full speed'
+                : lvl === 2
+                  ? 'Running'
+                  : 'Running slowly';
         status.textContent = text;
         const good = /Running|Full/.test(text);
         status.className = `machine-status ${good ? 'ok' : /Saving|Needs|empty|No power/.test(text) ? 'warn' : ''}`;
         card.classList.toggle('is-on', on);
       });
     }
-    p.append(pduWarn, cards, hint, autoRow, grid);
+    p.append(pduWarn, cards, hint, foldRow, autoRow, grid);
     const refresh = () => {
       const ex = expert();
       pduWarn.classList.toggle('hidden', !game.objects.pduBroken);
@@ -139,14 +193,37 @@ export function openBaseOps(game: Game, tab: OpsTab = 'power'): void {
       const peak = Math.max(0.1, panels * 2.2);
       const frac = res.gen / peak;
       sun.title.textContent = 'SUNLIGHT';
-      sun.value.textContent = ex ? `${res.gen.toFixed(1)} kW` : game.weather.isNight ? 'Night' : frac > 0.6 ? 'Lots!' : frac > 0.25 ? 'Some' : 'A little';
+      sun.value.textContent = ex
+        ? `${res.gen.toFixed(1)} kW`
+        : game.weather.isNight
+          ? 'Night'
+          : frac > 0.6
+            ? 'Lots!'
+            : frac > 0.25
+              ? 'Some'
+              : 'A little';
+      const folded = game.objects.allPanelsFolded;
+      const stormy = game.weather.stormComing || game.weather.storm.active;
       sun.sub.textContent = game.weather.isNight
         ? 'No sun: the battery keeps us going'
-        : game.weather.storm.active
-          ? 'Dust storm: less sun'
-          : dust > 30
-            ? 'Panels are dusty: brush them!'
-            : 'Panels are clean ✔';
+        : folded
+          ? 'Panels folded: no solar power'
+          : game.weather.storm.active
+            ? 'Dust storm: less sun'
+            : dust > 30
+              ? 'Panels are dusty: brush them!'
+              : 'Panels are clean ✔';
+      foldRow.classList.toggle('hidden', !panels);
+      foldRow.classList.toggle('alarm', stormy && !folded);
+      foldBtn.textContent = folded ? 'OPEN PANELS' : 'FOLD PANELS';
+      foldBtn.className = `switch fold-btn ${folded ? 'off' : 'on'}`;
+      foldText.textContent = folded
+        ? game.weather.storm.active
+          ? 'Solar panels folded: safe from the storm. Open them when it is over.'
+          : 'Solar panels folded: no solar power. Open them when the sky is clear.'
+        : stormy
+          ? 'DUST STORM coming! Fold the solar panels so the wind can not break them.'
+          : 'Solar panels open and making power. Fold them before a dust storm.';
       const pct = Math.round(res.batteryPct);
       batt.title.textContent = 'BATTERY';
       batt.value.textContent = `${pct}%`;
@@ -166,13 +243,15 @@ export function openBaseOps(game: Game, tab: OpsTab = 'power'): void {
     updaters.push(refresh);
   }
 
-  // ───────────── WATER ─────────────
+  // Water
   {
     const p = pages.water;
     const tank = bar('water');
     const valveWrap = el('div', 'valve');
     valveWrap.appendChild(el('h3', '', 'SHARE THE WATER'));
-    valveWrap.appendChild(el('p', 'muted small', 'Water can become OXYGEN to breathe, or help PLANTS grow food. Slide to choose!'));
+    valveWrap.appendChild(
+      el('p', 'muted small', 'Water can become OXYGEN to breathe, or help PLANTS grow food. Slide to choose!'),
+    );
     const lbl = el('div', 'valve-labels');
     lbl.append(iconText('ui_plant', 'PLANTS'), iconText('icon_o2', 'OXYGEN'));
     const slider = el('input', 'valve-slider');
@@ -203,11 +282,20 @@ export function openBaseOps(game: Game, tab: OpsTab = 'power'): void {
       air.title.textContent = 'BASE AIR';
       air.value.textContent = `${Math.round(res.o2)}%`;
       air.value.className = `bc-value ${res.o2 < 25 ? 'bad' : res.o2 < 50 ? 'warn' : 'ok'}`;
-      air.sub.textContent = res.flows.electroWater > 0.001 ? '▲ O2 Maker is working' : res.isOn('electrolysis') ? 'O2 Maker waiting' : 'O2 Maker is OFF';
+      air.sub.textContent =
+        res.flows.electroWater > 0.001
+          ? '▲ O2 Maker is working'
+          : res.isOn('electrolysis')
+            ? 'O2 Maker waiting'
+            : 'O2 Maker is OFF';
       const growing = res.beds.filter((b) => b.crop && b.growth < 1).length;
       plants.title.textContent = 'PLANTS';
       plants.value.textContent = growing ? `${growing} growing` : 'none';
-      plants.sub.textContent = growing ? (res.flows.irrigation > 0.001 ? 'getting water' : 'thirsty! slide toward plants') : 'plant seeds in the Greenhouse';
+      plants.sub.textContent = growing
+        ? res.flows.irrigation > 0.001
+          ? 'getting water'
+          : 'thirsty! slide toward plants'
+        : 'plant seeds in the Greenhouse';
       const iceN = res.storage.ice ?? 0;
       ice.textContent = res.isOn('melter')
         ? iceN > 0
@@ -217,27 +305,36 @@ export function openBaseOps(game: Game, tab: OpsTab = 'power'): void {
     });
   }
 
-  // ───────────── STORAGE ─────────────
+  // Storage
   {
     const p = pages.status;
     const store = el('div', 'store-grid');
     const grab = el('div', 'row wrap');
     for (const id of ['brick', 'regolith', 'ice'] as ItemId[]) {
       grab.appendChild(
-        button(`Take 10 ${ITEMS[id].name}s`, () => {
-          const n = Math.min(10, res.storage[id] ?? 0);
-          if (n <= 0) {
-            game.audio.error();
-            return;
-          }
-          const fit = game.player.addItem(id, n);
-          res.storage[id] = (res.storage[id] ?? 0) - fit;
-          game.audio.pickup();
-          if (fit < n) game.toast('Backpack is full!', '#ff5a5a');
-        }, 'btn small'),
+        button(
+          `Take 10 ${ITEMS[id].name}s`,
+          () => {
+            const n = Math.min(10, res.storage[id] ?? 0);
+            if (n <= 0) {
+              game.audio.error();
+              return;
+            }
+            const fit = game.player.addItem(id, n);
+            res.storage[id] = (res.storage[id] ?? 0) - fit;
+            game.audio.pickup();
+            if (fit < n) game.toast('Backpack is full!', '#ff5a5a');
+          },
+          'btn small',
+        ),
       );
     }
-    p.append(el('h3', '', 'IN STORAGE'), store, el('p', 'muted small', 'Need bricks or ice outside? Put some in your backpack:'), grab);
+    p.append(
+      el('h3', '', 'IN STORAGE'),
+      store,
+      el('p', 'muted small', 'Need bricks or ice outside? Put some in your backpack:'),
+      grab,
+    );
     let last = '';
     updaters.push(() => {
       const key = JSON.stringify(res.storage);
@@ -264,14 +361,20 @@ export function openBaseOps(game: Game, tab: OpsTab = 'power'): void {
     for (const u of updaters) u();
   };
   m.tick(1);
-
 }
 
-// ───────────────────────── Fabricator ─────────────────────────
+// Fabricator
 
 export function openFabricator(game: Game): void {
-  const m = game.ui.stack.open({ title: 'FABRICATOR · 3D PRINTER WORKSHOP', size: 'lg', pauses: false, cls: 'fab-modal' });
-  m.body.appendChild(el('p', 'muted', 'Turn Mars rocks into useful things! Materials come from base storage first, then your backpack.'));
+  const m = game.ui.stack.open({
+    title: 'FABRICATOR · 3D PRINTER WORKSHOP',
+    size: 'lg',
+    pauses: false,
+    cls: 'fab-modal',
+  });
+  m.body.appendChild(
+    el('p', 'muted', 'Turn Mars rocks into useful things! Materials come from base storage first, then your backpack.'),
+  );
   const grid = el('div', 'recipe-grid');
   m.body.appendChild(grid);
   const res = game.res;
@@ -282,9 +385,13 @@ export function openFabricator(game: Game): void {
     head.append(spriteCanvas(game.art.get(r.icon), 3), el('div', 'recipe-name', r.name));
     const gives = el('div', 'recipe-gives', r.gives);
     const cost = el('div', 'recipe-cost');
-    const btn = button('BUILD', () => {
-      if (res.craft(r.id)) refreshAll();
-    }, 'btn primary');
+    const btn = button(
+      'BUILD',
+      () => {
+        if (res.craft(r.id)) refreshAll();
+      },
+      'btn primary',
+    );
     const note = el('div', 'muted small');
     card.append(head, gives, cost, btn, note);
     grid.appendChild(card);
@@ -298,7 +405,15 @@ export function openFabricator(game: Game): void {
         cost.appendChild(chip);
       }
       btn.disabled = st.locked || st.maxed || !st.canAfford;
-      note.textContent = st.locked ? `Unlocks after Mission ${r.requiresMission}` : st.maxed ? '✔ Fully built!' : r.max !== Infinity ? `Built ${st.built}/${r.id === 'solar_panel' ? 4 : r.max}` : st.built ? `Made ${st.built} times` : "";
+      note.textContent = st.locked
+        ? `Unlocks after Mission ${r.requiresMission}`
+        : st.maxed
+          ? '✔ Fully built!'
+          : r.max !== Infinity
+            ? `Built ${st.built}/${r.id === 'solar_panel' ? 4 : r.max}`
+            : st.built
+              ? `Made ${st.built} times`
+              : '';
     });
   }
   const refreshAll = () => cards.forEach((c) => c());

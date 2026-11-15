@@ -7,7 +7,13 @@ import { button, el } from './Dom';
 
 export function openDishAlign(game: Game, onSuccess: () => void): void {
   const m = game.ui.stack.open({ title: 'DEEP SPACE ANTENNA · POINT AT EARTH', size: 'lg', cls: 'dish-modal' });
-  m.body.appendChild(el('p', 'muted', 'Earth is the bright blue dot. Use ← → (or A / D, or the slider) to aim the dish. Keep the signal in the green zone to lock on!'));
+  m.body.appendChild(
+    el(
+      'p',
+      'muted',
+      'Earth is the bright blue dot. Use ← → (or A / D, or the slider) to aim the dish. Keep the signal in the green zone to lock on!',
+    ),
+  );
   const W = 640;
   const H = 300;
   const canvas = el('canvas', 'dish-canvas');
@@ -59,7 +65,12 @@ export function openDishAlign(game: Game, onSuccess: () => void): void {
     if (!done) {
       if (signal > lockAt) lock += dt;
       else lock = Math.max(0, lock - dt * 2);
-      status.textContent = signal > lockAt ? `LOCKING ON… ${Math.min(100, Math.round((lock / holdFor) * 100))}%` : signal > 0.4 ? 'Getting warmer… keep turning!' : 'Signal: searching…';
+      status.textContent =
+        signal > lockAt
+          ? `LOCKING ON… ${Math.min(100, Math.round((lock / holdFor) * 100))}%`
+          : signal > 0.4
+            ? 'Getting warmer… keep turning!'
+            : 'Signal: searching…';
       if (Math.random() < signal * 0.15) game.audio.talk();
       if (lock >= holdFor) {
         done = true;

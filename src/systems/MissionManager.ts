@@ -11,7 +11,10 @@ import type { BountyTemplate, MissionDef, MissionSave, ObjectiveDef } from '../t
 
 export const STATE_CHECKS: Record<string, (g: Game) => boolean> = {
   greenhouse_on: (g) => !g.objects.pduBroken && g.res.isOn('greenhouse'),
-  power_ok: (g) => !g.objects.pduBroken && g.res.isOn('greenhouse') && (g.res.autoPower || g.res.net >= 0 || (g.weather.isNight && g.res.batteryPct > 40)),
+  power_ok: (g) =>
+    !g.objects.pduBroken &&
+    g.res.isOn('greenhouse') &&
+    (g.res.autoPower || g.res.net >= 0 || (g.weather.isNight && g.res.batteryPct > 40)),
   melter_on: (g) => !g.objects.pduBroken && g.res.isOn('melter'),
   algae_on: (g) => !g.objects.pduBroken && g.res.isOn('algae'),
   base_o2_70: (g) => g.res.o2 >= 70,
@@ -83,7 +86,7 @@ export class MissionManager {
     return m.objectives.find((o) => !this.isDone(o)) ?? null;
   }
 
-  // ───────────────────────── events ─────────────────────────
+  // Events
 
   emit(event: string, n = 1): void {
     const m = this.active;
@@ -120,7 +123,7 @@ export class MissionManager {
     if (m.objectives.every((o) => this.isDone(o))) this.completeMission();
   }
 
-  // ───────────────────────── flow ─────────────────────────
+  // Flow
 
   /** Begin the campaign (or resume the current mission after loading). */
   begin(showBriefing: boolean): void {
@@ -160,7 +163,14 @@ export class MissionManager {
       case 'ice_hint':
         break;
       case 'give_seeds':
-        if (g.res.have('seed_lettuce') + g.res.have('seed_tomato') + g.res.have('seed_pepper') + g.res.have('seed_potato') < 3) g.res.addStorage({ seed_lettuce: 3 });
+        if (
+          g.res.have('seed_lettuce') +
+            g.res.have('seed_tomato') +
+            g.res.have('seed_pepper') +
+            g.res.have('seed_potato') <
+          3
+        )
+          g.res.addStorage({ seed_lettuce: 3 });
         break;
       case 'prep_flare':
         this.flags.flareArmed = true;
@@ -212,7 +222,14 @@ export class MissionManager {
     const pool = this.game.data.missions.bounties.filter((t) => !this.bounties.some((b) => b.id === t.id));
     const t: BountyTemplate = pool[Math.floor(Math.random() * pool.length)];
     const n = Math.round(t.min + Math.random() * (t.max - t.min));
-    return { id: t.id, text: t.text.replace('{n}', String(n)), event: t.event, need: n, have: 0, xp: t.xp + Math.round(n * 2) };
+    return {
+      id: t.id,
+      text: t.text.replace('{n}', String(n)),
+      event: t.event,
+      need: n,
+      have: 0,
+      xp: t.xp + Math.round(n * 2),
+    };
   }
 
   private completeBounty(b: Bounty): void {
@@ -244,7 +261,12 @@ export class MissionManager {
     for (let i = 0; i < RANKS.length; i++) if (this.xp >= RANKS[i].xp) level = i;
     const cur = RANKS[level];
     const nxt = RANKS[level + 1];
-    return { title: cur.title, next: nxt ? nxt.xp : null, frac: nxt ? (this.xp - cur.xp) / (nxt.xp - cur.xp) : 1, level };
+    return {
+      title: cur.title,
+      next: nxt ? nxt.xp : null,
+      frac: nxt ? (this.xp - cur.xp) / (nxt.xp - cur.xp) : 1,
+      level,
+    };
   }
 
   update(dt: number): void {
@@ -269,7 +291,13 @@ export class MissionManager {
       this.checkComplete();
     }
     // Mission 5 script: the shelter is ready → DONKI reports the particles are coming
-    if (m.id === 5 && this.flags.flareArmed && g.weather.flare.phase === 'none' && STATE_CHECKS.shelter_full(g) && !g.dialogueActive) {
+    if (
+      m.id === 5 &&
+      this.flags.flareArmed &&
+      g.weather.flare.phase === 'none' &&
+      STATE_CHECKS.shelter_full(g) &&
+      !g.dialogueActive
+    ) {
       this.flags.flareArmed = false;
       g.weather.startFlare(true, 32);
     }
@@ -297,7 +325,11 @@ export class MissionManager {
       g.stats.flaresSurvived++;
       this.emit('flare_sheltered');
     } else {
-      g.luna.say(`Ouch, that was too much radiation! Let's practise again. Another flare is coming soon: go INTO the Storm Shelter room and wait there.`, 'sad', 3);
+      g.luna.say(
+        `Ouch, that was too much radiation! Let's practise again. Another flare is coming soon: go INTO the Storm Shelter room and wait there.`,
+        'sad',
+        3,
+      );
       setTimeout(() => {
         if (this.activeId() === 5) g.weather.startFlare(true, 30);
       }, 15000);
@@ -305,7 +337,15 @@ export class MissionManager {
   }
 
   serialize(): MissionSave {
-    return { index: this.index, progress: { ...this.progress }, done: !this.active, graduated: this.graduated, bounties: this.bounties.map((b) => ({ ...b })), xp: this.xp, flags: { ...this.flags } };
+    return {
+      index: this.index,
+      progress: { ...this.progress },
+      done: !this.active,
+      graduated: this.graduated,
+      bounties: this.bounties.map((b) => ({ ...b })),
+      xp: this.xp,
+      flags: { ...this.flags },
+    };
   }
 
   load(s: MissionSave): void {

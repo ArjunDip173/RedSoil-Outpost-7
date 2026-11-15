@@ -34,7 +34,10 @@ export function openAirlockModal(game: Game, onExit: () => void): void {
       key: 'o2',
       icon: 'icon_o2',
       label: () => `Suit O2 tank: ${Math.round((p.o2 / p.o2Max) * 100)}%`,
-      detail: () => (p.o2 / p.o2Max >= 0.9 ? 'Tank is full. Good to go!' : forTouch(`Click to refill from base air (base O2: ${Math.round(game.res.o2)}%).`)),
+      detail: () =>
+        p.o2 / p.o2Max >= 0.9
+          ? 'Tank is full. Good to go!'
+          : forTouch(`Click to refill from base air (base O2: ${Math.round(game.res.o2)}%).`),
       check: () => {
         if (p.o2 / p.o2Max < 0.9) game.refillSuitAtStation(true);
         return p.o2 / p.o2Max >= 0.5;
@@ -44,7 +47,7 @@ export function openAirlockModal(game: Game, onExit: () => void): void {
       key: 'pressure',
       icon: 'icon_heart',
       label: () => 'Suit pressure & leak check',
-      detail: () => 'The suit keeps you at a safe pressure — Mars air is less than 1% of Earth’s.',
+      detail: () => 'The suit keeps you at a safe pressure. Mars air is less than 1% of Earth’s.',
       check: () => true,
     },
     {
@@ -65,7 +68,7 @@ export function openAirlockModal(game: Game, onExit: () => void): void {
       },
       detail: () =>
         w.flare.phase !== 'none'
-          ? 'Radiation is dangerous right now! Stay inside — the Storm Shelter is the safest room.'
+          ? 'Radiation is dangerous right now! Stay inside: the Storm Shelter is the safest room.'
           : w.solDose > SOL_DOSE_BUDGET * 0.6
             ? 'You already got lots of radiation today. Keep this trip short!'
             : 'Radiation is low today. Safe to go out!',
@@ -102,10 +105,14 @@ export function openAirlockModal(game: Game, onExit: () => void): void {
         game.audio.error();
         row.classList.add('bad');
         if (!row.querySelector('.force')) {
-          const f = button('Go anyway (not safe!)', () => {
-            forced = true;
-            row.click();
-          }, 'btn danger small force');
+          const f = button(
+            'Go anyway (not safe!)',
+            () => {
+              forced = true;
+              row.click();
+            },
+            'btn danger small force',
+          );
           txt.appendChild(f);
         }
       } else if (r) {
@@ -133,9 +140,13 @@ export function openAirlockModal(game: Game, onExit: () => void): void {
   const actions = el('div', 'row');
   if (game.missions.completedCount() >= 1 || game.settings.quickAirlock) {
     actions.appendChild(
-      button('✔ Quick check all', () => {
-        for (const r of rows) if (!done.has(r.item.key)) r.row.click();
-      }, 'btn'),
+      button(
+        '✔ Quick check all',
+        () => {
+          for (const r of rows) if (!done.has(r.item.key)) r.row.click();
+        },
+        'btn',
+      ),
     );
   }
   actions.appendChild(cycle);
@@ -152,7 +163,7 @@ export function openAirlockModal(game: Game, onExit: () => void): void {
       const t = Math.min(1, (performance.now() - start) / dur);
       const kpa = 101.3 - (101.3 - 0.6) * (1 - Math.pow(1 - t, 3));
       gaugeFill.style.width = `${(kpa / 101.3) * 100}%`;
-      gaugeText.textContent = `${kpa.toFixed(1)} kPa${t >= 1 ? ' — Mars pressure! Outer door open.' : ''}`;
+      gaugeText.textContent = `${kpa.toFixed(1)} kPa${t >= 1 ? '. Mars pressure! Outer door open.' : ''}`;
       if (t < 1) requestAnimationFrame(step);
       else
         setTimeout(() => {

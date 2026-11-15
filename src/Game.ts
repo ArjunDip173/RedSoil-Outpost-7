@@ -2,7 +2,26 @@
  * One play session on Mars. Owns the world, entities and systems,
  * runs the fixed update order, routes events to missions, and draws each frame.
  */
-import { BADGES, BULKY_ITEMS, CROPS, G, GROUND_INFO, ITEMS, OBJ_INFO, ROVER_DRAIN, ROVER_MAX_SPEED, SOL_DOSE_BUDGET, SOL_SECONDS, SAVE_VERSION, SUIT_O2_DRAIN, SUIT_O2_EXERTION, SUIT_REFILL_COST, TILE, TOOLS, WALK_SPEED } from './config';
+import {
+  BADGES,
+  BULKY_ITEMS,
+  CROPS,
+  G,
+  GROUND_INFO,
+  ITEMS,
+  OBJ_INFO,
+  ROVER_DRAIN,
+  ROVER_MAX_SPEED,
+  SOL_DOSE_BUDGET,
+  SOL_SECONDS,
+  SAVE_VERSION,
+  SUIT_O2_DRAIN,
+  SUIT_O2_EXERTION,
+  SUIT_REFILL_COST,
+  TILE,
+  TOOLS,
+  WALK_SPEED,
+} from './config';
 import type { AudioEngine } from './core/AudioEngine';
 import type { InputManager } from './core/InputManager';
 import { type Ctx } from './core/canvas';
@@ -19,7 +38,18 @@ import { Guide, type GuideTarget } from './systems/Guide';
 import { ResourceManager } from './systems/ResourceManager';
 import { type ChatTurn, type GameContext, LunaAI } from './systems/LunaAI';
 import { WeatherSystem } from './systems/WeatherSystem';
-import type { CropId, DialogueLine, GameData, Interactable, LunaMood, Profile, SaveData, ScienceLogState, Settings, Stats } from './types';
+import type {
+  CropId,
+  DialogueLine,
+  GameData,
+  Interactable,
+  LunaMood,
+  Profile,
+  SaveData,
+  ScienceLogState,
+  Settings,
+  Stats,
+} from './types';
 import { openAirlockModal } from './ui/AirlockModal';
 import { openDishAlign } from './ui/DishAlignModal';
 import type { ModalStack } from './ui/Dom';
@@ -29,7 +59,7 @@ import { UIManager } from './ui/UIManager';
 import { openWiring } from './ui/WiringMiniGame';
 import { BaseHabitat, type Drawable, SPOTS } from './world/BaseHabitat';
 import { type DigResult, TileMap } from './world/TileMap';
-import { type Pickup, type SampleSpot, type SolarPanel, WorldObjects } from './world/WorldObjects';
+import { panelCenter, type Pickup, type SampleSpot, type SolarPanel, WorldObjects } from './world/WorldObjects';
 
 export interface GameDeps {
   /** World view (zoomed in). */
@@ -77,9 +107,9 @@ export function newStats(): Stats {
 }
 
 const MORNING_TIPS = [
-  'Good morning! Dust settles on the panels every day — give them a brush to keep the power up.',
+  'Good morning! Dust settles on the panels every day. Give them a brush to keep the power up.',
   'Rise and shine! Check Base Ops: is the battery charging now that the Sun is up?',
-  'New Sol, new science! Sparkly rocks are hiding out there — brush them for the Science Log.',
+  'New Sol, new science! Sparkly rocks are hiding out there. Brush them for the Science Log.',
   'Morning! Remember: the rover refills your suit O2, so take it on long trips.',
 ];
 
@@ -223,7 +253,7 @@ export class Game {
     return this.player.inBase && !this.rover.driving;
   }
 
-  // ───────────────────────── session start ─────────────────────────
+  // Session start
 
   startNew(): void {
     this.player.inBase = true;
@@ -253,7 +283,15 @@ export class Game {
     this.snapCamera();
     this.missions.begin(false);
     const next = this.missions.currentObjective();
-    setTimeout(() => this.luna.say(`Welcome back, ${this.profile.name}! ${next ? `Next step: ${next.text}.` : 'Mission Control has bonus jobs for us!'}`, 'happy', 1), 600);
+    setTimeout(
+      () =>
+        this.luna.say(
+          `Welcome back, ${this.profile.name}! ${next ? `Next step: ${next.text}.` : 'Mission Control has bonus jobs for us!'}`,
+          'happy',
+          1,
+        ),
+      600,
+    );
   }
 
   serialize(label: string): SaveData {
@@ -290,7 +328,7 @@ export class Game {
     this.storage.saveScience(this.science);
   }
 
-  // ───────────────────────── messaging helpers ─────────────────────────
+  // Messaging helpers
 
   toast(text: string, color = '#e8e6df', icon?: string): void {
     this.hud.toast(text, color, icon);
@@ -319,7 +357,8 @@ export class Game {
     if (!f) return;
     this.science.facts.push(id);
     this.saveScience();
-    if (!silent && this.settings.lunaChatty) this.toast(`Science Log: “${f.title}” (${f.source})`, '#7fe3ff', 'ui_book');
+    if (!silent && this.settings.lunaChatty)
+      this.toast(`Science Log: “${f.title}” (${f.source})`, '#7fe3ff', 'ui_book');
   }
 
   awardBadge(id: string, silent = false): void {
@@ -353,7 +392,9 @@ export class Game {
     const obj = this.missions.currentObjective();
     const r = this.res;
     return {
-      mission: m ? `Mission ${m.id} of 6, "${m.title}"` : 'All training missions are done; the player is doing bonus jobs',
+      mission: m
+        ? `Mission ${m.id} of 6, "${m.title}"`
+        : 'All training missions are done; the player is doing bonus jobs',
       objective: obj ? obj.text : 'explore Mars and complete Mission Control bounties',
       status: `Base air ${Math.round(r.o2)}%, water ${Math.round(r.water)} L, food ${Math.floor(r.food)} meals, battery ${Math.round(r.batteryPct)}%. It is ${this.weather.isNight ? 'night' : 'day'} on Sol ${this.weather.sol}. The player is ${this.locationLabel().toLowerCase()}.${touch.active ? ' The player is on a touchscreen (phone or tablet): they walk with the joystick on the left side of the screen, tap the USE button instead of pressing E, hold RUN to sprint, touch and hold a spot to use their tool there, and tap the on-screen buttons instead of keys.' : ''}`,
     };
@@ -384,7 +425,7 @@ export class Game {
     }, 260);
   }
 
-  // ───────────────────────── interactions ─────────────────────────
+  // Interactions
 
   /** Show the "NEW TOOL!" card for tools that unlock at this mission, and pick the first one. */
   announceNewTools(missionId: number): void {
@@ -427,7 +468,13 @@ export class Game {
     p.dir = 'down';
     this.luna.snapTo(p.cx + 20, p.y);
     this.emit('airlock_exit');
-    this.hint('firstEva', 'You are outside on Mars! Your blue O2 ring is in the bottom-left — come back before it runs out. Hold SHIFT to sprint.', 'happy', 99999, 2);
+    this.hint(
+      'firstEva',
+      'You are outside on Mars! Your blue O2 ring is in the bottom-left. Come back before it runs out. Hold SHIFT to sprint.',
+      'happy',
+      99999,
+      2,
+    );
   }
 
   enterBase(): void {
@@ -457,7 +504,8 @@ export class Game {
     this.res.o2 -= fill * SUIT_REFILL_COST;
     this.audio.hiss(false);
     if (fill < need) this.toast('Base air is too low to fill the tank completely!', '#ff9a3a', 'icon_o2');
-    else if (!silent) this.toast(`Suit O2 refilled (used ${(fill * SUIT_REFILL_COST).toFixed(0)}% base air)`, '#7fe3ff', 'icon_o2');
+    else if (!silent)
+      this.toast(`Suit O2 refilled (used ${(fill * SUIT_REFILL_COST).toFixed(0)}% base air)`, '#7fe3ff', 'icon_o2');
   }
 
   private plantBed(k: number, crop: CropId): void {
@@ -502,9 +550,16 @@ export class Game {
       return;
     }
     const name = CROPS[bed.crop].name;
-    if (bed.water < 0.25) this.hint('thirsty', `The ${name} is thirsty! Move the WATER VALVE toward the plants in Base Ops.`, 'alert', 10);
-    else if (res.effectiveLevel('greenhouse') === 0) this.hint('dark', 'Plants grow slowly without light. Turn on the Greenhouse Lights in Base Ops!', 'think', 10);
-    else this.toast(`${name} is ${Math.floor(bed.growth * 100)}% grown — keep the water and lights on!`, '#9be36a', `icon_seed_${bed.crop}`);
+    if (bed.water < 0.25)
+      this.hint('thirsty', `The ${name} is thirsty! Move the WATER VALVE toward the plants in Base Ops.`, 'alert', 10);
+    else if (res.effectiveLevel('greenhouse') === 0)
+      this.hint('dark', 'Plants grow slowly without light. Turn on the Greenhouse Lights in Base Ops!', 'think', 10);
+    else
+      this.toast(
+        `${name} is ${Math.floor(bed.growth * 100)}% grown. Keep the water and lights on!`,
+        '#9be36a',
+        `icon_seed_${bed.crop}`,
+      );
   }
 
   openPduRepair(): void {
@@ -517,26 +572,74 @@ export class Game {
     openWiring(
       this.ui.stack,
       this.audio,
-      { title: 'PDU REPAIR · POWER DISTRIBUTION UNIT', subtitle: 'The storm jumbled the cables! Drag each plug on the left to the socket with the SAME colour and shape.', wires: 4, left: labels, right: labels },
+      {
+        title: 'PDU REPAIR · POWER DISTRIBUTION UNIT',
+        subtitle:
+          'The storm jumbled the cables! Drag each plug on the left to the socket with the SAME colour and shape.',
+        wires: 4,
+        left: labels,
+        right: labels,
+      },
       () => {
         this.objects.pduBroken = false;
         this.emit('pdu_repaired');
         this.particles.sparks(SPOTS.pdu.x + 9, SPOTS.pdu.y - 14, 20, '#5fd068');
-        this.toast('PDU repaired — power flows again!', '#5fd068', 'icon_power');
-        this.luna.say('Brilliant! Now open BASE OPS at the Mission Console and choose which machines get power.', 'wow', 2);
+        this.toast('PDU repaired! Power flows again.', '#5fd068', 'icon_power');
+        this.luna.say(
+          'Brilliant! Now open BASE OPS at the Mission Console and choose which machines get power.',
+          'wow',
+          2,
+        );
         this.unlockFact('power_tradeoff');
       },
     );
   }
 
+  /** Fold every solar panel away (dust storm) or open them again. Returns false if it isn't safe yet. */
+  setPanelsFolded(fold: boolean): boolean {
+    const panels = this.objects.panels;
+    if (!panels.length || panels.every((p) => p.folded === fold)) return true;
+    if (!fold && this.weather.storm.active) {
+      this.luna.say('Not yet! The storm is still blowing. Open the panels when it is over.', 'alert', 3);
+      this.audio.error();
+      return false;
+    }
+    for (const p of panels) p.folded = fold;
+    this.audio.hiss(fold);
+    if (fold) {
+      this.toast('Solar panels folded: safe from the storm', '#7fe3ff', 'icon_solar');
+      this.emit('panels_folded');
+    } else this.toast('Solar panels open: making power again', '#ffd166', 'icon_solar');
+    return true;
+  }
+
+  onPanelStormDamage(p: SolarPanel): void {
+    const c = panelCenter(p);
+    this.particles.sparks(c.x, c.y - 20, 10);
+    this.audio.spark();
+    this.toast('The storm cracked a solar panel!', '#ff5a5a', 'icon_solar');
+    this.luna.hint(
+      'stormpanel',
+      'Oh no, the wind cracked an open solar panel! Fold the panels before a storm hits next time.',
+      'alert',
+      30,
+      3,
+    );
+  }
+
   openPanelRepair(p: SolarPanel): void {
     const labels = ['CELL STRING A', 'CELL STRING B', 'GROUND'];
+    const why =
+      p.cause === 'storm'
+        ? 'The storm wind shook this panel’s wires loose.'
+        : 'A meteorite shook this panel’s wires loose.';
     openWiring(
       this.ui.stack,
       this.audio,
-      { title: 'SOLAR PANEL REPAIR', subtitle: 'A meteorite shook this panel’s wires loose. Reconnect them!', wires: 3, left: labels, right: labels },
+      { title: 'SOLAR PANEL REPAIR', subtitle: `${why} Reconnect them!`, wires: 3, left: labels, right: labels },
       () => {
         p.broken = false;
+        p.wear = 0;
         p.dust = 0;
         p.shine = 1;
         this.toast('Solar panel repaired!', '#5fd068', 'icon_solar');
@@ -552,24 +655,39 @@ export class Game {
   useAntenna(): void {
     const a = this.objects.antenna;
     if (a.state === 'online') {
-      this.toast('Earth link ONLINE — Mission Control is listening!', '#7fe3ff', 'icon_dish');
+      this.toast('Earth link ONLINE! Mission Control is listening.', '#7fe3ff', 'icon_dish');
       this.unlockFact('dsn');
       return;
     }
     if (this.missions.activeId() !== 6) {
-      this.luna.say('This is our Deep Space Antenna. The storm broke it — we will fix it in Mission 6, once the base is running!', 'think', 1);
+      this.luna.say(
+        'This is our Deep Space Antenna. The storm broke it, and we will fix it in Mission 6, once the base is running!',
+        'think',
+        1,
+      );
       return;
     }
     if (a.state === 'broken') {
       if (this.antennaPartsHeld() < 3) {
-        this.hint('needparts', `We need 3 antenna parts — you have ${this.antennaPartsHeld()}. Follow the glowing yellow path to find the rest!`, 'think', 6);
+        this.hint(
+          'needparts',
+          `We need 3 antenna parts and you have ${this.antennaPartsHeld()}. Follow the glowing yellow path to find the rest!`,
+          'think',
+          6,
+        );
         return;
       }
       const labels = ['POWER', 'AMPLIFIER', 'RECEIVER', 'TRANSMITTER', 'FEED HORN'];
       openWiring(
         this.ui.stack,
         this.audio,
-        { title: 'DEEP SPACE ANTENNA REPAIR', subtitle: 'Install the new parts and reconnect all 5 cables. Match colour + shape!', wires: 5, left: labels, right: labels },
+        {
+          title: 'DEEP SPACE ANTENNA REPAIR',
+          subtitle: 'Install the new parts and reconnect all 5 cables. Match colour + shape!',
+          wires: 5,
+          left: labels,
+          right: labels,
+        },
         () => {
           a.state = 'repaired';
           a.partsInstalled = 3;
@@ -590,8 +708,16 @@ export class Game {
   readLanderPlaque(): void {
     this.dialogue(
       [
-        { who: 'LUNA', mood: 'think', text: 'This old robotic lander explored here long before Outpost 7. Its plaque says it studied the weather and dug for ice — just like NASA’s Phoenix lander did in 2008!' },
-        { who: 'LUNA', mood: 'wow', text: 'Phoenix carried a weather station built by the Canadian Space Agency. Its laser saw SNOW falling from Martian clouds!' },
+        {
+          who: 'LUNA',
+          mood: 'think',
+          text: 'This old robotic lander explored here long before Outpost 7. Its plaque says it studied the weather and dug for ice, just like NASA’s Phoenix lander did in 2008!',
+        },
+        {
+          who: 'LUNA',
+          mood: 'wow',
+          text: 'Phoenix carried a weather station built by the Canadian Space Agency. Its laser saw SNOW falling from Martian clouds!',
+        },
       ],
       () => {
         this.unlockFact('csa_phoenix_snow');
@@ -637,11 +763,15 @@ export class Game {
         w.solDose = 0;
         this.onNewSol();
       }
-      this.luna.say('Good morning! While you slept, the base ran on battery power and the plants kept growing.', 'happy', 2);
+      this.luna.say(
+        'Good morning! While you slept, the base ran on battery power and the plants kept growing.',
+        'happy',
+        2,
+      );
     });
   }
 
-  // ───────────────────────── world event hooks ─────────────────────────
+  // World event hooks
 
   /** Called when the laser finishes breaking a rock or digging a pit. */
   onDig(tx: number, ty: number, res: DigResult): void {
@@ -664,7 +794,13 @@ export class Game {
     if (!drop) return;
     const got = this.player.addItem(drop, count);
     if (!got) {
-      this.hint('packfull', 'Backpack full (60 items)! Hop into the rover to store it in the trunk, or walk back into the base to unload.', 'alert', 20, 2);
+      this.hint(
+        'packfull',
+        'Backpack full (60 items)! Hop into the rover to store it in the trunk, or walk back into the base to unload.',
+        'alert',
+        20,
+        2,
+      );
       return;
     }
     this.particles.floatText(tx * TILE + 8, ty * TILE - 4, `+${got} ${ITEMS[drop].name}`, ITEMS[drop].color);
@@ -672,7 +808,11 @@ export class Game {
       this.stats.iceMined += got;
       this.emit('mine_ice', got);
       if (this.stats.iceMined <= got) {
-        this.luna.say('Real Martian ice! NASA found water ice like this hiding just under the soil. Bring it back to the base to melt it.', 'wow', 2);
+        this.luna.say(
+          'Real Martian ice! NASA found water ice like this hiding just under the soil. Bring it back to the base to melt it.',
+          'wow',
+          2,
+        );
         this.unlockFact('subsurface_ice');
       }
     } else if (drop === 'iron') this.emit('mine_iron', got);
@@ -727,14 +867,20 @@ export class Game {
       this.particles.burst(pk.x + 7, pk.y + 7, 16, '#ffd166', 60);
       const have = this.antennaPartsHeld();
       this.toast(`Antenna part found! (${have}/3)`, '#ffd166', 'icon_part');
-      this.luna.say(have >= 3 ? 'That is all 3 parts! Now head EAST to the Deep Space Antenna on the ridge.' : `Antenna part ${have} of 3! Follow the glowing path to the next one.`, 'wow', 2);
+      this.luna.say(
+        have >= 3
+          ? 'That is all 3 parts! Now head EAST to the Deep Space Antenna on the ridge.'
+          : `Antenna part ${have} of 3! Follow the glowing path to the next one.`,
+        'wow',
+        2,
+      );
     } else if (pk.kind === 'meteorite') {
       p.addItem('meteorite', 1);
       this.stats.meteoritesFound++;
       this.missions.addXp(60);
       this.emit('meteorite');
       this.audio.harvest();
-      this.toast('You found a meteorite — a rock from space!', '#b9b5c8', 'icon_meteorite');
+      this.toast('You found a meteorite: a rock from space!', '#b9b5c8', 'icon_meteorite');
       this.unlockFact('meteorite');
       this.checkBadges();
     } else {
@@ -756,8 +902,17 @@ export class Game {
     if (!scripted) {
       if (dose < 1.2) {
         this.stats.flaresSurvived++;
-        this.luna.say('The flare is over. You hid well and got only a tiny bit of radiation. Great sheltering!', 'happy', 2);
-      } else this.luna.say('The flare is over, but you got too much radiation. Next time, hide in the Storm Shelter!', 'think', 2);
+        this.luna.say(
+          'The flare is over. You hid well and got only a tiny bit of radiation. Great sheltering!',
+          'happy',
+          2,
+        );
+      } else
+        this.luna.say(
+          'The flare is over, but you got too much radiation. Next time, hide in the Storm Shelter!',
+          'think',
+          2,
+        );
       this.unlockFact('flare_classes');
     }
     this.toast('Solar flare has passed', '#9be36a', 'icon_rad');
@@ -811,11 +966,11 @@ export class Game {
       this.weather.solDose = Math.min(this.weather.solDose, SOL_DOSE_BUDGET * 0.5);
       this.snapCamera();
       this.evacuating = false;
-      this.luna.say('You’re safe in the med bay. Let’s try again — carefully this time!', 'happy', 2);
+      this.luna.say('You’re safe in the med bay. Let’s try again, carefully this time!', 'happy', 2);
     });
   }
 
-  // ───────────────────────── guide targets ─────────────────────────
+  // Guide targets
 
   /** True when the suit only has enough air left to walk home (with a safety margin). */
   turnBackNeeded(): boolean {
@@ -841,22 +996,41 @@ export class Game {
   /** Where the guide should lead right now (null: nowhere in particular). */
   guideTarget(): GuideTarget | null {
     // safety first: point home when the air or rover battery is running out
-    if (this.turnBackNeeded()) return { x: SPOTS.airlockOut.x, y: SPOTS.airlockOut.y - 18, label: 'BASE · AIR LOW!', urgent: true };
+    if (this.turnBackNeeded())
+      return { x: SPOTS.airlockOut.x, y: SPOTS.airlockOut.y - 18, label: 'BASE · AIR LOW!', urgent: true };
     if (this.roverLowForTrip()) {
       const pad = this.rover.padCenter();
       return { x: pad.x, y: pad.y, label: 'CHARGING PAD', urgent: true };
     }
+    const panels = this.panelGoal();
+    if (panels) return panels;
     const obj = this.missions.currentObjective();
     if (!obj?.target) return null;
     const inside = ['airlock', 'pdu', 'console', 'melter', 'beds', 'fabricator', 'shelter'];
     const targetInside = inside.includes(obj.target);
-    if (this.player.inBase && !targetInside) return { x: SPOTS.airlockIn.x, y: SPOTS.airlockIn.y - 4, label: 'AIRLOCK · GO OUTSIDE' };
+    if (this.player.inBase && !targetInside)
+      return { x: SPOTS.airlockIn.x, y: SPOTS.airlockIn.y - 4, label: 'AIRLOCK · GO OUTSIDE' };
     if (!this.player.inBase && targetInside) {
       if (this.rover.driving) return { x: SPOTS.charger.x - 40, y: SPOTS.charger.y, label: 'ROVER PAD' };
       return { x: SPOTS.airlockOut.x, y: SPOTS.airlockOut.y - 18, label: 'AIRLOCK · GO INSIDE' };
     }
     const at = this.resolveTarget(obj.target);
     return at ? { ...at, label: TARGET_LABEL[obj.target] ?? 'GO HERE' } : null;
+  }
+
+  /** Storm coming with the panels open, or the storm is over and they are still folded. */
+  private panelGoal(): GuideTarget | null {
+    const w = this.weather;
+    const o = this.objects;
+    const fold = (w.stormComing || w.storm.active) && o.anyPanelOpen;
+    const unfold = !w.stormComing && !w.storm.active && o.allPanelsFolded && !w.isNight;
+    if (!fold && !unfold) return null;
+    const what = fold ? 'FOLD SOLAR PANELS' : 'OPEN SOLAR PANELS';
+    if (this.player.inBase)
+      return { x: SPOTS.console.x + 20, y: SPOTS.console.y - 26, label: `BASE OPS · ${what}`, urgent: fold };
+    if (this.rover.driving) return null;
+    const pn = o.nearestPanel(this.player.cx, this.player.cy);
+    return pn ? { x: panelCenter(pn).x, y: pn.y - 36, label: what, urgent: fold } : null;
   }
 
   private resolveTarget(name: string): { x: number; y: number } | null {
@@ -868,7 +1042,7 @@ export class Game {
         return { x: SPOTS.airlockOut.x, y: SPOTS.airlockOut.y - 18 };
       case 'panels': {
         const pn = this.objects.dirtiestPanel();
-        return pn ? { x: pn.x + 17, y: pn.y - 22 } : null;
+        return pn ? { x: panelCenter(pn).x, y: pn.y - 36 } : null;
       }
       case 'pdu':
         return { x: SPOTS.pdu.x + 9, y: SPOTS.pdu.y - 20 };
@@ -879,7 +1053,10 @@ export class Game {
       case 'fabricator':
         return { x: SPOTS.fabricator.x + 16, y: SPOTS.fabricator.y - 26 };
       case 'beds': {
-        const k = Math.max(0, this.res.beds.findIndex((b) => !b.crop || b.growth >= 1));
+        const k = Math.max(
+          0,
+          this.res.beds.findIndex((b) => !b.crop || b.growth >= 1),
+        );
         return { x: SPOTS.beds[k].x + 16, y: SPOTS.beds[k].y - 4 };
       }
       case 'shelter':
@@ -913,7 +1090,7 @@ export class Game {
     return null;
   }
 
-  // ───────────────────────── update ─────────────────────────
+  // Update
 
   private computeFocus(): void {
     this.focus = null;
@@ -921,7 +1098,12 @@ export class Game {
     const p = this.player;
     if (this.rover.driving) {
       const r = this.rover;
-      this.focus = { label: r.onPad() ? 'Hop out (unloads trunk to base)' : 'Hop out of the rover', x: r.cx, y: r.y - 6, act: () => r.exit() };
+      this.focus = {
+        label: r.onPad() ? 'Hop out (unloads trunk to base)' : 'Hop out of the rover',
+        x: r.cx,
+        y: r.y - 6,
+        act: () => r.exit(),
+      };
       return;
     }
     this.interactAge++;
@@ -937,7 +1119,8 @@ export class Game {
           y: r.y - 10,
           w: r.w + 12,
           h: r.h + 10,
-          label: () => `Drive the rover · battery ${Math.round(r.battery)}%${r.trunkCount() ? ` · trunk ${r.trunkCount()}` : ''}`,
+          label: () =>
+            `Drive the rover · battery ${Math.round(r.battery)}%${r.trunkCount() ? ` · trunk ${r.trunkCount()}` : ''}`,
           enabled: () => !this.player.inBase && !r.driving,
           act: () => r.enter(),
         },
@@ -972,7 +1155,13 @@ export class Game {
 
   /** Fast-forward only when the astronaut is safe inside and nothing needs attention. */
   canFastForward(): boolean {
-    return this.player.inBase && !this.rover.driving && this.weather.flare.phase === 'none' && !this.ui.blocking && !this.hud.alerts.some((a) => a.level === 'bad');
+    return (
+      this.player.inBase &&
+      !this.rover.driving &&
+      this.weather.flare.phase === 'none' &&
+      !this.ui.blocking &&
+      !this.hud.alerts.some((a) => a.level === 'bad')
+    );
   }
   private brickAssistArmed = true;
 
@@ -1018,7 +1207,8 @@ export class Game {
       if (input.pressed('b') && this.player.inBase) this.ui.openBaseOps('power');
       for (let i = 0; i < 8; i++) if (input.pressed(String(i + 1))) this.selectTool(i);
       const nTools = this.toolsUnlocked();
-      if (input.wheel && nTools > 0) this.player.hotbar = (this.player.hotbar + (input.wheel > 0 ? 1 : nTools - 1)) % nTools;
+      if (input.wheel && nTools > 0)
+        this.player.hotbar = (this.player.hotbar + (input.wheel > 0 ? 1 : nTools - 1)) % nTools;
       if (this.player.hotbar >= nTools) this.player.hotbar = 0;
     }
 
@@ -1069,7 +1259,12 @@ export class Game {
 
     // mission location checks
     const p = this.player;
-    if (!p.inBase && this.missions.activeId() === 6 && Math.hypot(p.cx - this.objects.antenna.x, p.cy - this.objects.antenna.y) < 110) this.emit('reach_antenna');
+    if (
+      !p.inBase &&
+      this.missions.activeId() === 6 &&
+      Math.hypot(p.cx - this.objects.antenna.x, p.cy - this.objects.antenna.y) < 110
+    )
+      this.emit('reach_antenna');
     this.badgeT -= dt;
     if (this.badgeT <= 0) {
       this.badgeT = 2;
@@ -1089,7 +1284,7 @@ export class Game {
   doScan(): void {
     const p = this.player;
     if (p.inBase) {
-      this.hint('scanin', 'My scanner works outside — the habitat walls block it!', 'think', 8);
+      this.hint('scanin', 'My scanner only works outside: the habitat walls block it!', 'think', 8);
       return;
     }
     if (this.scanCooldown > 0) return;
@@ -1104,9 +1299,23 @@ export class Game {
       const dy = Math.round((ice.y - p.cy) / TILE);
       const horiz = Math.abs(dx) < 2 ? '' : `${Math.abs(dx)} m ${dx > 0 ? 'EAST (right)' : 'WEST (left)'}`;
       const vert = Math.abs(dy) < 2 ? '' : `${Math.abs(dy)} m ${dy > 0 ? 'SOUTH (down)' : 'NORTH (up)'}`;
-      this.luna.say(`Scan complete! I found ice under the soil ${[horiz, vert].filter(Boolean).join(' and ') || 'right here'}. It glows blue now — dig it with the Mining Laser!`, 'wow', 2);
-    } else if (ice) this.luna.say('Scan complete! No buried ice right here, but I can see ice further away. Follow the glowing path!', 'think', 2);
-    else this.luna.say('Scan complete! No ice close by. Try somewhere else — ice is more common toward the poles (north and south).', 'think', 2);
+      this.luna.say(
+        `Scan complete! I found ice under the soil ${[horiz, vert].filter(Boolean).join(' and ') || 'right here'}. It glows blue now. Dig it with the Mining Laser!`,
+        'wow',
+        2,
+      );
+    } else if (ice)
+      this.luna.say(
+        'Scan complete! No buried ice right here, but I can see ice further away. Follow the glowing path!',
+        'think',
+        2,
+      );
+    else
+      this.luna.say(
+        'Scan complete! No ice close by. Try somewhere else: ice is more common toward the poles (north and south).',
+        'think',
+        2,
+      );
   }
 
   snapCamera(): void {
@@ -1143,7 +1352,7 @@ export class Game {
     this.clampCamera();
   }
 
-  // ───────────────────────── render ─────────────────────────
+  // Render
 
   render(): void {
     const g = this.g;
@@ -1162,12 +1371,15 @@ export class Game {
 
     // everything that stands up is drawn back-to-front by its foot position (2.5D)
     const list: Drawable[] = [];
-    this.map.forEachObject(cx, cy, vw, vh, (tx, ty) => list.push({ y: (ty + 1) * TILE, draw: () => this.map.drawObject(g, this.art, tx, ty, cx, cy, t) }));
+    this.map.forEachObject(cx, cy, vw, vh, (tx, ty) =>
+      list.push({ y: (ty + 1) * TILE, draw: () => this.map.drawObject(g, this.art, tx, ty, cx, cy, t) }),
+    );
     this.base.drawables(list, cx, cy, t);
     this.objects.drawables(list, cx, cy, t);
     this.weather.drawables(list, cx, cy, t);
     list.push({ y: this.rover.y + this.rover.h, draw: () => this.rover.render(g, cx, cy) });
-    if (!this.player.hidden) list.push({ y: this.player.y + this.player.h, draw: () => this.player.render(g, cx, cy, t) });
+    if (!this.player.hidden)
+      list.push({ y: this.player.y + this.player.h, draw: () => this.player.render(g, cx, cy, t) });
     list.sort((a, b) => a.y - b.y);
     for (const d of list) d.draw();
 

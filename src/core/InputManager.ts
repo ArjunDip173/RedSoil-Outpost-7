@@ -63,7 +63,8 @@ export class InputManager {
       const k = this.norm(e.key);
       if (!this.held.has(k)) this.pressedSet.add(k);
       this.held.add(k);
-      if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'tab'].includes(k) && !this.blocked) e.preventDefault();
+      if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'tab'].includes(k) && !this.blocked)
+        e.preventDefault();
     });
     window.addEventListener('keyup', (e) => this.held.delete(this.norm(e.key)));
     window.addEventListener('blur', () => {
@@ -113,7 +114,7 @@ export class InputManager {
       { passive: false },
     );
 
-    // ── touch and pen ──
+    // Touch and pen
     canvas.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'mouse') return;
       e.preventDefault();

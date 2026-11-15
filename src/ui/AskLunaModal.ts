@@ -26,7 +26,11 @@ export function openAskLuna(game: Game): void {
 
   const head = el('div', 'ask-head');
   head.appendChild(spriteCanvas(game.art.get('luna_happy'), 4));
-  const status = el('div', 'ask-status', ai.enabled ? 'Connecting to AI LUNA…' : 'Offline LUNA · answers from the Science Log');
+  const status = el(
+    'div',
+    'ask-status',
+    ai.enabled ? 'Connecting to AI LUNA…' : 'Offline LUNA · answers from the Science Log',
+  );
   const setStatus = (online: boolean) => {
     status.textContent = online ? 'AI LUNA is online' : 'Offline LUNA · answers from the Science Log';
     status.classList.toggle('on', online);
@@ -52,10 +56,15 @@ export function openAskLuna(game: Game): void {
   const foot = el('div', 'ask-foot');
   foot.append(
     el('span', 'muted small', "Don't share your real name, address or other personal details."),
-    button('AI settings', () => {
-      m.close();
-      game.ui.openSettings();
-    }, 'btn ghost small', 'ui_gear'),
+    button(
+      'AI settings',
+      () => {
+        m.close();
+        game.ui.openSettings();
+      },
+      'btn ghost small',
+      'ui_gear',
+    ),
   );
   m.body.append(head, log, chips, form, foot);
 
@@ -63,7 +72,14 @@ export function openAskLuna(game: Game): void {
     const row = el('div', `ask-msg ${who}`);
     const b = el('div', 'ask-bubble', who === 'luna' ? forTouch(text) : text);
     row.appendChild(b);
-    if (who === 'luna' && source) row.appendChild(el('div', 'ask-src', source === 'ai' ? 'AI answer · check big facts with a grown-up' : 'From LUNA’s Science Log'));
+    if (who === 'luna' && source)
+      row.appendChild(
+        el(
+          'div',
+          'ask-src',
+          source === 'ai' ? 'AI answer · check big facts with a grown-up' : 'From LUNA’s Science Log',
+        ),
+      );
     if (note) row.appendChild(el('div', 'ask-note', note));
     log.appendChild(row);
     log.scrollTop = log.scrollHeight;
@@ -73,13 +89,19 @@ export function openAskLuna(game: Game): void {
   if (!game.lunaLog.length) bubble('luna', 'Hi! I’m LUNA. What would you like to know?');
   for (const e of game.lunaLog) bubble(e.who, e.text, e.note, e.source);
 
-  const shuffled = SUGGESTIONS.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+  const shuffled = SUGGESTIONS.slice()
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 4);
   for (const s of shuffled)
     chips.appendChild(
-      button(s, () => {
-        input.value = s;
-        form.requestSubmit();
-      }, 'chip ask-chip'),
+      button(
+        s,
+        () => {
+          input.value = s;
+          form.requestSubmit();
+        },
+        'chip ask-chip',
+      ),
     );
 
   let busy = false;
@@ -99,7 +121,7 @@ export function openAskLuna(game: Game): void {
     const typing = bubble('luna', '…');
     typing.classList.add('typing');
     // a slow answer: let the player know LUNA is still working on it
-    const slow = window.setTimeout(() => typing.isConnected && (typing.textContent = 'Thinking… 🛰'), 3000);
+    const slow = window.setTimeout(() => typing.isConnected && (typing.textContent = 'Thinking…'), 3000);
     const answer = await ai.ask(q, game.lunaChat, game.aiContext());
     clearTimeout(slow);
     if (m.closed) return;

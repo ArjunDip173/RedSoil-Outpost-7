@@ -8,18 +8,30 @@ import type { FactSource, GameData, ScienceLogState, Stats } from '../types';
 import { button, el, type ModalStack, spriteCanvas } from './Dom';
 
 const SOURCE_INFO: Record<FactSource, string> = {
-  DONKI: 'NASA DONKI — space weather database',
+  DONKI: 'NASA DONKI: space weather database',
   RadLab: 'Radiation science (Curiosity RAD, ISS)',
-  OSDR: 'NASA Open Science Data Repository — space biology',
+  OSDR: 'NASA Open Science Data Repository: space biology',
   CSA: 'Canadian Space Agency',
   'NASA Mars': 'NASA Mars exploration',
   NASA: 'NASA human spaceflight & technology',
 };
 
-export function openScienceLog(stack: ModalStack, art: Sprites, data: GameData, science: ScienceLogState, stats: Stats | null, onCertificate?: () => void): void {
+export function openScienceLog(
+  stack: ModalStack,
+  art: Sprites,
+  data: GameData,
+  science: ScienceLogState,
+  stats: Stats | null,
+  onCertificate?: () => void,
+): void {
   const m = stack.open({ title: 'SCIENCE LOG', size: 'xl', cls: 'log-modal' });
   const tabs = el('div', 'tabs');
-  const pages = { facts: el('div', 'page'), samples: el('div', 'page'), patches: el('div', 'page'), stats: el('div', 'page') };
+  const pages = {
+    facts: el('div', 'page'),
+    samples: el('div', 'page'),
+    patches: el('div', 'page'),
+    stats: el('div', 'page'),
+  };
   type K = keyof typeof pages;
   const labels: Record<K, string> = {
     facts: `FACTS ${science.facts.length}/${data.facts.facts.length}`,
@@ -34,7 +46,12 @@ export function openScienceLog(stack: ModalStack, art: Sprites, data: GameData, 
       btns[key]?.classList.toggle('active', key === k);
     }
   };
-  const tabIcons: Record<string, string> = { facts: 'icon_dish', samples: 'icon_basalt', patches: 'icon_star', stats: 'ui_chart' };
+  const tabIcons: Record<string, string> = {
+    facts: 'icon_dish',
+    samples: 'icon_basalt',
+    patches: 'icon_star',
+    stats: 'ui_chart',
+  };
   for (const k of Object.keys(pages) as K[]) {
     if (k === 'stats' && !stats) continue;
     const b = button(labels[k], () => show(k), 'tab', tabIcons[k]);
@@ -45,7 +62,13 @@ export function openScienceLog(stack: ModalStack, art: Sprites, data: GameData, 
 
   // facts grouped by source
   const sources = Array.from(new Set(data.facts.facts.map((f) => f.source)));
-  pages.facts.appendChild(el('p', 'muted', 'Facts unlock as you play: LUNA shares them, missions teach them, and the base reveals them. All facts come from real NASA and partner-agency science.'));
+  pages.facts.appendChild(
+    el(
+      'p',
+      'muted',
+      'Facts unlock as you play: LUNA shares them, missions teach them, and the base reveals them. All facts come from real NASA and partner-agency science.',
+    ),
+  );
   for (const s of sources) {
     const all = data.facts.facts.filter((f) => f.source === s);
     const got = all.filter((f) => science.facts.includes(f.id));
@@ -69,10 +92,17 @@ export function openScienceLog(stack: ModalStack, art: Sprites, data: GameData, 
     const card = el('div', `sample ${got ? '' : 'locked'}`);
     const sw = el('div', 'swatch');
     sw.style.background = got ? s.color : '#2a2230';
-    card.append(sw, el('b', '', got ? s.name : '??? Unknown rock'), el('p', '', got ? s.text : 'Find a sparkly rock and brush it with the Dust Brush.'));
+    card.append(
+      sw,
+      el('b', '', got ? s.name : '??? Unknown rock'),
+      el('p', '', got ? s.text : 'Find a sparkly rock and brush it with the Dust Brush.'),
+    );
     sg.appendChild(card);
   }
-  pages.samples.append(el('p', 'muted', 'Sparkly rocks hide all over Mars — on the surface, in craters, at the poles and in caves.'), sg);
+  pages.samples.append(
+    el('p', 'muted', 'Sparkly rocks hide all over Mars: on the surface, in craters, at the poles and in caves.'),
+    sg,
+  );
 
   // patches
   const pg = el('div', 'badge-grid');
@@ -84,14 +114,15 @@ export function openScienceLog(stack: ModalStack, art: Sprites, data: GameData, 
     pg.appendChild(card);
   }
   pages.patches.appendChild(pg);
-  if (onCertificate && science.badges.includes('badge_graduate')) pages.patches.appendChild(button('View my graduation certificate', onCertificate, 'btn primary', 'ui_cap'));
+  if (onCertificate && science.badges.includes('badge_graduate'))
+    pages.patches.appendChild(button('View my graduation certificate', onCertificate, 'btn primary', 'ui_cap'));
 
   // stats
   if (stats) {
     const rows: [string, string][] = [
       ['Ice chunks mined', `${stats.iceMined}`],
       ['Blocks dug', `${stats.tilesDug}`],
-            ['Crops harvested', `${stats.cropsHarvested}`],
+      ['Crops harvested', `${stats.cropsHarvested}`],
       ['Solar panels cleaned', `${stats.panelsCleaned}`],
       ['Science samples', `${stats.samplesFound}`],
       ['Rover distance', `${stats.distanceDriven} m`],

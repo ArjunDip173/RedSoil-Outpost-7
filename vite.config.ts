@@ -5,7 +5,7 @@ import { defineConfig, type Plugin } from 'vite';
 
 /**
  * Inlines the bundled JS, CSS and fonts into ONE html file, so the game can be opened
- * by double-clicking it (file://) — no server, no "npm run dev" needed.
+ * by double-clicking it (file://), with no server and no "npm run dev".
  * The result is copied to ./RedSoil-Outpost7.html for submission.
  */
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
@@ -22,11 +22,19 @@ function singleFile(): Plugin {
       for (const [name, item] of Object.entries(bundle)) {
         if (item.type === 'chunk' && item.isEntry) {
           const code = item.code.replace(/<\/script/gi, '<\\/script');
-          html = html.replace(new RegExp(`<script[^>]*src="[^"]*${item.fileName.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}"[^>]*></script>`), () => '');
+          html = html.replace(
+            new RegExp(
+              `<script[^>]*src="[^"]*${item.fileName.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}"[^>]*></script>`,
+            ),
+            () => '',
+          );
           html = html.replace('</body>', () => `<script type="module">${code}</script>\n</body>`);
           delete bundle[name];
         } else if (item.type === 'asset' && name.endsWith('.css')) {
-          html = html.replace(new RegExp(`<link[^>]*href="[^"]*${item.fileName.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}"[^>]*>`), () => `<style>${String(item.source)}</style>`);
+          html = html.replace(
+            new RegExp(`<link[^>]*href="[^"]*${item.fileName.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}"[^>]*>`),
+            () => `<style>${String(item.source)}</style>`,
+          );
           delete bundle[name];
         }
       }

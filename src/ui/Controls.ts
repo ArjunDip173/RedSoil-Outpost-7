@@ -51,6 +51,8 @@ export function controlsTable(): HTMLElement {
   rows(MAIN);
   wrap.appendChild(el('h3', '', 'SHORTCUTS (or use the buttons on screen)'));
   rows(EXTRA);
-  wrap.appendChild(el('p', 'muted small', 'Tip: Easy Mode (on by default) makes your suit oxygen last longer. Change it in Settings.'));
+  wrap.appendChild(
+    el('p', 'muted small', 'Tip: Easy Mode (on by default) makes your suit oxygen last longer. Change it in Settings.'),
+  );
   return wrap;
 }

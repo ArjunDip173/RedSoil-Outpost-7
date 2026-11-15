@@ -36,12 +36,16 @@ describe('missions', () => {
   });
 
   it('only uses state checks that exist', () => {
-    for (const m of missions) for (const o of m.objectives) if (o.state) expect(STATE_CHECKS, `mission ${m.id} step ${o.id}`).toHaveProperty(o.state);
+    for (const m of missions)
+      for (const o of m.objectives)
+        if (o.state) expect(STATE_CHECKS, `mission ${m.id} step ${o.id}`).toHaveProperty(o.state);
   });
 
   it('only waits for events the game actually sends', () => {
     for (const m of missions)
-      for (const o of m.objectives) if (o.event) expect(source.includes(`emit('${o.event}'`), `nothing emits '${o.event}' (mission ${m.id})`).toBe(true);
+      for (const o of m.objectives)
+        if (o.event)
+          expect(source.includes(`emit('${o.event}'`), `nothing emits '${o.event}' (mission ${m.id})`).toBe(true);
   });
 
   it('has a patch sprite and a known fact for every mission', () => {
@@ -54,7 +58,8 @@ describe('missions', () => {
 
   it('keeps briefing lines short enough for young readers', () => {
     for (const m of missions)
-      for (const line of [...m.briefing, ...m.complete]) expect(line.text.split(/\s+/).length, line.text).toBeLessThanOrEqual(20);
+      for (const line of [...m.briefing, ...m.complete])
+        expect(line.text.split(/\s+/).length, line.text).toBeLessThanOrEqual(20);
   });
 });
 

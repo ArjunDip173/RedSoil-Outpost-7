@@ -6,6 +6,7 @@ import { GAME_TITLE, TEAM_NAME } from '../config';
 import type { AudioEngine } from '../core/AudioEngine';
 import { type Sprites } from '../core/Sprites';
 import type { Game } from '../Game';
+import { confetti } from './Confetti';
 import { button, el, type ModalStack, iconText } from './Dom';
 
 export interface CertificateInfo {
@@ -21,7 +22,7 @@ export interface CertificateInfo {
   patches: string[];
 }
 
-// ───────────────────────── Earth contact ─────────────────────────
+// Earth contact
 
 export function showEarthContact(game: Game, onDone: () => void): void {
   const m = game.ui.stack.open({ title: 'EARTH COMMS RESTORED', size: 'lg', closable: false, cls: 'earth-modal' });
@@ -42,10 +43,14 @@ export function showEarthContact(game: Game, onDone: () => void): void {
     `> NASA DEEP SPACE NETWORK: signal received ✔`,
     `> MESSAGE FROM EARTH: "Outpost 7, we hear you loud and clear. Welcome back, ${game.profile.name}!"`,
   ];
-  const cont = button('CONTINUE ▶', () => {
-    m.close();
-    onDone();
-  }, 'btn primary big hidden');
+  const cont = button(
+    'CONTINUE ▶',
+    () => {
+      m.close();
+      onDone();
+    },
+    'btn primary big hidden',
+  );
   m.body.append(c, log, cont);
   const g = c.getContext('2d')!;
   let t = 0;
@@ -113,7 +118,7 @@ export function showEarthContact(game: Game, onDone: () => void): void {
   game.unlockFact('dsn', true);
 }
 
-// ───────────────────────── certificate ─────────────────────────
+// Certificate
 
 export function drawCertificate(art: Sprites, info: CertificateInfo): HTMLCanvasElement {
   const W = 1600;
@@ -169,7 +174,12 @@ export function drawCertificate(art: Sprites, info: CertificateInfo): HTMLCanvas
   center(info.name.toUpperCase(), 450, '64px "Press Start 2P", monospace', '#ffffff');
   g.fillStyle = '#ffd166';
   g.fillRect(W / 2 - 420, 478, 840, 6);
-  center('has completed all six training missions on the red soil of Mars and', 540, '40px VT323, monospace', '#e8e6df');
+  center(
+    'has completed all six training missions on the red soil of Mars and',
+    540,
+    '40px VT323, monospace',
+    '#e8e6df',
+  );
   center('is now an official JUNIOR ASTRONAUT of Outpost 7!', 585, '40px VT323, monospace', '#e8e6df');
   // patches
   const ps = info.patches;
@@ -178,7 +188,14 @@ export function drawCertificate(art: Sprites, info: CertificateInfo): HTMLCanvas
   const totalW = ps.length * pw + (ps.length - 1) * gap;
   ps.forEach((p, i) => g.drawImage(art.get(p), W / 2 - totalW / 2 + i * (pw + gap), 615, pw, pw));
   // skills
-  const skills = ['Power budgeting', 'Water: O2 vs. crops', 'Radiation shielding', 'Life support', 'Rover EVA', 'Deep-space comms'];
+  const skills = [
+    'Power budgeting',
+    'Water: O2 vs. crops',
+    'Radiation shielding',
+    'Life support',
+    'Rover EVA',
+    'Deep-space comms',
+  ];
   g.font = '30px VT323, monospace';
   g.fillStyle = '#c9c7c0';
   g.textAlign = 'center';
@@ -201,7 +218,7 @@ export function drawCertificate(art: Sprites, info: CertificateInfo): HTMLCanvas
   g.fillRect(170, 948, 460, 4);
   g.font = '28px VT323, monospace';
   g.fillStyle = '#e8e6df';
-  g.fillText(`Signed: ${TEAM_NAME} — Game Development Team`, 170, 985);
+  g.fillText(`Signed: ${TEAM_NAME}, Game Development Team`, 170, 985);
   g.textAlign = 'right';
   g.font = '28px VT323, monospace';
   g.fillText(`Date: ${info.date}`, W - 170, 930);
@@ -210,36 +227,59 @@ export function drawCertificate(art: Sprites, info: CertificateInfo): HTMLCanvas
   g.textAlign = 'center';
   g.font = '24px VT323, monospace';
   g.fillStyle = '#c9a089';
-  g.fillText(`Created by ${TEAM_NAME} for the 2026 NASA Space Apps Challenge · Facts from NASA DONKI, RadLab, OSDR & the Canadian Space Agency`, W / 2, H - 92);
+  g.fillText(
+    `Created by ${TEAM_NAME} for the 2026 NASA Space Apps Challenge · Facts from NASA DONKI, RadLab, OSDR & the Canadian Space Agency`,
+    W / 2,
+    H - 92,
+  );
   return c;
 }
 
-export function showCertificate(stack: ModalStack, art: Sprites, audio: AudioEngine, info: CertificateInfo, onDone?: () => void): void {
+export function showCertificate(
+  stack: ModalStack,
+  art: Sprites,
+  audio: AudioEngine,
+  info: CertificateInfo,
+  onDone?: () => void,
+): void {
   const m = stack.open({ title: 'YOUR JUNIOR ASTRONAUT CERTIFICATE', size: 'xl', cls: 'cert-modal', onClose: onDone });
   const canvas = drawCertificate(art, info);
   canvas.className = 'cert-canvas';
   const row = el('div', 'row wrap');
   row.append(
-    button('Download PNG', () => {
-      const a = document.createElement('a');
-      a.download = `OP7-Certificate-${info.name.replace(/[^a-z0-9]+/gi, '_')}.png`;
-      a.href = canvas.toDataURL('image/png');
-      a.click();
-      audio.chime();
-    }, 'btn primary', 'ui_download'),
-    button('Print', () => {
-      const w = window.open('', '_blank');
-      if (!w) return;
-      w.document.write(`<title>Certificate</title><body style="margin:0"><img src="${canvas.toDataURL('image/png')}" style="width:100%" onload="window.print()"></body>`);
-      w.document.close();
-    }, 'btn', 'ui_print'),
+    button(
+      'Download PNG',
+      () => {
+        const a = document.createElement('a');
+        a.download = `OP7-Certificate-${info.name.replace(/[^a-z0-9]+/gi, '_')}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+        audio.chime();
+      },
+      'btn primary',
+      'ui_download',
+    ),
+    button(
+      'Print',
+      () => {
+        const w = window.open('', '_blank');
+        if (!w) return;
+        w.document.write(
+          `<title>Certificate</title><body style="margin:0"><img src="${canvas.toDataURL('image/png')}" style="width:100%" onload="window.print()"></body>`,
+        );
+        w.document.close();
+      },
+      'btn',
+      'ui_print',
+    ),
     button('Continue ▶', () => m.close(), 'btn'),
   );
   m.body.append(canvas, row);
-  audio.victory();
+  audio.celebrate();
+  confetti();
 }
 
-// ───────────────────────── Med-Evac ─────────────────────────
+// Med-Evac
 
 export type EvacCause = 'oxygen' | 'radiation' | 'injury';
 
@@ -249,12 +289,20 @@ export function showMedEvac(game: Game, cause: EvacCause, lost: number, onDone: 
     oxygen: {
       what: 'Your suit ran out of air!',
       why: 'Mars has almost no oxygen, so your suit carries a small tank. It empties while you are outside.',
-      next: ['Watch the blue ring in the bottom-left corner.', 'When it is half empty, follow the glowing path home.', 'Standing next to the rover refills your suit.'],
+      next: [
+        'Watch the blue ring in the bottom-left corner.',
+        'When it is half empty, follow the glowing path home.',
+        'Standing next to the rover refills your suit.',
+      ],
     },
     radiation: {
       what: 'You got too much space radiation today!',
       why: 'Mars has no thick air or magnetic field, so radiation from the Sun reaches the ground.',
-      next: ['When a SOLAR FLARE warning flashes, go inside straight away.', 'Hide in the Storm Shelter room or deep in the lava tube cave.', 'Rock, soil and water block radiation.'],
+      next: [
+        'When a SOLAR FLARE warning flashes, go inside straight away.',
+        'Hide in the Storm Shelter room or deep in the lava tube cave.',
+        'Rock, soil and water block radiation.',
+      ],
     },
     injury: {
       what: 'You got hurt out there!',
@@ -276,18 +324,26 @@ export function showMedEvac(game: Game, cause: EvacCause, lost: number, onDone: 
   const row = el('div', 'row wrap center');
   if (!game.settings.easyMode && game.stats.medEvacs >= 2) {
     row.appendChild(
-      button('Turn on Easy Mode (more air)', () => {
-        game.settings.easyMode = true;
-        game.storage.saveSettings(game.settings);
-        game.toast('Easy Mode is ON: your suit air lasts longer', '#5fd068');
-      }, 'btn'),
+      button(
+        'Turn on Easy Mode (more air)',
+        () => {
+          game.settings.easyMode = true;
+          game.storage.saveSettings(game.settings);
+          game.toast('Easy Mode is ON: your suit air lasts longer', '#5fd068');
+        },
+        'btn',
+      ),
     );
   }
   row.appendChild(
-    button('BACK TO BASE ▶', () => {
-      m.close();
-      onDone();
-    }, 'btn primary big'),
+    button(
+      'BACK TO BASE ▶',
+      () => {
+        m.close();
+        onDone();
+      },
+      'btn primary big',
+    ),
   );
   m.body.appendChild(row);
   game.audio.alarm();

@@ -6,7 +6,12 @@ import { cleanAnswer, LunaAI } from '../src/systems/LunaAI';
 import type { FactsData } from '../src/types';
 
 const luna = new LunaAI({ ...DEFAULT_SETTINGS, aiEnabled: false }, factsJson as unknown as FactsData);
-const ctx = { mission: 'Mission 3: Ice, Ice, Mars-y', objective: 'Mine 10 ice chunks', status: '', location: 'outside' };
+const ctx = {
+  mission: 'Mission 3: Ice, Ice, Mars-y',
+  objective: 'Mine 10 ice chunks',
+  status: '',
+  location: 'outside',
+};
 
 describe('offline LUNA', () => {
   it('says hello back', () => {

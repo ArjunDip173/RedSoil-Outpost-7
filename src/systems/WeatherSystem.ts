@@ -16,6 +16,7 @@ import {
   SOL_DOSE_BUDGET,
   SOL_SECONDS,
   START_TIME_OF_SOL,
+  STORM_WARNING,
   SURFACE_DOSE_RATE,
   TILE,
 } from '../config';
@@ -23,6 +24,7 @@ import { type Ctx, rgba } from '../core/canvas';
 import { clamp, mulberry32 } from '../core/Rng';
 import type { Game } from '../Game';
 import type { Drawable } from '../world/BaseHabitat';
+import { panelCenter } from '../world/WorldObjects';
 import type { WeatherSave } from '../types';
 
 type FlarePhase = 'none' | 'warning' | 'active';
@@ -51,8 +53,15 @@ export class WeatherSystem {
   solDose = 0;
   doseRate = SURFACE_DOSE_RATE;
   shieldFactor = 1;
-  storm = { active: false, t: 0, duration: 0, peak: 0 };
-  flare: { phase: FlarePhase; t: number; duration: number; cls: string; scripted: boolean } = { phase: 'none', t: 0, duration: 0, cls: 'M5.1', scripted: false };
+  /** `warn` counts down the seconds until a storm that is on its way arrives. */
+  storm = { active: false, t: 0, duration: 0, peak: 0, warn: 0 };
+  flare: { phase: FlarePhase; t: number; duration: number; cls: string; scripted: boolean } = {
+    phase: 'none',
+    t: 0,
+    duration: 0,
+    cls: 'M5.1',
+    scripted: false,
+  };
   flareDose = 0;
   flareSheltered = 0;
   flareTotal = 0;
@@ -67,7 +76,7 @@ export class WeatherSystem {
     this.game = game;
   }
 
-  // ───────────────────────── derived values ─────────────────────────
+  // Derived values
 
   get sun(): number {
     const t = this.time;
@@ -87,9 +96,17 @@ export class WeatherSystem {
     const env = p < 0.2 ? p / 0.2 : p > 0.8 ? (1 - p) / 0.2 : 1;
     return env * this.storm.peak;
   }
+  /** A storm has been forecast and will hit in `storm.warn` seconds. */
+  get stormComing(): boolean {
+    return !this.storm.active && this.storm.warn > 0;
+  }
   get flareRate(): number {
     if (this.flare.phase !== 'active') return 0;
-    return Math.sin((this.flare.t / this.flare.duration) * Math.PI) * FLARE_PEAK_RATE * (this.flare.cls.startsWith('X') ? 1 : 0.75);
+    return (
+      Math.sin((this.flare.t / this.flare.duration) * Math.PI) *
+      FLARE_PEAK_RATE *
+      (this.flare.cls.startsWith('X') ? 1 : 0.75)
+    );
   }
   get clock(): string {
     const hours = this.time * 24.66;
@@ -101,14 +118,21 @@ export class WeatherSystem {
     return this.solDose > SOL_DOSE_BUDGET;
   }
 
-  // ───────────────────────── events ─────────────────────────
+  // Events
 
-  startStorm(duration = 70 + this.rng() * 60, peak = 0.6 + this.rng() * 0.4): void {
-    if (this.storm.active) return;
-    this.storm = { active: true, t: 0, duration, peak };
-    this.game.luna.say('Dust storm rolling in! Solar power will drop and the panels will get dusty. Watch the battery!', 'alert', 2);
-    this.game.toast('DUST STORM approaching', '#e8b58a', 'icon_storm');
-    this.game.audio.warn();
+  /** Forecast a dust storm: it hits after STORM_WARNING seconds, giving time to fold the panels. */
+  startStorm(duration = 70 + this.rng() * 60, peak = 0.6 + this.rng() * 0.4, warning = STORM_WARNING): void {
+    if (this.storm.active || this.stormComing) return;
+    this.storm = { active: false, t: 0, duration, peak, warn: warning };
+    const g = this.game;
+    g.toast(`DUST STORM in ${Math.round(warning)} seconds! Fold the solar panels`, '#e8b58a', 'icon_storm');
+    if (g.objects.anyPanelOpen)
+      g.luna.say(
+        'A dust storm is coming! Fold the solar panels before the wind breaks them: use BASE OPS (Power), or press E next to a panel.',
+        'alert',
+        3,
+      );
+    g.audio.warn();
   }
 
   startFlare(scripted: boolean, lead = 35): void {
@@ -120,14 +144,20 @@ export class WeatherSystem {
     this.flareTotal = 0;
     const g = this.game;
     g.audio.alarm();
-    g.toast(`DONKI ALERT: ${cls} solar flare — particles arrive in ${Math.round(lead)} s`, '#ff5a5a', 'icon_rad');
-    g.luna.say(`NASA's DONKI space-weather feed reports a ${cls} flare! Get to the Storm Shelter or into the lava tube cave!`, 'alert', 3);
+    g.toast(`DONKI ALERT: ${cls} solar flare! Particles arrive in ${Math.round(lead)} s`, '#ff5a5a', 'icon_rad');
+    g.luna.say(
+      `NASA's DONKI space-weather feed reports a ${cls} flare! Get to the Storm Shelter or into the lava tube cave!`,
+      'alert',
+      3,
+    );
     g.unlockFact('donki', true);
   }
 
   /** Is a tile part of the outpost (never hit by meteors)? */
   private nearOutpost(tx: number, ty: number): boolean {
-    return tx > LANDMARKS.roverPad.x - 6 && tx < BASE_X + BASE_W + 8 && ty > BASE_Y - 6 && ty < LANDMARKS.solarField.y + 10;
+    return (
+      tx > LANDMARKS.roverPad.x - 6 && tx < BASE_X + BASE_W + 8 && ty > BASE_Y - 6 && ty < LANDMARKS.solarField.y + 10
+    );
   }
 
   spawnMeteor(): void {
@@ -161,15 +191,23 @@ export class WeatherSystem {
     g.particles.burst(px, py, 30, '#ffd166', 160);
     this.shake = 0.6;
     for (const p of g.objects.panels) {
-      if (Math.hypot(p.x + 17 - px, p.y - 8 - py) < 70 && !p.broken) {
+      const c = panelCenter(p);
+      if (Math.hypot(c.x - px, c.y - py) < 70 && !p.broken) {
         p.broken = true;
-        g.luna.say('A meteorite cracked a solar panel! Go fix its wiring — stand next to it and press E.', 'alert', 2);
+        p.cause = 'meteor';
+        g.luna.say('A meteorite cracked a solar panel! Go fix its wiring: stand next to it and press E.', 'alert', 2);
       }
     }
-    g.luna.hint('meteor', 'Whoa, a meteorite landed! Go find it — scientists LOVE space rocks. Look for the glowing chunk.', 'wow', 20, 2);
+    g.luna.hint(
+      'meteor',
+      'Whoa, a meteorite landed! Go find it. Scientists LOVE space rocks. Look for the glowing chunk.',
+      'wow',
+      20,
+      2,
+    );
   }
 
-  // ───────────────────────── update ─────────────────────────
+  // Update
 
   private skippingNight = false;
 
@@ -177,7 +215,13 @@ export class WeatherSystem {
     const g = this.game;
     this.time += dt / SOL_SECONDS;
     // Training missions skip the night (no long waits): dusk jumps to the next morning.
-    if (this.time > 0.68 && this.time < 0.9 && g.missions.activeId() <= 6 && !this.skippingNight && this.flare.phase === 'none') {
+    if (
+      this.time > 0.68 &&
+      this.time < 0.9 &&
+      g.missions.activeId() <= 6 &&
+      !this.skippingNight &&
+      this.flare.phase === 'none'
+    ) {
       this.skippingNight = true;
       g.fade(() => {
         this.time = 0.3;
@@ -195,13 +239,35 @@ export class WeatherSystem {
     }
     this.shake = Math.max(0, this.shake - dt);
 
+    if (this.stormComing) {
+      const before = this.storm.warn;
+      this.storm.warn = Math.max(0, before - dt);
+      if (this.storm.warn < 10 && Math.floor(before) !== Math.floor(this.storm.warn)) g.audio.warn();
+      if (this.storm.warn <= 0) {
+        this.storm.active = true;
+        g.toast('DUST STORM! Stay close to the base', '#e8b58a', 'icon_storm');
+        g.luna.say(
+          g.objects.anyPanelOpen
+            ? 'The storm is here and the solar panels are still open! Fold them quickly!'
+            : 'The storm is here. Good job folding the panels: they are safe!',
+          g.objects.anyPanelOpen ? 'alert' : 'happy',
+          3,
+        );
+      }
+    }
     if (this.storm.active) {
       this.storm.t += dt;
       if (this.storm.t >= this.storm.duration) {
         this.storm.active = false;
         g.stats.stormsSurvived++;
         g.emit('storm_survived');
-        g.luna.say('The dust storm is over! Time to brush the panels clean again.', 'happy', 1);
+        g.luna.say(
+          g.objects.allPanelsFolded
+            ? 'The dust storm is over! Open the solar panels again (BASE OPS, Power) so we get power.'
+            : 'The dust storm is over! Time to brush the panels clean again.',
+          'happy',
+          2,
+        );
         g.unlockFact('dust_storm_2018', true);
         g.checkBadges();
       }
@@ -213,7 +279,7 @@ export class WeatherSystem {
       if (f.t <= 0) {
         f.phase = 'active';
         f.t = 0;
-        g.toast('SOLAR PARTICLES ARRIVING — take cover!', '#ff5a5a', 'icon_rad');
+        g.toast('SOLAR PARTICLES ARRIVING! Take cover!', '#ff5a5a', 'icon_rad');
         g.audio.alarm();
       }
     } else if (f.phase === 'active') {
@@ -240,7 +306,14 @@ export class WeatherSystem {
       const ang = this.rng() * Math.PI * 2;
       const sx = g.player.cx + Math.cos(ang) * (g.vw * 0.6);
       const sy = g.player.cy + Math.sin(ang) * (g.vh * 0.6);
-      this.devils.push({ x: sx, y: sy, vx: -Math.cos(ang) * (18 + this.rng() * 18), vy: -Math.sin(ang) * (12 + this.rng() * 12), life: 30 + this.rng() * 20, spin: 0 });
+      this.devils.push({
+        x: sx,
+        y: sy,
+        vx: -Math.cos(ang) * (18 + this.rng() * 18),
+        vy: -Math.sin(ang) * (12 + this.rng() * 12),
+        life: 30 + this.rng() * 20,
+        spin: 0,
+      });
     }
     for (const d of this.devils) {
       d.x += d.vx * dt;
@@ -248,11 +321,18 @@ export class WeatherSystem {
       d.life -= dt;
       d.spin += dt * 9;
       for (const p of g.objects.panels) {
-        if (Math.hypot(p.x + 17 - d.x, p.y - 8 - d.y) < 24 && p.dust > 0.05) {
+        const c = panelCenter(p);
+        if (Math.hypot(c.x - d.x, c.y - d.y) < 24 && p.dust > 0.05) {
           const before = p.dust;
           p.dust = Math.max(0, p.dust - dt * 0.4);
           if (before > 0.2 && p.dust <= 0.2) {
-            g.luna.hint('devilclean', 'A dust devil just blew a solar panel clean! NASA rovers called this a "cleaning event".', 'wow', 60, 0);
+            g.luna.hint(
+              'devilclean',
+              'A dust devil just blew a solar panel clean! NASA rovers called this a "cleaning event".',
+              'wow',
+              60,
+              0,
+            );
             g.unlockFact('dust_devils', true);
           }
         }
@@ -308,13 +388,25 @@ export class WeatherSystem {
     if (Math.random() < cps * dt) g.audio.geiger();
     if (this.solDose > SOL_DOSE_BUDGET && this.doseRate > 1.5) {
       p.hurt(2.2 * dt);
-      g.hint('raddmg', "You've had too much radiation today! Get into the Storm Shelter or the lava tube cave NOW.", 'alert', 12, 3);
+      g.hint(
+        'raddmg',
+        "You've had too much radiation today! Get into the Storm Shelter or the lava tube cave NOW.",
+        'alert',
+        12,
+        3,
+      );
     } else if (this.flare.phase === 'active' && this.doseRate > 8) {
-      g.hint('radhigh', 'Radiation is very high out here! Shelter inside the base, or in the lava tube cave — rock blocks radiation.', 'alert', 10, 3);
+      g.hint(
+        'radhigh',
+        'Radiation is very high out here! Shelter inside the base, or in the lava tube cave. Rock blocks radiation.',
+        'alert',
+        10,
+        3,
+      );
     }
   }
 
-  // ───────────────────────── rendering ─────────────────────────
+  // Rendering
 
   /** Dust devils & incoming meteors go into the y-sorted world. */
   drawables(list: Drawable[], camX: number, camY: number, time: number): void {
@@ -371,7 +463,8 @@ export class WeatherSystem {
 
   /** Sunrise / sunset colour wash (Mars sunsets are blue!) and daytime haze. */
   renderTint(g: Ctx, vw: number, vh: number): void {
-    const dusk = Math.max(0, 1 - Math.abs(this.time - 0.75) / 0.05) + Math.max(0, 1 - Math.abs(this.time - 0.25) / 0.05);
+    const dusk =
+      Math.max(0, 1 - Math.abs(this.time - 0.75) / 0.05) + Math.max(0, 1 - Math.abs(this.time - 0.25) / 0.05);
     if (dusk > 0) {
       g.fillStyle = `rgba(90,140,210,${Math.min(0.28, dusk * 0.28)})`;
       g.fillRect(0, 0, vw, vh);
@@ -416,14 +509,20 @@ export class WeatherSystem {
   }
 
   serialize(): WeatherSave {
-    return { sol: this.sol, time: this.time, solDose: this.solDose, storm: { ...this.storm }, flare: { ...this.flare } };
+    return {
+      sol: this.sol,
+      time: this.time,
+      solDose: this.solDose,
+      storm: { ...this.storm },
+      flare: { ...this.flare },
+    };
   }
 
   load(s: WeatherSave): void {
     this.sol = s.sol;
     this.time = s.time;
     this.solDose = s.solDose;
-    this.storm = { ...s.storm };
+    this.storm = { warn: 0, ...s.storm };
     this.flare = { ...s.flare };
   }
 }

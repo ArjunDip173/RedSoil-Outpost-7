@@ -50,7 +50,18 @@ export class ParticleSystem {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const s = 30 + Math.random() * 70;
-      this.add({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 20, life: 0.25 + Math.random() * 0.3, max: 0.5, color: Math.random() < 0.5 ? color : '#ffffff', size: 1, grav: 200, drag: 1 });
+      this.add({
+        x,
+        y,
+        vx: Math.cos(a) * s,
+        vy: Math.sin(a) * s - 20,
+        life: 0.25 + Math.random() * 0.3,
+        max: 0.5,
+        color: Math.random() < 0.5 ? color : '#ffffff',
+        size: 1,
+        grav: 200,
+        drag: 1,
+      });
     }
   }
 
@@ -71,7 +82,19 @@ export class ParticleSystem {
 
   bubbles(x: number, y: number, n: number, color: string, ceil?: number): void {
     for (let i = 0; i < n; i++) {
-      this.add({ x, y, vx: (Math.random() - 0.5) * 4, vy: -12 - Math.random() * 14, life: 1.6 + Math.random(), max: 2.6, color, size: 1, grav: -4, drag: 0.2, ceil: ceil ?? y - 30 });
+      this.add({
+        x,
+        y,
+        vx: (Math.random() - 0.5) * 4,
+        vy: -12 - Math.random() * 14,
+        life: 1.6 + Math.random(),
+        max: 2.6,
+        color,
+        size: 1,
+        grav: -4,
+        drag: 0.2,
+        ceil: ceil ?? y - 30,
+      });
     }
   }
 
@@ -96,7 +119,18 @@ export class ParticleSystem {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const s = speed * (0.4 + Math.random() * 0.6);
-      this.add({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 0.5 + Math.random() * 0.6, max: 1.1, color, size: Math.random() < 0.4 ? 2 : 1, grav: 60, drag: 1.2 });
+      this.add({
+        x,
+        y,
+        vx: Math.cos(a) * s,
+        vy: Math.sin(a) * s,
+        life: 0.5 + Math.random() * 0.6,
+        max: 1.1,
+        color,
+        size: Math.random() < 0.4 ? 2 : 1,
+        grav: 60,
+        drag: 1.2,
+      });
     }
   }
 

@@ -84,7 +84,11 @@ export class Sprites {
 
   static async load(): Promise<Sprites> {
     const s = new Sprites();
-    const [main, chars, roof] = await Promise.all([loadImage(spritesPng), loadImage(charactersPng), loadImage(roofPng)]);
+    const [main, chars, roof] = await Promise.all([
+      loadImage(spritesPng),
+      loadImage(charactersPng),
+      loadImage(roofPng),
+    ]);
     cut(main, spritesJson.frames, s.sprites);
     cut(chars, charactersJson.frames, s.templates);
     const [rc, rg] = makeCanvas(roof.width, roof.height);

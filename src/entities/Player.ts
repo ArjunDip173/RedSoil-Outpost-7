@@ -27,7 +27,7 @@ import { type Ctx, rect } from '../core/canvas';
 import { type ArmFrame, ASTRO_H, ASTRO_W, type LegFrame } from '../core/Sprites';
 import type { Game } from '../Game';
 import type { CropId, Inventory, ItemId, PlayerSave } from '../types';
-import type { SolarPanel } from '../world/WorldObjects';
+import { panelCenter, type SolarPanel } from '../world/WorldObjects';
 import { type Body, moveBody, overlaps } from './Physics';
 
 export type Dir = 'down' | 'up' | 'side';
@@ -93,7 +93,7 @@ export class Player implements Body {
     this.vy = 0;
   }
 
-  // ───────────────────────── inventory ─────────────────────────
+  // Inventory
 
   packCount(): number {
     let n = 0;
@@ -134,7 +134,7 @@ export class Player implements Body {
     return { tx, ty };
   }
 
-  // ───────────────────────── update ─────────────────────────
+  // Update
 
   update(dt: number): void {
     const g = this.game;
@@ -232,10 +232,11 @@ export class Player implements Body {
 
     if (this.autoBrush) {
       const p = this.autoBrush;
-      if (Math.hypot(p.x + 17 - this.cx, p.y - 8 - this.cy) > 60 || this.inBase) this.autoBrush = null;
+      const c = panelCenter(p);
+      if (Math.hypot(c.x - this.cx, c.y - this.cy) > 60 || this.inBase || p.folded) this.autoBrush = null;
       else {
         this.brushing = true;
-        this.faceToward(p.x + 17, p.y - 10);
+        this.faceToward(c.x, c.y - 2);
         this.brushPanel(p, dt);
         if (p.dust <= 0) this.autoBrush = null;
       }
@@ -266,7 +267,18 @@ export class Player implements Body {
         case 'brush': {
           if (this.inBase) break;
           const panel = g.objects.panelAt(mx, my);
-          if (panel && Math.hypot(panel.x + 17 - this.cx, panel.y - 8 - this.cy) < REACH + 20) {
+          const pc = panel && panelCenter(panel);
+          if (panel && pc && Math.hypot(pc.x - this.cx, pc.y - this.cy) < REACH + 20) {
+            if (panel.folded) {
+              if (input.mousePressed)
+                g.hint(
+                  'foldedbrush',
+                  'This panel is folded away. Open the solar panels first (BASE OPS, Power).',
+                  'think',
+                  10,
+                );
+              break;
+            }
             this.brushing = true;
             if (panel.broken) {
               if (input.mousePressed) g.openPanelRepair(panel);
@@ -289,7 +301,14 @@ export class Player implements Body {
           const item = tool.uses!;
           if ((this.pack[item] ?? 0) <= 0) {
             if (input.mousePressed)
-              g.hint(`no_${item}`, item === 'brick' ? 'No bricks in your backpack! Make them at the Fabricator (2 regolith = 4 bricks), then carry them out.' : `No ${item} in your backpack. Mine some first!`, 'think', 8);
+              g.hint(
+                `no_${item}`,
+                item === 'brick'
+                  ? 'No bricks in your backpack! Make them at the Fabricator (2 regolith = 4 bricks), then carry them out.'
+                  : `No ${item} in your backpack. Mine some first!`,
+                'think',
+                8,
+              );
             break;
           }
           if (!g.map.canPlace(tx, ty)) break;
@@ -302,7 +321,13 @@ export class Player implements Body {
           break;
         }
         case 'seeds':
-          if (input.mousePressed) g.hint('seedhint', 'Seeds go in the Greenhouse trays inside the base. Stand next to a tray and press E!', 'think', 10);
+          if (input.mousePressed)
+            g.hint(
+              'seedhint',
+              'Seeds go in the Greenhouse trays inside the base. Stand next to a tray and press E!',
+              'think',
+              10,
+            );
           break;
         case 'flag':
           if (input.mousePressed) g.plantFlag();
@@ -352,7 +377,7 @@ export class Player implements Body {
     this.seed = CROP_ORDER[(i + 1) % CROP_ORDER.length];
   }
 
-  // ───────────────────────── rendering ─────────────────────────
+  // Rendering
 
   private frameName(): string {
     const moving = Math.hypot(this.vx, this.vy) > 5;
@@ -421,7 +446,17 @@ export class Player implements Body {
   }
 
   serialize(): PlayerSave {
-    return { x: this.x, y: this.y, o2: this.o2, health: this.health, jet: this.jet, pack: { ...this.pack }, hotbar: this.hotbar, seed: this.seed, inBase: this.inBase };
+    return {
+      x: this.x,
+      y: this.y,
+      o2: this.o2,
+      health: this.health,
+      jet: this.jet,
+      pack: { ...this.pack },
+      hotbar: this.hotbar,
+      seed: this.seed,
+      inBase: this.inBase,
+    };
   }
 
   load(s: PlayerSave): void {

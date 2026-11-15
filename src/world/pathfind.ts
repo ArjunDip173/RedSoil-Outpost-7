@@ -1,9 +1,15 @@
 /**
- * Finds a walkable route on the tile grid (A*, 8 directions, no cutting past corners), then
- * straightens it where nothing is in the way. Used for the glowing "follow me" path.
+ * Route finding for the glowing "follow me" path: A* on a grid of nodes (8 directions, no
+ * cutting past corners), then the route is straightened wherever the body still fits.
+ * A node is usually a tile, but the caller decides what "blocked" means, so the same search
+ * works for the astronaut (one tile) and the rover (two tiles wide).
  */
 
-export type Blocked = (tx: number, ty: number) => boolean;
+export type Blocked = (x: number, y: number) => boolean;
+export interface Pt {
+  x: number;
+  y: number;
+}
 
 class Heap {
   private items: number[] = [];
@@ -63,10 +69,21 @@ const DIRS: [number, number, number][] = [
 ];
 
 /**
- * Tiles from (sx, sy) to the goal, or null if there is no way (or it is too far to search).
- * When the goal tile itself is solid (a machine, a dish), any free tile within 2 tiles counts.
+ * Nodes from (sx, sy) to the goal, or null if there is no way (or it is too far to search).
+ * When the goal node itself is blocked (a machine, a dish), any free node within 2 counts.
+ * With `partial`, an unreachable goal gives the route to the closest node that can be reached.
  */
-export function findPath(blocked: Blocked, w: number, h: number, sx: number, sy: number, gx: number, gy: number, maxNodes = 40000): [number, number][] | null {
+export function findPath(
+  blocked: Blocked,
+  w: number,
+  h: number,
+  sx: number,
+  sy: number,
+  gx: number,
+  gy: number,
+  maxNodes = 40000,
+  partial = false,
+): [number, number][] | null {
   const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h;
   const free = (x: number, y: number) => inside(x, y) && !blocked(x, y);
   const reach = free(gx, gy) ? 0 : 2;
@@ -86,6 +103,13 @@ export function findPath(blocked: Blocked, w: number, h: number, sx: number, sy:
   const s = sy * w + sx;
   cost[s] = 0;
   open.push(s, heur(sx, sy));
+  const trace = (end: number) => {
+    const out: [number, number][] = [];
+    for (let i = end; i !== -1; i = from[i]) out.push([i % w, Math.floor(i / w)]);
+    return out.reverse();
+  };
+  let closest = s;
+  let closestH = heur(sx, sy);
   let expanded = 0;
   while (open.size) {
     const cur = open.pop();
@@ -93,12 +117,13 @@ export function findPath(blocked: Blocked, w: number, h: number, sx: number, sy:
     closed[cur] = 1;
     const cx = cur % w;
     const cy = (cur - cx) / w;
-    if (isGoal(cx, cy) && free(cx, cy)) {
-      const out: [number, number][] = [];
-      for (let i = cur; i !== -1; i = from[i]) out.push([i % w, Math.floor(i / w)]);
-      return out.reverse();
+    if (isGoal(cx, cy) && free(cx, cy)) return trace(cur);
+    const hh = heur(cx, cy);
+    if (hh < closestH) {
+      closest = cur;
+      closestH = hh;
     }
-    if (++expanded > maxNodes) return null;
+    if (++expanded > maxNodes) break;
     for (const [dx, dy, step] of DIRS) {
       const nx = cx + dx;
       const ny = cy + dy;
@@ -115,36 +140,26 @@ export function findPath(blocked: Blocked, w: number, h: number, sx: number, sy:
       }
     }
   }
-  return null;
+  return partial && closest !== s ? trace(closest) : null;
 }
 
-/** Can you walk in a straight line between two points (world px) without touching a solid tile? */
-export function clearLine(blocked: Blocked, tile: number, ax: number, ay: number, bx: number, by: number, half = 5): boolean {
-  const len = Math.hypot(bx - ax, by - ay);
-  const steps = Math.max(1, Math.ceil(len / 4));
-  // also check a little to each side, so the straightened path keeps off walls and corners
-  const nx = len ? (-(by - ay) / len) * half : 0;
-  const ny = len ? ((bx - ax) / len) * half : 0;
-  for (let i = 0; i <= steps; i++) {
-    const x = ax + ((bx - ax) * i) / steps;
-    const y = ay + ((by - ay) * i) / steps;
-    for (const k of [0, 1, -1]) if (blocked(Math.floor((x + nx * k) / tile), Math.floor((y + ny * k) / tile))) return false;
-  }
+/** Can the body move in a straight line from a to b? `fits(x, y)` checks one spot (world px). */
+export function clearLine(fits: (x: number, y: number) => boolean, a: Pt, b: Pt): boolean {
+  const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 4));
+  for (let i = 0; i <= steps; i++)
+    if (!fits(a.x + ((b.x - a.x) * i) / steps, a.y + ((b.y - a.y) * i) / steps)) return false;
   return true;
 }
 
-/** Tile path → a few world-pixel points, skipping corners that are not needed. */
-export function smoothPath(blocked: Blocked, tile: number, tiles: [number, number][], start: { x: number; y: number }): { x: number; y: number }[] {
-  const pts = tiles.map(([x, y]) => ({ x: x * tile + tile / 2, y: y * tile + tile / 2 }));
-  if (pts.length) pts[0] = { ...start };
-  if (pts.length <= 2) return pts;
+/** Drops the corners of a route that are not needed: from each point, jump to the furthest one in a clear line. */
+export function smoothPath(pts: Pt[], clear: (a: Pt, b: Pt) => boolean): Pt[] {
+  if (pts.length <= 2) return pts.slice();
   const out = [pts[0]];
   let i = 0;
   while (i < pts.length - 1) {
-    let j = pts.length - 1;
-    // look at most 24 tiles ahead: long straight lines are rare and the check is not free
-    j = Math.min(j, i + 24);
-    while (j > i + 1 && !clearLine(blocked, tile, pts[i].x, pts[i].y, pts[j].x, pts[j].y)) j--;
+    // look at most 24 nodes ahead: long straight lines are rare and each check costs a little
+    let j = Math.min(pts.length - 1, i + 24);
+    while (j > i + 1 && !clear(pts[i], pts[j])) j--;
     out.push(pts[j]);
     i = j;
   }
@@ -152,14 +167,14 @@ export function smoothPath(blocked: Blocked, tile: number, tiles: [number, numbe
 }
 
 /** Length of a polyline in world pixels. */
-export function pathLength(pts: { x: number; y: number }[]): number {
+export function pathLength(pts: Pt[]): number {
   let d = 0;
   for (let i = 1; i < pts.length; i++) d += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
   return d;
 }
 
 /** The point `dist` pixels along a polyline (the end if it is shorter). */
-export function pointAlong(pts: { x: number; y: number }[], dist: number): { x: number; y: number } | null {
+export function pointAlong(pts: Pt[], dist: number): Pt | null {
   if (!pts.length) return null;
   let left = dist;
   for (let i = 1; i < pts.length; i++) {

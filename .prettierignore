@@ -1,0 +1,9 @@
+dist
+release
+node_modules
+server/node_modules
+server/.wrangler
+RedSoil-Outpost7.html
+package-lock.json
+server/package-lock.json
+src/assets

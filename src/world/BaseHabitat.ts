@@ -124,7 +124,8 @@ export class BaseHabitat {
     map.protectedRects.push({ x: P.x, y: P.y, w: P.w, h: P.h });
 
     // machine footprints block movement
-    const block = (x: number, bottom: number, w: number, depth = 10) => map.blockers.push({ x, y: bottom - depth, w, h: depth });
+    const block = (x: number, bottom: number, w: number, depth = 10) =>
+      map.blockers.push({ x, y: bottom - depth, w, h: depth });
     block(SPOTS.console.x, SPOTS.console.y, 40);
     block(SPOTS.science.x, SPOTS.science.y, 28);
     block(SPOTS.sleeppod.x, SPOTS.sleeppod.y, 36, 14);
@@ -162,31 +163,100 @@ export class BaseHabitat {
   }
 
   firstEmptySlot(): { x: number; y: number } | null {
-    for (const s of this.shelterSlots) if (this.game.map.getObj(s.x, s.y) === O.NONE) return { x: s.x * TILE + 8, y: s.y * TILE + 8 };
+    for (const s of this.shelterSlots)
+      if (this.game.map.getObj(s.x, s.y) === O.NONE) return { x: s.x * TILE + 8, y: s.y * TILE + 8 };
     return null;
   }
 
-  // ───────────────────────── interactions ─────────────────────────
+  // Interactions
 
   interactables(): Interactable[] {
     const g = this.game;
     const res = g.res;
     const inside = () => g.player.inBase;
     const list: Interactable[] = [];
-    const add = (id: string, x: number, y: number, w: number, h: number, label: () => string, act: () => void, enabled: () => boolean = inside) =>
-      list.push({ id, x, y, w, h, label, act, enabled });
+    const add = (
+      id: string,
+      x: number,
+      y: number,
+      w: number,
+      h: number,
+      label: () => string,
+      act: () => void,
+      enabled: () => boolean = inside,
+    ) => list.push({ id, x, y, w, h, label, act, enabled });
     const around = (x: number, bottom: number, w: number) => [x - 6, bottom - 22, w + 12, 34] as const;
 
-    add('airlock_in', tx(2), ty(14), 48, 32, () => 'Airlock: Go outside (spacewalk)', () => g.openAirlock());
-    add('airlock_out', tx(1), ty(17) - 4, 64, 30, () => 'Airlock: Go back inside', () => g.enterBase(), () => !g.player.inBase && !g.rover.driving);
-    add('locker', ...around(SPOTS.locker.x, SPOTS.locker.y, 24), () => 'Storage Locker: see base storage', () => g.ui.openBaseOps('status'));
-    add('console', ...around(SPOTS.console.x, SPOTS.console.y, 40), () => 'Mission Console: open BASE OPS', () => g.ui.openBaseOps('power'));
-    add('pdu', SPOTS.pdu.x - 8, ty(1), 34, 32, () => (g.objects.pduBroken ? 'PDU: Fix the jumbled wires!' : 'Power Distribution Unit (all good)'), () => g.openPduRepair());
-    add('science', ...around(SPOTS.science.x, SPOTS.science.y, 28), () => 'Science Station: open SCIENCE LOG', () => g.ui.openScienceLog());
-    add('sleeppod', ...around(SPOTS.sleeppod.x, SPOTS.sleeppod.y, 36), () => (g.weather.isNight ? 'Sleep Pod: sleep until morning' : 'Sleep Pod (you can sleep at night)'), () => g.sleep());
-    add('melter', ...around(SPOTS.melter.x, SPOTS.melter.y, 30), () => `Ice Melter: ${res.storage.ice ?? 0} ice waiting · ${Math.round(res.water)} L water`, () => g.ui.openBaseOps('water'));
-    add('electrolysis', ...around(SPOTS.electrolysis.x, SPOTS.electrolysis.y, 26), () => `O2 Maker: base air ${Math.round(res.o2)}%`, () => g.ui.openBaseOps('water'));
-    add('o2station', ...around(SPOTS.o2station.x, SPOTS.o2station.y, 16), () => `O2 Station: fill suit tank (${Math.round(g.player.o2)}/${g.player.o2Max})`, () => g.refillSuitAtStation());
+    add(
+      'airlock_in',
+      tx(2),
+      ty(14),
+      48,
+      32,
+      () => 'Airlock: Go outside (spacewalk)',
+      () => g.openAirlock(),
+    );
+    add(
+      'airlock_out',
+      tx(1),
+      ty(17) - 4,
+      64,
+      30,
+      () => 'Airlock: Go back inside',
+      () => g.enterBase(),
+      () => !g.player.inBase && !g.rover.driving,
+    );
+    add(
+      'locker',
+      ...around(SPOTS.locker.x, SPOTS.locker.y, 24),
+      () => 'Storage Locker: see base storage',
+      () => g.ui.openBaseOps('status'),
+    );
+    add(
+      'console',
+      ...around(SPOTS.console.x, SPOTS.console.y, 40),
+      () => 'Mission Console: open BASE OPS',
+      () => g.ui.openBaseOps('power'),
+    );
+    add(
+      'pdu',
+      SPOTS.pdu.x - 8,
+      ty(1),
+      34,
+      32,
+      () => (g.objects.pduBroken ? 'PDU: Fix the jumbled wires!' : 'Power Distribution Unit (all good)'),
+      () => g.openPduRepair(),
+    );
+    add(
+      'science',
+      ...around(SPOTS.science.x, SPOTS.science.y, 28),
+      () => 'Science Station: open SCIENCE LOG',
+      () => g.ui.openScienceLog(),
+    );
+    add(
+      'sleeppod',
+      ...around(SPOTS.sleeppod.x, SPOTS.sleeppod.y, 36),
+      () => (g.weather.isNight ? 'Sleep Pod: sleep until morning' : 'Sleep Pod (you can sleep at night)'),
+      () => g.sleep(),
+    );
+    add(
+      'melter',
+      ...around(SPOTS.melter.x, SPOTS.melter.y, 30),
+      () => `Ice Melter: ${res.storage.ice ?? 0} ice waiting · ${Math.round(res.water)} L water`,
+      () => g.ui.openBaseOps('water'),
+    );
+    add(
+      'electrolysis',
+      ...around(SPOTS.electrolysis.x, SPOTS.electrolysis.y, 26),
+      () => `O2 Maker: base air ${Math.round(res.o2)}%`,
+      () => g.ui.openBaseOps('water'),
+    );
+    add(
+      'o2station',
+      ...around(SPOTS.o2station.x, SPOTS.o2station.y, 16),
+      () => `O2 Station: fill suit tank (${Math.round(g.player.o2)}/${g.player.o2Max})`,
+      () => g.refillSuitAtStation(),
+    );
     SPOTS.beds.forEach((b, k) => {
       add(
         `bed${k}`,
@@ -207,12 +277,24 @@ export class BaseHabitat {
         () => g.useBed(k),
       );
     });
-    SPOTS.algae.forEach((a, k) => add(`algae${k}`, ...around(a.x, a.y, 22), () => `Spirulina tank: ${Math.round(res.algae * 100)}% culture`, () => g.ui.openBaseOps('power')));
-    add('fabricator', ...around(SPOTS.fabricator.x, SPOTS.fabricator.y, 32), () => 'Fabricator: build bricks & upgrades', () => g.ui.openFabricator());
+    SPOTS.algae.forEach((a, k) =>
+      add(
+        `algae${k}`,
+        ...around(a.x, a.y, 22),
+        () => `Spirulina tank: ${Math.round(res.algae * 100)}% culture`,
+        () => g.ui.openBaseOps('power'),
+      ),
+    );
+    add(
+      'fabricator',
+      ...around(SPOTS.fabricator.x, SPOTS.fabricator.y, 32),
+      () => 'Fabricator: build bricks & upgrades',
+      () => g.ui.openFabricator(),
+    );
     return list;
   }
 
-  // ───────────────────────── rendering ─────────────────────────
+  // Rendering
 
   /** Room tints, painted labels and shelter slot outlines (on the floor, under everything). */
   renderFloor(g: Ctx, camX: number, camY: number, time: number): void {
@@ -241,7 +323,8 @@ export class BaseHabitat {
       g.fillRect(Math.round(tx(7) - camX), Math.round(ty(10) - camY), 13 * TILE, 6 * TILE);
     }
     // hazard stripes at the airlock
-    for (let k = 0; k < 4; k++) rect(g, Math.round(tx(2) + k * 8 - camX), Math.round(ty(15) + 10 - camY), 4, 3, '#e0c02c');
+    for (let k = 0; k < 4; k++)
+      rect(g, Math.round(tx(2) + k * 8 - camX), Math.round(ty(15) + 10 - camY), 4, 3, '#e0c02c');
     // shelter shielding tint
     const sh = SPOTS.shelter;
     const shield = this.shelterFilled() / SHELTER_SLOTS;
@@ -251,7 +334,8 @@ export class BaseHabitat {
   }
 
   private renderSlots(g: Ctx, camX: number, camY: number, time: number): void {
-    const show = this.game.missions.activeId() === 5 || (this.shelterFilled() > 0 && this.shelterFilled() < SHELTER_SLOTS);
+    const show =
+      this.game.missions.activeId() === 5 || (this.shelterFilled() > 0 && this.shelterFilled() < SHELTER_SLOTS);
     if (!show) return;
     const slot = this.game.art.get('slot');
     for (const s of this.shelterSlots) {
@@ -289,11 +373,20 @@ export class BaseHabitat {
     put('sleeppod', SPOTS.sleeppod.x, SPOTS.sleeppod.y);
     put('melter', SPOTS.melter.x, SPOTS.melter.y, () => {
       const wl = Math.min(1, res.water / 150);
-      rect(g(), cx(SPOTS.melter.x + 6), cy(SPOTS.melter.y - 11 - Math.round(20 * wl)), 10, Math.round(20 * wl), '#4fb3ff');
-      if (res.effectiveLevel('melter') > 0 && (res.storage.ice ?? 0) > 0 && Math.random() < 0.1) game.particles.bubbles(SPOTS.melter.x + 11, SPOTS.melter.y - 14, 1, '#cfefff');
+      rect(
+        g(),
+        cx(SPOTS.melter.x + 6),
+        cy(SPOTS.melter.y - 11 - Math.round(20 * wl)),
+        10,
+        Math.round(20 * wl),
+        '#4fb3ff',
+      );
+      if (res.effectiveLevel('melter') > 0 && (res.storage.ice ?? 0) > 0 && Math.random() < 0.1)
+        game.particles.bubbles(SPOTS.melter.x + 11, SPOTS.melter.y - 14, 1, '#cfefff');
     });
     put('electrolysis', SPOTS.electrolysis.x, SPOTS.electrolysis.y, () => {
-      if (res.flows.electroWater > 0.001 && Math.random() < 0.25) game.particles.bubbles(SPOTS.electrolysis.x + 6, SPOTS.electrolysis.y - 10, 1, '#cfe6ff');
+      if (res.flows.electroWater > 0.001 && Math.random() < 0.25)
+        game.particles.bubbles(SPOTS.electrolysis.x + 6, SPOTS.electrolysis.y - 10, 1, '#cfe6ff');
     });
     put('o2station', SPOTS.o2station.x, SPOTS.o2station.y);
     SPOTS.algae.forEach((a, k) => {
@@ -307,7 +400,8 @@ export class BaseHabitat {
           g().fillStyle = 'rgba(255,255,255,0.12)';
           g().fillRect(cx(a.x + 3), cy(a.y - 38 + Math.sin(time * 2 + k) * 1.5), 16, 2);
           g().drawImage(art.get('algae_tank'), cx(a.x), cy(a.y - 42));
-          if (lit && Math.random() < 0.18) game.particles.bubbles(a.x + 5 + Math.random() * 12, a.y - 8, 1, '#c8ffe6', a.y - 38);
+          if (lit && Math.random() < 0.18)
+            game.particles.bubbles(a.x + 5 + Math.random() * 12, a.y - 8, 1, '#c8ffe6', a.y - 38);
         },
       });
     });
@@ -375,7 +469,11 @@ export class BaseHabitat {
     const y = Math.round(BY - 8 - camY);
     if (x > game.vw || x + this.roof.width < 0 || y > game.vh || y + this.roof.height < 0) return;
     const body = game.rover.driving ? game.rover : game.player;
-    const behind = body.x + body.w > BX && body.x < BX + BASE_W * TILE && body.y + body.h < BY + (BASE_H - 1) * TILE + 8 && body.y + body.h > BY - 30;
+    const behind =
+      body.x + body.w > BX &&
+      body.x < BX + BASE_W * TILE &&
+      body.y + body.h < BY + (BASE_H - 1) * TILE + 8 &&
+      body.y + body.h > BY - 30;
     g.globalAlpha = behind ? 0.45 : 1;
     g.drawImage(this.roof, x, y);
     g.globalAlpha = 1;

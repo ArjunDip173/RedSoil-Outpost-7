@@ -209,7 +209,7 @@ export interface Interactable {
   act: () => void;
 }
 
-// ───────────────────────── Save game ─────────────────────────
+// Save game
 
 export interface PlayerSave {
   x: number;
@@ -252,7 +252,7 @@ export interface WeatherSave {
   sol: number;
   time: number;
   solDose: number;
-  storm: { active: boolean; t: number; duration: number; peak: number };
+  storm: { active: boolean; t: number; duration: number; peak: number; warn?: number };
   flare: { phase: 'none' | 'warning' | 'active'; t: number; duration: number; cls: string; scripted: boolean };
 }
 
@@ -268,7 +268,7 @@ export interface MissionSave {
 
 export interface WorldSave {
   tiles: [number, number][];
-  panels: { dust: number; broken: boolean }[];
+  panels: { dust: number; broken: boolean; folded?: boolean }[];
   pickups: { kind: string; x: number; y: number; taken: boolean; id: string; hidden?: boolean }[];
   samples: { id: string; taken: boolean }[];
   flags: { x: number; y: number }[];

@@ -46,7 +46,11 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
 
     const rocketSide = rotate90(art.get('cs_rocket'));
     const flameSide = [0, 1, 2].map((i) => rotate90(art.get(`cs_flame${i}`)));
-    const stars: Star[] = Array.from({ length: 90 }, (_, i) => ({ x: (i * 97.3) % W, y: (i * 53.7) % H, z: 0.3 + ((i * 7) % 10) / 10 }));
+    const stars: Star[] = Array.from({ length: 90 }, (_, i) => ({
+      x: (i * 97.3) % W,
+      y: (i * 53.7) % H,
+      z: 0.3 + ((i * 7) % 10) / 10,
+    }));
     const puffs: { x: number; y: number; vx: number; vy: number; life: number; kind: 'smoke' | 'dust' }[] = [];
     const said = new Set<string>();
     let start = 0;
@@ -138,12 +142,19 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
       g.globalAlpha = 1;
     };
 
-    // ── 1. launch from Earth ──
+    // 1. launch from Earth
     const launchScene = (t: number, dt: number) => {
       const lift = Math.max(0, t - 2.6);
       const rise = 26 * lift * lift + 8 * lift; // slow start, then faster and faster
       const space = clamp01((rise - 60) / 140);
-      sky(space > 0 ? `rgb(${Math.round(95 * (1 - space))},${Math.round(168 * (1 - space))},${Math.round(232 * (1 - space)) + 8})` : '#5fa8e8', space > 0 ? `rgb(${Math.round(191 * (1 - space))},${Math.round(227 * (1 - space))},${Math.round(255 * (1 - space)) + 12})` : '#bfe3ff');
+      sky(
+        space > 0
+          ? `rgb(${Math.round(95 * (1 - space))},${Math.round(168 * (1 - space))},${Math.round(232 * (1 - space)) + 8})`
+          : '#5fa8e8',
+        space > 0
+          ? `rgb(${Math.round(191 * (1 - space))},${Math.round(227 * (1 - space))},${Math.round(255 * (1 - space)) + 12})`
+          : '#bfe3ff',
+      );
       drawStars(space);
       const cam = Math.max(0, rise - 70); // the camera follows the rocket up
       const groundY = 140 + cam;
@@ -160,7 +171,15 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
       if (t > 2.2) {
         const f = art.get(`cs_flame${Math.floor(t * 18) % 3}`);
         g.drawImage(f, Math.round(rx + rocket.width / 2 - f.width / 2), Math.round(ry + rocket.height - 2));
-        if (Math.random() < dt * 30 && rise < 120) puffs.push({ x: padX + 6 + (Math.random() - 0.5) * 6, y: groundY - 6, vx: (Math.random() - 0.5) * 80, vy: -10 - Math.random() * 10, life: 1.8, kind: 'smoke' });
+        if (Math.random() < dt * 30 && rise < 120)
+          puffs.push({
+            x: padX + 6 + (Math.random() - 0.5) * 6,
+            y: groundY - 6,
+            vx: (Math.random() - 0.5) * 80,
+            vy: -10 - Math.random() * 10,
+            life: 1.8,
+            kind: 'smoke',
+          });
       }
       g.drawImage(rocket, Math.round(rx), Math.round(ry));
       updatePuffs(dt);
@@ -175,7 +194,7 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
       caption('EARTH', 'Launch day');
     };
 
-    // ── 2. cruise through space ──
+    // 2. cruise through space
     const cruiseScene = (t: number) => {
       const p = t / (LANDING - CRUISE);
       sky('#05040c', '#120a1e');
@@ -184,10 +203,22 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
       const mars = art.get('cs_mars');
       // Earth falls behind, Mars grows ahead
       const es = 2 - p * 1.4;
-      g.drawImage(earth, Math.round(-20 - p * 140), Math.round(80 - (earth.height * es) / 2), Math.round(earth.width * es), Math.round(earth.height * es));
+      g.drawImage(
+        earth,
+        Math.round(-20 - p * 140),
+        Math.round(80 - (earth.height * es) / 2),
+        Math.round(earth.width * es),
+        Math.round(earth.height * es),
+      );
       g.drawImage(art.get('cs_moon'), Math.round(70 - p * 160), 40);
       const ms = 0.4 + ease(p) * 1.6;
-      g.drawImage(mars, Math.round(W - 30 - (mars.width * ms) / 2 + (1 - p) * 40), Math.round(96 - (mars.height * ms) / 2), Math.round(mars.width * ms), Math.round(mars.height * ms));
+      g.drawImage(
+        mars,
+        Math.round(W - 30 - (mars.width * ms) / 2 + (1 - p) * 40),
+        Math.round(96 - (mars.height * ms) / 2),
+        Math.round(mars.width * ms),
+        Math.round(mars.height * ms),
+      );
       const rx = 120 + Math.sin(t * 1.3) * 6;
       const ry = 84 + Math.sin(t * 2.1) * 3;
       const f = flameSide[Math.floor(t * 18) % 3];
@@ -197,7 +228,7 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
       caption('THE JOURNEY', p < 0.5 ? 'Earth to Mars: about 7 months' : 'Mars is getting closer!');
     };
 
-    // ── 3. landing next to the outpost ──
+    // 3. landing next to the outpost
     const landingScene = (t: number, dt: number) => {
       sky('#d99a5f', '#f2cfa0');
       g.drawImage(art.get('cs_hills_mars'), 0, 112);
@@ -213,12 +244,28 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
         const f = art.get(`cs_flame${Math.floor(t * 18) % 3}`);
         g.drawImage(f, Math.round(rx + rocket.width / 2 - f.width / 2), Math.round(ry + rocket.height - 2));
         audio.loop('thruster', 0.5);
-        if (ry > 70 && Math.random() < dt * 40) puffs.push({ x: rx + 6 + (Math.random() - 0.5) * 10, y: 138, vx: (Math.random() - 0.5) * 120, vy: -6 - Math.random() * 12, life: 1.6, kind: 'dust' });
+        if (ry > 70 && Math.random() < dt * 40)
+          puffs.push({
+            x: rx + 6 + (Math.random() - 0.5) * 10,
+            y: 138,
+            vx: (Math.random() - 0.5) * 120,
+            vy: -6 - Math.random() * 12,
+            life: 1.6,
+            kind: 'dust',
+          });
       } else {
         once('touchdown', () => {
           audio.loop('thruster', 0);
           audio.place();
-          for (let i = 0; i < 14; i++) puffs.push({ x: rx + 6, y: 136, vx: (Math.random() - 0.5) * 160, vy: -4 - Math.random() * 14, life: 1.8, kind: 'dust' });
+          for (let i = 0; i < 14; i++)
+            puffs.push({
+              x: rx + 6,
+              y: 136,
+              vx: (Math.random() - 0.5) * 160,
+              vy: -4 - Math.random() * 14,
+              life: 1.8,
+              kind: 'dust',
+            });
         });
       }
       if (land > 0.6) g.drawImage(art.get('cs_legs'), rx, Math.round(ry + rocket.height - 4));
@@ -227,7 +274,7 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
       caption('MARS', 'Landing at Outpost 7');
     };
 
-    // ── 4. walk into the airlock ──
+    // 4. walk into the airlock
     const arriveScene = (t: number, dt: number) => {
       landingScene(LANDING + 4.5 + t, dt);
       const walk = clamp01((t - 0.4) / 2.2);
@@ -277,4 +324,3 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
     requestAnimationFrame(frame);
   });
 }
-

@@ -50,7 +50,14 @@ export class UIManager {
   openScienceLog(): void {
     const g = this.game;
     g.unlockFact('osdr', true);
-    openScienceLog(this.stack, g.art, g.data, g.science, g.stats, g.missions.graduated ? () => this.openCertificate() : undefined);
+    openScienceLog(
+      this.stack,
+      g.art,
+      g.data,
+      g.science,
+      g.stats,
+      g.missions.graduated ? () => this.openCertificate() : undefined,
+    );
   }
 
   showQuiz(): void {
@@ -73,42 +80,78 @@ export class UIManager {
     const g = this.game;
     const m = this.stack.open({ title: 'PAUSED', size: 'sm', cls: 'pause-modal' });
     const col = el('div', 'menu-col');
-    const toastSaved = (ok: boolean) => g.toast(ok ? 'Game saved!' : 'Could not save (storage blocked)', ok ? '#5fd068' : '#ff5a5a');
+    const toastSaved = (ok: boolean) =>
+      g.toast(ok ? 'Game saved!' : 'Could not save (storage blocked)', ok ? '#5fd068' : '#ff5a5a');
     col.append(
       button('▶ Resume', () => m.close(), 'btn primary big'),
-      button('Save game', () => {
-        toastSaved(g.save('manual'));
-        m.close();
-      }, 'btn', 'ui_save'),
-      button('Load last save', () => {
-        m.close();
-        g.requestLoad();
-      }, 'btn', 'ui_load'),
-      button('Science Log', () => {
-        m.close();
-        this.openScienceLog();
-      }, 'btn', 'ui_book'),
+      button(
+        'Save game',
+        () => {
+          toastSaved(g.save('manual'));
+          m.close();
+        },
+        'btn',
+        'ui_save',
+      ),
+      button(
+        'Load last save',
+        () => {
+          m.close();
+          g.requestLoad();
+        },
+        'btn',
+        'ui_load',
+      ),
+      button(
+        'Science Log',
+        () => {
+          m.close();
+          this.openScienceLog();
+        },
+        'btn',
+        'ui_book',
+      ),
       ...(g.missions.graduated
         ? [
-            button('My certificate', () => {
-              m.close();
-              this.openCertificate();
-            }, 'btn', 'ui_cap'),
+            button(
+              'My certificate',
+              () => {
+                m.close();
+                this.openCertificate();
+              },
+              'btn',
+              'ui_cap',
+            ),
           ]
         : []),
-      button('Settings', () => {
-        m.close();
-        this.openSettings();
-      }, 'btn', 'ui_gear'),
-      button('Controls', () => {
-        m.close();
-        this.openControls();
-      }, 'btn', 'ui_gamepad'),
-      button('Save & quit to menu', () => {
-        g.save('auto');
-        m.close();
-        onQuit();
-      }, 'btn ghost', 'ui_home'),
+      button(
+        'Settings',
+        () => {
+          m.close();
+          this.openSettings();
+        },
+        'btn',
+        'ui_gear',
+      ),
+      button(
+        'Controls',
+        () => {
+          m.close();
+          this.openControls();
+        },
+        'btn',
+        'ui_gamepad',
+      ),
+      button(
+        'Save & quit to menu',
+        () => {
+          g.save('auto');
+          m.close();
+          onQuit();
+        },
+        'btn ghost',
+        'ui_home',
+      ),
     );
     m.body.appendChild(col);
   }
@@ -116,13 +159,22 @@ export class UIManager {
   /** "NEW TOOL!" card: big icon, what it does and its key. */
   showNewTools(tools: { name: string; icon: string; hint: string; key: number }[], onDone: () => void): void {
     const g = this.game;
-    const m = this.stack.open({ title: tools.length > 1 ? 'NEW TOOLS!' : 'NEW TOOL!', size: 'sm', cls: 'newtool-modal', onClose: onDone });
+    const m = this.stack.open({
+      title: tools.length > 1 ? 'NEW TOOLS!' : 'NEW TOOL!',
+      size: 'sm',
+      cls: 'newtool-modal',
+      onClose: onDone,
+    });
     for (const t of tools) {
       const row = el('div', 'newtool');
       const icon = el('div', 'newtool-icon');
       icon.appendChild(spriteCanvas(g.art.get(t.icon), 6));
       const txt = el('div', 'newtool-text');
-      txt.append(el('div', 'newtool-name', t.name), el('div', 'newtool-hint', t.hint), el('div', 'newtool-key', `It's in your tool bar: slot ${t.key}`));
+      txt.append(
+        el('div', 'newtool-name', t.name),
+        el('div', 'newtool-hint', t.hint),
+        el('div', 'newtool-key', `It's in your tool bar: slot ${t.key}`),
+      );
       row.append(icon, txt);
       m.body.appendChild(row);
     }
@@ -139,12 +191,21 @@ export class UIManager {
     const grid = el('div', 'seed-grid');
     for (const c of Object.values(CROPS)) {
       const n = g.res.have(c.seedItem);
-      const b = button('', () => {
-        m.close();
-        onPick(c.id);
-      }, 'seed-btn');
+      const b = button(
+        '',
+        () => {
+          m.close();
+          onPick(c.id);
+        },
+        'seed-btn',
+      );
       b.disabled = n <= 0;
-      b.append(spriteCanvas(g.art.get(`icon_seed_${c.id}`), 4), el('span', 'seed-name', c.name), el('span', 'seed-count', n > 0 ? `${n} seeds` : 'none left'), iconText('icon_food', `${c.meals} meals`, 'seed-meals'));
+      b.append(
+        spriteCanvas(g.art.get(`icon_seed_${c.id}`), 4),
+        el('span', 'seed-name', c.name),
+        el('span', 'seed-count', n > 0 ? `${n} seeds` : 'none left'),
+        iconText('icon_food', `${c.meals} meals`, 'seed-meals'),
+      );
       grid.appendChild(b);
     }
     m.body.appendChild(grid);
@@ -185,7 +246,11 @@ export class UIManager {
         g.storage.saveSettings(s);
         voice.speak("Hi! I'm LUNA, your helper drone. Let's explore Mars together!", 'LUNA', true);
       });
-      const test = button('▶ Test', () => voice.speak("Hi! I'm LUNA, your helper drone. Let's explore Mars together!", 'LUNA', true), 'btn small');
+      const test = button(
+        '▶ Test',
+        () => voice.speak("Hi! I'm LUNA, your helper drone. Let's explore Mars together!", 'LUNA', true),
+        'btn small',
+      );
       row.append(el('span', 'field-label', 'VOICE'), sel, test);
       return row;
     };
@@ -199,24 +264,48 @@ export class UIManager {
       g.audio.setVolume(s.volume);
     });
     m.body.append(
-      toggle('Sound on', () => !s.muted, (v) => {
-        s.muted = !v;
-        g.audio.setMuted(s.muted);
-      }),
-      toggle('Music on', () => s.music, (v) => {
-        s.music = v;
-        g.audio.setMusic(v);
-      }),
+      toggle(
+        'Sound on',
+        () => !s.muted,
+        (v) => {
+          s.muted = !v;
+          g.audio.setMuted(s.muted);
+        },
+      ),
+      toggle(
+        'Music on',
+        () => s.music,
+        (v) => {
+          s.music = v;
+          g.audio.setMusic(v);
+        },
+      ),
       el('div', 'muted small', 'Volume'),
       vol,
-      toggle('Easy Mode (suit oxygen lasts longer)', () => s.easyMode, (v) => (s.easyMode = v)),
-      toggle('Quick airlock (one-click checklist)', () => s.quickAirlock, (v) => (s.quickAirlock = v)),
-      toggle('LUNA reads her words out loud', () => s.voice, (v) => {
-        s.voice = v;
-        if (!v) g.luna.stopVoice();
-      }),
+      toggle(
+        'Easy Mode (suit oxygen lasts longer)',
+        () => s.easyMode,
+        (v) => (s.easyMode = v),
+      ),
+      toggle(
+        'Quick airlock (one-click checklist)',
+        () => s.quickAirlock,
+        (v) => (s.quickAirlock = v),
+      ),
+      toggle(
+        'LUNA reads her words out loud',
+        () => s.voice,
+        (v) => {
+          s.voice = v;
+          if (!v) g.luna.stopVoice();
+        },
+      ),
       voiceRow(),
-      toggle('LUNA also shares fun facts and pop quizzes', () => s.lunaChatty, (v) => (s.lunaChatty = v)),
+      toggle(
+        'LUNA also shares fun facts and pop quizzes',
+        () => s.lunaChatty,
+        (v) => (s.lunaChatty = v),
+      ),
       el('p', 'muted small', 'When this is off, LUNA only tells you the important steps and warnings.'),
     );
     // text size
@@ -228,13 +317,17 @@ export class UIManager {
       ['big', 'Aa+'],
       ['huge', 'Aa++'],
     ] as const) {
-      const b = button(label, () => {
-        s.textSize = z;
-        applyTextSize(z);
-        g.storage.saveSettings(s);
-        sizeBtns.forEach((x) => x.classList.toggle('active', x === b));
-        g.audio.blip();
-      }, `tab ${s.textSize === z ? 'active' : ''}`);
+      const b = button(
+        label,
+        () => {
+          s.textSize = z;
+          applyTextSize(z);
+          g.storage.saveSettings(s);
+          sizeBtns.forEach((x) => x.classList.toggle('active', x === b));
+          g.audio.blip();
+        },
+        `tab ${s.textSize === z ? 'active' : ''}`,
+      );
       sizeBtns.push(b);
       sizeRow.appendChild(b);
     }
@@ -248,18 +341,22 @@ export class UIManager {
       ['normal', 'Normal'],
       ['close', 'Close'],
     ] as const) {
-      const b = button(label, () => {
-        s.zoom = z;
-        g.storage.saveSettings(s);
-        (window as unknown as { __op7resize?: () => void }).__op7resize?.();
-        zoomBtns.forEach((x) => x.classList.toggle('active', x === b));
-        g.audio.blip();
-      }, `tab ${s.zoom === z ? 'active' : ''}`);
+      const b = button(
+        label,
+        () => {
+          s.zoom = z;
+          g.storage.saveSettings(s);
+          (window as unknown as { __op7resize?: () => void }).__op7resize?.();
+          zoomBtns.forEach((x) => x.classList.toggle('active', x === b));
+          g.audio.blip();
+        },
+        `tab ${s.zoom === z ? 'active' : ''}`,
+      );
       zoomBtns.push(b);
       zoomRow.appendChild(b);
     }
     m.body.appendChild(zoomRow);
-    // ── optional AI chat through a LiteLLM proxy ──
+    // Optional AI chat through a LiteLLM proxy
     const field = (label: string, value: string, set: (v: string) => void, type = 'text', placeholder = '') => {
       const wrap = el('label', 'field');
       const inp = el('input', 'name-input small-input');
@@ -272,27 +369,47 @@ export class UIManager {
       return wrap;
     };
     const result = el('div', 'muted small');
-    const testBtn = button('Test connection', async () => {
-      g.storage.saveSettings(s);
-      result.textContent = 'Testing…';
-      const r = await g.lunaAI.test();
-      result.textContent = `${r.ok ? '✔' : '✖'} ${r.message}`;
-      result.className = `small ${r.ok ? 'ok' : 'bad'}`;
-    }, 'btn small');
+    const testBtn = button(
+      'Test connection',
+      async () => {
+        g.storage.saveSettings(s);
+        result.textContent = 'Testing…';
+        const r = await g.lunaAI.test();
+        result.textContent = `${r.ok ? '✔' : '✖'} ${r.message}`;
+        result.className = `small ${r.ok ? 'ok' : 'bad'}`;
+      },
+      'btn small',
+    );
     const adv = el('details', 'advanced');
     adv.appendChild(el('summary', '', 'Advanced (for older players and teachers)'));
     adv.append(
-      toggle('Expert power: show kW numbers and set each machine by hand', () => s.expertPower, (v) => {
-        s.expertPower = v;
-        if (!v) g.res.setAutoPower(true);
-      }),
+      toggle(
+        'Expert power: show kW numbers and set each machine by hand',
+        () => s.expertPower,
+        (v) => {
+          s.expertPower = v;
+          if (!v) g.res.setAutoPower(true);
+        },
+      ),
       el('h3', '', 'AI answers for LUNA'),
-      el('p', 'muted small', 'Ask LUNA uses AI answers from our server when you are online. Offline, she answers from the Science Log. You can point her at your own LiteLLM server instead.'),
-      toggle('Use AI answers when online', () => s.aiEnabled, (v) => (s.aiEnabled = v)),
+      el(
+        'p',
+        'muted small',
+        'Ask LUNA uses AI answers from our server when you are online. Offline, she answers from the Science Log. You can point her at your own LiteLLM server instead.',
+      ),
+      toggle(
+        'Use AI answers when online',
+        () => s.aiEnabled,
+        (v) => (s.aiEnabled = v),
+      ),
       field('SERVER', s.aiUrl, (v) => (s.aiUrl = v), 'text', AI_SERVER_URL),
       field('MODEL', s.aiModel, (v) => (s.aiModel = v), 'text', 'luna'),
       field('KEY', s.aiKey, (v) => (s.aiKey = v), 'password', 'leave empty for the local server'),
-      el('p', 'muted small', 'Only needed for a LiteLLM server that asks for a key. Never put a Google or Anthropic key here.'),
+      el(
+        'p',
+        'muted small',
+        'Only needed for a LiteLLM server that asks for a key. Never put a Google or Anthropic key here.',
+      ),
       testBtn,
       result,
     );

@@ -94,7 +94,9 @@ export class DialogueBox {
       if (this.shown >= t.length) {
         clearInterval(this.timer);
         this.more.style.visibility = 'visible';
-        this.more.textContent = forTouch(this.i < this.lines.length - 1 ? '▼ click / SPACE' : '✔ click / SPACE to continue');
+        this.more.textContent = forTouch(
+          this.i < this.lines.length - 1 ? '▼ click / SPACE' : '✔ click / SPACE to continue',
+        );
       }
     }, 22);
   }

@@ -49,7 +49,11 @@ const audio = new AudioEngine();
 const storage = new StorageManager();
 const settings = storage.loadSettings();
 applyTextSize(settings.textSize);
-voice.configure(() => settings.voice && !settings.muted, () => settings.volume, () => settings.voiceName ?? '');
+voice.configure(
+  () => settings.voice && !settings.muted,
+  () => settings.volume,
+  () => settings.voiceName ?? '',
+);
 const stack = new ModalStack(root);
 stack.onBlip = () => audio.blip();
 
@@ -113,7 +117,10 @@ async function boot(): Promise<void> {
   ls.log('Booting habitat computer…', 'info');
   ls.progress(0.05);
   try {
-    await Promise.race([Promise.all([document.fonts.load('8px "Press Start 2P"'), document.fonts.load('16px VT323')]), wait(2500)]);
+    await Promise.race([
+      Promise.all([document.fonts.load('8px "Press Start 2P"'), document.fonts.load('16px VT323')]),
+      wait(2500),
+    ]);
   } catch {
     /* fonts are optional */
   }
@@ -124,7 +131,14 @@ async function boot(): Promise<void> {
   art = await Sprites.load();
   art.tintProfile(storage.loadProfile() ?? defaultProfile());
   useIconSheet(art);
-  if (import.meta.env.DEV) (window as unknown as Record<string, unknown>).__op7 = { art, audio, get game() { return game; } };
+  if (import.meta.env.DEV)
+    (window as unknown as Record<string, unknown>).__op7 = {
+      art,
+      audio,
+      get game() {
+        return game;
+      },
+    };
   ls.log(`Sprite sheets ....................... ${art.sprites.size} sprites`);
   ls.progress(0.45);
   await audio.load();

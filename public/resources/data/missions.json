@@ -29,9 +29,7 @@
       "patch": "patch_m1",
       "summary": "Suit up safely and brush the dust off the solar panels.",
       "lesson": "Dust blocks sunlight. Dirty solar panels make less power — the Opportunity rover once got a big boost when the wind blew its panels clean!",
-      "onStart": [
-        "dust_panels"
-      ],
+      "onStart": ["dust_panels"],
       "briefing": [
         {
           "who": "LUNA",
@@ -103,9 +101,7 @@
       "patch": "patch_m2",
       "summary": "Fix the power unit and switch on the greenhouse lights.",
       "lesson": "Every machine needs power, but the Sun only gives so much. Engineers choose what gets power first — that's a trade-off!",
-      "onStart": [
-        "break_pdu"
-      ],
+      "onStart": ["break_pdu"],
       "briefing": [
         {
           "who": "LUNA",
@@ -176,9 +172,7 @@
       "patch": "patch_m3",
       "summary": "Scan for buried ice, dig it up and melt it into water.",
       "lesson": "Mars has lots of water — but it's frozen underground! Robots like Phoenix dug up real Martian ice in 2008.",
-      "onStart": [
-        "ice_hint"
-      ],
+      "onStart": ["ice_hint"],
       "briefing": [
         {
           "who": "LUNA",
@@ -265,9 +259,7 @@
       "patch": "patch_m4",
       "summary": "Share the water: oxygen to breathe, or water for the plants?",
       "lesson": "Water can be split into oxygen to breathe, or given to plants to grow food. A good base needs BOTH, so you choose the balance.",
-      "onStart": [
-        "give_seeds"
-      ],
+      "onStart": ["give_seeds"],
       "briefing": [
         {
           "who": "LUNA",
@@ -338,9 +330,7 @@
       "patch": "patch_m5",
       "summary": "A solar flare is coming! Build shielding and take cover.",
       "lesson": "Mars has no global magnetic field and a thin atmosphere, so space radiation reaches the ground. Thick walls of regolith or water block it.",
-      "onStart": [
-        "prep_flare"
-      ],
+      "onStart": ["prep_flare"],
       "briefing": [
         {
           "who": "DONKI",
@@ -416,9 +406,7 @@
       "patch": "patch_m6",
       "summary": "Drive the rover, collect antenna parts, fix the dish and contact Earth.",
       "lesson": "Radio signals travel at the speed of light, but Mars is so far away that a message takes between 3 and 22 minutes to reach Earth!",
-      "onStart": [
-        "spawn_parts"
-      ],
+      "onStart": ["spawn_parts"],
       "briefing": [
         {
           "who": "LUNA",

@@ -21,13 +21,20 @@ export class LoadingScreen {
     this.globe.width = 48;
     this.globe.height = 48;
     const titles = el('div', 'boot-titles');
-    titles.append(el('div', 'boot-title', 'OUTPOST-7 HABITAT OS'), el('div', 'boot-sub', 'v2.026 · Junior Astronaut Mission Trainer'));
+    titles.append(
+      el('div', 'boot-title', 'OUTPOST-7 HABITAT OS'),
+      el('div', 'boot-sub', 'v2.026 · Junior Astronaut Mission Trainer'),
+    );
     head.append(this.globe, titles);
     this.logEl = el('div', 'boot-log');
     const bar = el('div', 'boot-bar');
     this.fill = el('div', 'boot-fill');
     bar.appendChild(this.fill);
-    this.press = el('div', 'boot-press hidden', touch.active ? '▶ TAP TO START ◀' : '▶ PRESS ANY KEY OR CLICK TO START ◀');
+    this.press = el(
+      'div',
+      'boot-press hidden',
+      touch.active ? '▶ TAP TO START ◀' : '▶ PRESS ANY KEY OR CLICK TO START ◀',
+    );
     this.root.append(head, this.logEl, bar, this.press);
     host.appendChild(this.root);
     this.spin();

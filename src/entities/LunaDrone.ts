@@ -7,6 +7,7 @@ import { voice } from '../core/Voice';
 import { type Ctx } from '../core/canvas';
 import type { Game } from '../Game';
 import type { LunaMood } from '../types';
+import { spriteCanvas } from '../ui/Dom';
 
 interface Speech {
   text: string;
@@ -36,6 +37,7 @@ export class LunaDrone {
   quizTimer = 200;
   private scanRing = -1;
   factsShared: string[] = [];
+  /** What LUNA says shows as a caption above the tool bar, so it never covers the astronaut. */
   private bubble: HTMLDivElement;
   private bubbleText: HTMLSpanElement;
   private game: Game;
@@ -44,10 +46,14 @@ export class LunaDrone {
     this.game = game;
     this.bubble = document.createElement('div');
     this.bubble.className = 'luna-bubble hidden';
+    const face = spriteCanvas(game.art.get('luna_happy'), 2);
+    face.className = 'luna-face';
+    const words = document.createElement('div');
     const name = document.createElement('b');
     name.textContent = 'LUNA';
     this.bubbleText = document.createElement('span');
-    this.bubble.append(name, this.bubbleText);
+    words.append(name, this.bubbleText);
+    this.bubble.append(face, words);
     root.appendChild(this.bubble);
   }
 
@@ -76,7 +82,8 @@ export class LunaDrone {
       if (this.speech && this.speech.shown < this.speech.text.length) this.queue.unshift(this.speech);
       this.speech = s;
       this.mood = mood;
-    } else if (this.queue.length < 4 && !this.queue.some((q) => q.text === text) && this.speech.text !== text) this.queue.push(s);
+    } else if (this.queue.length < 4 && !this.queue.some((q) => q.text === text) && this.speech.text !== text)
+      this.queue.push(s);
   }
 
   /** Say something at most once per `cooldown` seconds. A cooldown of an hour or more means "only ever once". */
@@ -158,7 +165,13 @@ export class LunaDrone {
         this.factTimer = 95 + Math.random() * 40;
         this.shareFact();
       }
-      if (this.quizTimer <= 0 && !this.speech && (g.player.inBase || g.player.o2 > 60) && g.weather.flare.phase === 'none' && g.missions.activeId() >= 2) {
+      if (
+        this.quizTimer <= 0 &&
+        !this.speech &&
+        (g.player.inBase || g.player.o2 > 60) &&
+        g.weather.flare.phase === 'none' &&
+        g.missions.activeId() >= 2
+      ) {
         this.quizTimer = 230 + Math.random() * 90;
         g.ui.showQuiz();
       }
@@ -200,16 +213,9 @@ export class LunaDrone {
       g.stroke();
       g.lineWidth = 1;
     }
-    // DOM speech bubble positioned over the canvas
-    if (this.speech && !game.ui.hideBubble && !game.ui.blocking) {
+    if (this.speech && !game.ui.hideBubble && !game.ui.blocking && !game.hud.bigMap) {
       this.bubble.classList.remove('hidden');
       this.bubbleText.textContent = this.speech.text.slice(0, Math.ceil(this.speech.shown));
-      const scale = game.scale;
-      const left = (sx + 7) * scale;
-      const top = sy * scale;
-      const w = this.bubble.offsetWidth;
-      const clampedLeft = Math.max(8, Math.min(window.innerWidth - w - 8, left - w / 2));
-      this.bubble.style.transform = `translate(${clampedLeft}px, ${Math.max(40, top - this.bubble.offsetHeight - 10)}px)`;
       this.bubble.dataset.mood = this.speech.mood;
     } else this.bubble.classList.add('hidden');
   }

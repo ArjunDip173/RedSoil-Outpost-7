@@ -1,6 +1,6 @@
 // The "where to go" guide: walkable routes on the tile grid.
 import { describe, expect, it } from 'vitest';
-import { clearLine, findPath, pathLength, pointAlong, smoothPath } from '../src/world/pathfind';
+import { clearLine, findPath, pathLength, pointAlong, type Pt, smoothPath } from '../src/world/pathfind';
 
 /** A little map from text: '#' is solid, '.' is free. */
 function grid(rows: string[]) {
@@ -58,10 +58,17 @@ describe('guide route', () => {
     expect(findPath(m.blocked, m.w, m.h, 0, 1, 4, 1)).toBeNull();
   });
 
+  /** Straighten a tile route for a body that fits inside one free tile. */
+  const straighten = (m: ReturnType<typeof grid>, tiles: [number, number][], start: Pt) => {
+    const fits = (x: number, y: number) => !m.blocked(Math.floor(x / 16), Math.floor(y / 16));
+    const pts = tiles.map(([x, y]) => ({ x: x * 16 + 8, y: y * 16 + 8 }));
+    pts[0] = start;
+    return { pts: smoothPath(pts, (a, b) => clearLine(fits, a, b)), fits };
+  };
+
   it('straightens the route where nothing is in the way', () => {
     const m = grid(['..........', '..........', '..........', '..........']);
-    const tiles = findPath(m.blocked, m.w, m.h, 0, 0, 9, 3)!;
-    const pts = smoothPath(m.blocked, 16, tiles, { x: 8, y: 8 });
+    const { pts } = straighten(m, findPath(m.blocked, m.w, m.h, 0, 0, 9, 3)!, { x: 8, y: 8 });
     expect(pts.length).toBe(2);
     expect(pathLength(pts)).toBeCloseTo(Math.hypot(9 * 16, 3 * 16), 0);
   });
@@ -72,10 +79,26 @@ describe('guide route', () => {
       '.####.',
       '......',
     ]);
-    const tiles = findPath(m.blocked, m.w, m.h, 0, 2, 5, 0)!;
-    const pts = smoothPath(m.blocked, 16, tiles, { x: 8, y: 40 });
-    for (let i = 1; i < pts.length; i++) expect(clearLine(m.blocked, 16, pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y, 0)).toBe(true);
+    const { pts, fits } = straighten(m, findPath(m.blocked, m.w, m.h, 0, 2, 5, 0)!, { x: 8, y: 40 });
+    for (let i = 1; i < pts.length; i++) expect(clearLine(fits, pts[i - 1], pts[i])).toBe(true);
     expect(pts.length).toBeGreaterThan(2);
+  });
+
+  it('a wide body (the rover) does not squeeze through a one-tile gap', () => {
+    const m = grid([
+      '..........', //
+      '####.#####',
+      '..........',
+    ]);
+    // the rover needs the node's tile and the one to its left free
+    const roverBlocked = (x: number, y: number) => m.blocked(x - 1, y) || m.blocked(x, y);
+    expect(findPath(m.blocked, m.w, m.h, 4, 2, 4, 0)).not.toBeNull(); // walking fits
+    expect(findPath(roverBlocked, m.w, m.h, 4, 2, 4, 0)).toBeNull(); // driving does not
+    // ...but with `partial` it still drives as close as it can: the parking spot below the gap
+    const park = findPath(roverBlocked, m.w, m.h, 0, 2, 4, 0, 40000, true)!;
+    const [px, py] = park.at(-1)!;
+    expect(py).toBe(2);
+    expect(Math.abs(px - 4)).toBeLessThanOrEqual(1);
   });
 
   it('finds the point a little way along the route (for the arrow next to the astronaut)', () => {
@@ -93,7 +116,8 @@ describe('guide route', () => {
     const w = 240;
     const h = 180;
     // scattered rocks, like the Mars surface
-    const blocked = (x: number, y: number) => x < 0 || y < 0 || x >= w || y >= h || ((x * 7 + y * 13) % 11 === 0 && (x + y) % 3 === 0);
+    const blocked = (x: number, y: number) =>
+      x < 0 || y < 0 || x >= w || y >= h || ((x * 7 + y * 13) % 11 === 0 && (x + y) % 3 === 0);
     const t0 = performance.now();
     const p = findPath(blocked, w, h, 5, 5, 230, 170);
     expect(p).not.toBeNull();

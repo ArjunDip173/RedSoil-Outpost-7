@@ -38,23 +38,77 @@ const TIMEOUT_MS = 22000; // the server gives up after 18 s
 
 /** Game-help topics: used for offline answers and given to the AI as a guide. */
 const HELP: { keys: string[]; text: string }[] = [
-  { keys: ['water', 'ice', 'melt', 'thirsty', 'drink', 'dig', 'laser', 'mine'], text: 'To make water: go outside and press the SCAN button (or Q) so buried ice glows blue. Pick the Mining Laser in your tool bar and hold the mouse on the blue ground. Walk back inside (the ice unloads by itself), then switch ON the Ice Melter in Base Ops.' },
-  { keys: ['valve', 'share', 'split', 'slider', 'electrolysis'], text: 'The WATER VALVE is in Base Ops (Mission Console in the Command room, WATER tab). Slide it toward PLANTS to water the crops, or toward OXYGEN so the O2 Maker splits more water into air.' },
-  { keys: ['oxygen', 'o2', 'air', 'breathe', 'breathing', 'suit'], text: 'Base air comes from the O2 Maker, which splits water with electricity, and from the algae tanks. Your suit air is the blue ring in the bottom-left: refill it at the O2 Station inside, or stand next to the rover outside.' },
-  { keys: ['power', 'battery', 'solar', 'panel', 'electricity', 'energy', 'dust', 'dusty'], text: 'Solar panels make power in the daytime. Stand next to a dusty panel and press E to brush it clean. AUTO POWER shares the power for you: just switch machines ON or OFF in Base Ops.' },
-  { keys: ['ops', 'console', 'machine', 'machines', 'switch', 'light', 'melter', 'algae'], text: 'Base Ops opens at the Mission Console in the Command room, or with the BASE OPS button inside the base. Its POWER tab has big ON/OFF switches for the Greenhouse Lights, O2 Maker, Ice Melter and Algae Lab.' },
-  { keys: ['food', 'plant', 'seed', 'crop', 'grow', 'lettuce', 'potato', 'tomato', 'pepper', 'hungry', 'greenhouse', 'harvest'], text: 'Plant seeds in the Greenhouse trays: stand by a tray, press E and pick a seed. Plants need water from the water valve and light from the Greenhouse Lights. When a plant sparkles, press E to harvest it.' },
-  { keys: ['radiation', 'flare', 'shelter', 'geiger', 'donki', 'storm', 'shield', 'wall'], text: 'When a SOLAR FLARE warning flashes, hide in the Storm Shelter room (bottom-right of the base) or deep in the lava tube cave. Rock, soil and water block radiation.' },
-  { keys: ['brick', 'build', 'fabricator', 'upgrade', 'craft', 'glowing', 'square'], text: 'The Fabricator (3D printer in the Algae Lab) turns regolith into bricks and builds upgrades. For the shield wall, walk to the glowing squares on the right side of the base and click each one while carrying bricks.' },
-  { keys: ['rover', 'drive', 'car', 'driving', 'home'], text: 'The rover is on the landing pad to the left of the base. Press E next to it to drive with WASD. Standing next to it refills your suit air, and the GO HOME button (or R) drives it back to the pad by itself.' },
-  { keys: ['antenna', 'earth', 'call', 'radio', 'signal', 'part', 'dish'], text: 'The Deep Space Antenna is far up and to the right on a rocky ridge. In Mission 6 you find 3 parts by following the glowing yellow path, fix its wires and turn the dish toward the blue Earth.' },
-  { keys: ['move', 'walk', 'control', 'key', 'sprint', 'run', 'play', 'button', 'stuck', 'lost'], text: 'Walk with WASD or the arrow keys. Press E to use the thing you are next to, and hold the mouse to use your tool. Follow the glowing yellow path on the ground (and the big arrow next to you) and the mission box at the top-right. The buttons in the bottom-right are Scan, Map, Log, Ask LUNA, Base Ops and Fast.' },
-  { keys: ['fast', 'wait', 'waiting', 'time', 'night', 'slow', 'speed'], text: 'Inside the base, hold the FAST button to speed up time when you are safe. During training missions the night is skipped.' },
-  { keys: ['sample', 'rock', 'sparkly', 'mineral', 'science', 'log'], text: 'Sparkly rocks are science samples! Pick the Dust Brush in your tool bar and hold the mouse on them to add them to your Science Log.' },
+  {
+    keys: ['water', 'ice', 'melt', 'thirsty', 'drink', 'dig', 'laser', 'mine'],
+    text: 'To make water: go outside and press the SCAN button (or Q) so buried ice glows blue. Pick the Mining Laser in your tool bar and hold the mouse on the blue ground. Walk back inside (the ice unloads by itself), then switch ON the Ice Melter in Base Ops.',
+  },
+  {
+    keys: ['valve', 'share', 'split', 'slider', 'electrolysis'],
+    text: 'The WATER VALVE is in Base Ops (Mission Console in the Command room, WATER tab). Slide it toward PLANTS to water the crops, or toward OXYGEN so the O2 Maker splits more water into air.',
+  },
+  {
+    keys: ['oxygen', 'o2', 'air', 'breathe', 'breathing', 'suit'],
+    text: 'Base air comes from the O2 Maker, which splits water with electricity, and from the algae tanks. Your suit air is the blue ring in the bottom-left: refill it at the O2 Station inside, or stand next to the rover outside.',
+  },
+  {
+    keys: ['power', 'battery', 'solar', 'panel', 'electricity', 'energy', 'dust', 'dusty'],
+    text: 'Solar panels make power in the daytime. Stand next to a dusty panel and press E to brush it clean. AUTO POWER shares the power for you: just switch machines ON or OFF in Base Ops.',
+  },
+  {
+    keys: ['ops', 'console', 'machine', 'machines', 'switch', 'light', 'melter', 'algae'],
+    text: 'Base Ops opens at the Mission Console in the Command room, or with the BASE OPS button inside the base. Its POWER tab has big ON/OFF switches for the Greenhouse Lights, O2 Maker, Ice Melter and Algae Lab.',
+  },
+  {
+    keys: [
+      'food',
+      'plant',
+      'seed',
+      'crop',
+      'grow',
+      'lettuce',
+      'potato',
+      'tomato',
+      'pepper',
+      'hungry',
+      'greenhouse',
+      'harvest',
+    ],
+    text: 'Plant seeds in the Greenhouse trays: stand by a tray, press E and pick a seed. Plants need water from the water valve and light from the Greenhouse Lights. When a plant sparkles, press E to harvest it.',
+  },
+  {
+    keys: ['radiation', 'flare', 'shelter', 'geiger', 'donki', 'storm', 'shield', 'wall'],
+    text: 'When a SOLAR FLARE warning flashes, hide in the Storm Shelter room (bottom-right of the base) or deep in the lava tube cave. Rock, soil and water block radiation.',
+  },
+  {
+    keys: ['brick', 'build', 'fabricator', 'upgrade', 'craft', 'glowing', 'square'],
+    text: 'The Fabricator (3D printer in the Algae Lab) turns regolith into bricks and builds upgrades. For the shield wall, walk to the glowing squares on the right side of the base and click each one while carrying bricks.',
+  },
+  {
+    keys: ['rover', 'drive', 'car', 'driving', 'home'],
+    text: 'The rover is on the landing pad to the left of the base. Press E next to it to drive with WASD. Standing next to it refills your suit air, and the GO HOME button (or R) drives it back to the pad by itself.',
+  },
+  {
+    keys: ['antenna', 'earth', 'call', 'radio', 'signal', 'part', 'dish'],
+    text: 'The Deep Space Antenna is far up and to the right on a rocky ridge. In Mission 6 you find 3 parts by following the glowing yellow path, fix its wires and turn the dish toward the blue Earth.',
+  },
+  {
+    keys: ['move', 'walk', 'control', 'key', 'sprint', 'run', 'play', 'button', 'stuck', 'lost'],
+    text: 'Walk with WASD or the arrow keys. Press E to use the thing you are next to, and hold the mouse to use your tool. Follow the glowing yellow path on the ground (and the big arrow next to you) and the mission box at the top-right. The buttons in the bottom-right are Scan, Map, Log, Ask LUNA, Base Ops and Fast.',
+  },
+  {
+    keys: ['fast', 'wait', 'waiting', 'time', 'night', 'slow', 'speed'],
+    text: 'Inside the base, hold the FAST button to speed up time when you are safe. During training missions the night is skipped.',
+  },
+  {
+    keys: ['sample', 'rock', 'sparkly', 'mineral', 'science', 'log'],
+    text: 'Sparkly rocks are science samples! Pick the Dust Brush in your tool bar and hold the mouse on them to add them to your Science Log.',
+  },
 ];
 
 const STOP = new Set(
-  'the a an and or but is are was were be to of in on at for with what why how who when where which do does did can could would should i you me my we it its this that there their they them about from mars please tell explain really very'.split(' '),
+  'the a an and or but is are was were be to of in on at for with what why how who when where which do does did can could would should i you me my we it its this that there their they them about from mars please tell explain really very'.split(
+    ' ',
+  ),
 );
 
 function words(s: string): string[] {
@@ -129,7 +183,7 @@ export class LunaAI {
     return h;
   }
 
-  // ───────────────────────── offline knowledge ─────────────────────────
+  // Offline knowledge
 
   /** Facts that best match a question (simple keyword overlap). */
   relevantFacts(question: string, n = 4): NasaFact[] {
@@ -161,12 +215,22 @@ export class LunaAI {
 
   /** Friendly replies to chit-chat ("hi", "how are you?", jokes…) and "what do I do next?". */
   private smallTalk(question: string, ctx?: GameContext): string | null {
-    const q = question.toLowerCase().replace(/[^a-z' ]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const q = question
+      .toLowerCase()
+      .replace(/[^a-z' ]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     const pick = (list: string[]) => list[Math.floor(Math.random() * list.length)];
     if (/^(hi+|hey+|hel+o+|hiya|yo+|howdy|sup|hola|greetings|good (morning|afternoon|evening))( luna)?$/.test(q))
-      return pick(['Hi there, astronaut! Ask me anything about Mars, or tap a question below.', 'Hello! LUNA here, ready to help. What would you like to know?']);
+      return pick([
+        'Hi there, astronaut! Ask me anything about Mars, or tap a question below.',
+        'Hello! LUNA here, ready to help. What would you like to know?',
+      ]);
     if (/how (are|r) (you|u)|how's it going|how is it going|how do you feel|are you ok/.test(q))
-      return pick(["My circuits are buzzing happily, thanks! How's your mission going?", "I'm great! Floating around Mars with you is the best job ever."]);
+      return pick([
+        "My circuits are buzzing happily, thanks! How's your mission going?",
+        "I'm great! Floating around Mars with you is the best job ever.",
+      ]);
     if (/who are you|what are you|your name|are you a robot|are you real/.test(q))
       return "I'm LUNA, your helper drone at Outpost 7. I know lots about Mars and how to keep our base running!";
     if (/\b(thanks|thank you|thx|ty)\b/.test(q)) return "You're welcome! Happy exploring, astronaut!";
@@ -175,12 +239,19 @@ export class LunaAI {
         'Why did the astronaut break up with the rover? It needed more space!',
         "What's an astronaut's favourite key on the keyboard? The space bar!",
         'How do you throw a party on Mars? You planet!',
-        "Why is the Sun so smart? It has over five billion degrees!",
+        'Why is the Sun so smart? It has over five billion degrees!',
       ]);
     if (/\b(bye|goodbye|see you|see ya|cya|good night)\b/.test(q)) return 'Bye for now! Fly safe, astronaut!';
-    if (/\b(love you|you are (cool|awesome|great|smart|nice)|you're (cool|awesome|great|smart|nice))\b/.test(q)) return "Aww, thank you! You're a super astronaut too!";
-    if (/what (should|do|can) i do|what now|what next|next step|what's next|what is next|i'm stuck|im stuck|i am stuck/.test(q))
-      return ctx && ctx.objective && ctx.objective !== 'none' ? `Your next step: ${ctx.objective}. Follow the glowing yellow path and I'll help along the way!` : 'Follow the glowing yellow path on the ground and check the mission box in the top-right corner!';
+    if (/\b(love you|you are (cool|awesome|great|smart|nice)|you're (cool|awesome|great|smart|nice))\b/.test(q))
+      return "Aww, thank you! You're a super astronaut too!";
+    if (
+      /what (should|do|can) i do|what now|what next|next step|what's next|what is next|i'm stuck|im stuck|i am stuck/.test(
+        q,
+      )
+    )
+      return ctx && ctx.objective && ctx.objective !== 'none'
+        ? `Your next step: ${ctx.objective}. Follow the glowing yellow path and I'll help along the way!`
+        : 'Follow the glowing yellow path on the ground and check the mission box in the top-right corner!';
     return null;
   }
 
@@ -201,7 +272,7 @@ export class LunaAI {
     };
   }
 
-  // ───────────────────────── AI server ─────────────────────────
+  // AI server
 
   private systemPrompt(question: string, ctx: GameContext): string {
     const facts = this.relevantFacts(question)
@@ -235,7 +306,8 @@ export class LunaAI {
     if (!this.enabled) return this.offline(q, undefined, ctx);
     // Ask straight away (no separate "are you there?" check first: that cost a whole extra round
     // trip per question). If the server could not be reached a moment ago, answer offline at once.
-    if (this.avail && !this.avail.ok && performance.now() - this.avail.at < 12000) return this.offline(q, undefined, ctx);
+    if (this.avail && !this.avail.ok && performance.now() - this.avail.at < 12000)
+      return this.offline(q, undefined, ctx);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
@@ -246,13 +318,24 @@ export class LunaAI {
         body: JSON.stringify({
           model: this.settings.aiModel.trim() || 'luna',
           max_tokens: 1024,
-          messages: [{ role: 'system', content: this.systemPrompt(q, ctx) }, ...history.slice(-6), { role: 'user', content: q }],
+          messages: [
+            { role: 'system', content: this.systemPrompt(q, ctx) },
+            ...history.slice(-6),
+            { role: 'user', content: q },
+          ],
         }),
       });
       if (!res.ok) return this.offline(q, this.httpProblem(res.status, await res.text().catch(() => '')), ctx);
       const json = (await res.json()) as { choices?: { message?: { content?: unknown } }[] };
       const raw = json.choices?.[0]?.message?.content;
-      const text = typeof raw === 'string' ? raw : Array.isArray(raw) ? raw.map((p) => (typeof p === 'object' && p && 'text' in p ? String((p as { text: unknown }).text) : '')).join(' ') : '';
+      const text =
+        typeof raw === 'string'
+          ? raw
+          : Array.isArray(raw)
+            ? raw
+                .map((p) => (typeof p === 'object' && p && 'text' in p ? String((p as { text: unknown }).text) : ''))
+                .join(' ')
+            : '';
       const clean = cleanAnswer(text);
       this.avail = { ok: true, at: performance.now() };
       if (!clean) return this.offline(q, undefined, ctx);
@@ -274,14 +357,22 @@ export class LunaAI {
       return "The AI account is out of credits. Add credits in the provider's billing page.";
     // Gemini free tier: per-minute or per-day limit reached.
     if (status === 429 || b.includes('resource_exhausted') || b.includes('quota'))
-      return gemini ? 'The free Gemini limit was reached for now. Wait a minute (or until tomorrow) and try again.' : 'Too many questions at once. Wait a moment and try again.';
+      return gemini
+        ? 'The free Gemini limit was reached for now. Wait a minute (or until tomorrow) and try again.'
+        : 'Too many questions at once. Wait a moment and try again.';
     // The AI provider rejected the key stored on the server.
-    if (b.includes('api key not valid') || b.includes('api_key_invalid') || ((/exception|x-api-key|invalid api key|authentication_error|permission_denied/.test(b)) && (status === 400 || status === 401 || status === 403)))
+    if (
+      b.includes('api key not valid') ||
+      b.includes('api_key_invalid') ||
+      (/exception|x-api-key|invalid api key|authentication_error|permission_denied/.test(b) &&
+        (status === 400 || status === 401 || status === 403))
+    )
       return `The AI provider rejected the server's API key${gemini ? ' (Gemini)' : ''}. Update the key and redeploy the server.`;
     // The server itself rejected the game's key (LiteLLM without a database says "No connected db").
     if (b.includes('no connected db') || b.includes('proxy server token') || status === 401 || status === 403)
-      return "The AI server did not accept the key in AI settings.";
-    if (status === 404) return `The model "${this.settings.aiModel}" was not found. Check model_name in litellm/config.yaml.`;
+      return 'The AI server did not accept the key in AI settings.';
+    if (status === 404)
+      return `The model "${this.settings.aiModel}" was not found. Check model_name in litellm/config.yaml.`;
     return `The AI server returned an error (${status}).`;
   }
 
@@ -296,10 +387,17 @@ export class LunaAI {
       const json = (await res.json()) as { data?: { id?: string }[] };
       const ids = (json.data ?? []).map((m) => m.id).filter((x): x is string => !!x);
       const model = this.settings.aiModel.trim();
-      if (ids.length && !ids.includes(model)) return { ok: false, message: `Connected, but no model named "${model}". The server has: ${ids.join(', ')}.` };
+      if (ids.length && !ids.includes(model))
+        return { ok: false, message: `Connected, but no model named "${model}". The server has: ${ids.join(', ')}.` };
       return { ok: true, message: `Connected. Model "${model}" is ready.` };
     } catch (e) {
-      return { ok: false, message: (e as Error).name === 'AbortError' ? 'The server took too long to answer.' : `Can't reach ${this.base()}. Are you online?` };
+      return {
+        ok: false,
+        message:
+          (e as Error).name === 'AbortError'
+            ? 'The server took too long to answer.'
+            : `Can't reach ${this.base()}. Are you online?`,
+      };
     } finally {
       clearTimeout(timer);
     }

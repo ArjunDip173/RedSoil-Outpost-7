@@ -65,7 +65,12 @@ export class ResourceManager {
   autoPower = true;
   switches: Record<PowerSystemId, boolean> = { greenhouse: false, electrolysis: true, melter: false, algae: false };
   /** Short explanation per machine for the Base Ops screen ("Waiting for ice", "Saving power"...). */
-  autoReason: Record<PowerSystemId, string> = { greenhouse: 'Off', electrolysis: 'Starting…', melter: 'Off', algae: 'Off' };
+  autoReason: Record<PowerSystemId, string> = {
+    greenhouse: 'Off',
+    electrolysis: 'Starting…',
+    melter: 'Off',
+    algae: 'Off',
+  };
   private autoT = 0;
   upgrades: Record<string, number> = {};
   beds: Bed[] = Array.from({ length: 6 }, () => ({ crop: null, growth: 0, water: 0.5 }));
@@ -153,7 +158,10 @@ export class ResourceManager {
     const pct = this.batteryPct;
     let budget = this.computeSolar() + (this.upgrades.kilopower ? KILOPOWER_KW : 0) - LIFE_SUPPORT_KW;
     budget += pct > 60 ? 4 : pct > 35 ? 1.5 : pct > 15 ? 0 : -0.5;
-    const order: PowerSystemId[] = this.o2 < 40 ? ['electrolysis', 'greenhouse', 'melter', 'algae'] : ['greenhouse', 'electrolysis', 'melter', 'algae'];
+    const order: PowerSystemId[] =
+      this.o2 < 40
+        ? ['electrolysis', 'greenhouse', 'melter', 'algae']
+        : ['greenhouse', 'electrolysis', 'melter', 'algae'];
     const target: Record<PowerSystemId, number> = { greenhouse: 0, electrolysis: 0, melter: 0, algae: 0 };
     for (let level = 1; level <= MAX_POWER_LEVEL; level++) {
       for (const id of order) {
@@ -172,7 +180,14 @@ export class ResourceManager {
       if (next > 0) this.shed.delete(id);
       this.autoReason[id] = !this.switches[id]
         ? 'Off'
-        : need[id] ?? (target[id] === 0 ? 'Saving power' : target[id] === 3 ? 'Full speed' : target[id] === 2 ? 'Running' : 'Running slowly');
+        : (need[id] ??
+          (target[id] === 0
+            ? 'Saving power'
+            : target[id] === 3
+              ? 'Full speed'
+              : target[id] === 2
+                ? 'Running'
+                : 'Running slowly'));
     }
   }
 
@@ -181,7 +196,7 @@ export class ResourceManager {
     const sun = g.weather.sun;
     const haze = 1 - 0.78 * g.weather.stormIntensity;
     let kw = 0;
-    for (const p of g.objects.panels) if (!p.broken) kw += PANEL_PEAK_KW * sun * (1 - 0.85 * p.dust) * haze;
+    for (const p of g.objects.panels) if (!p.broken) kw += PANEL_PEAK_KW * sun * (1 - 0.85 * p.dust) * haze * p.open;
     return kw;
   }
 
@@ -196,7 +211,7 @@ export class ResourceManager {
         this.autoBalance();
       }
     }
-    // ── power ──
+    // Power
     this.solarKw = this.computeSolar();
     this.gen = this.solarKw + (this.upgrades.kilopower ? KILOPOWER_KW : 0);
     const pduOk = !g.objects.pduBroken;
@@ -212,7 +227,13 @@ export class ResourceManager {
         if (this.power[id] > 0 && !this.shed.has(id)) {
           this.shed.add(id);
           demand = demandOf();
-          g.hint(`shed_${id}`, `Battery empty! I switched off the ${POWER_SYSTEMS.find((p) => p.id === id)!.name} to save power.`, 'alert', 40, 2);
+          g.hint(
+            `shed_${id}`,
+            `Battery empty! I switched off the ${POWER_SYSTEMS.find((p) => p.id === id)!.name} to save power.`,
+            'alert',
+            40,
+            2,
+          );
         }
       }
     } else if (this.shed.size && this.battery > this.batteryMax * 0.08) {
@@ -224,7 +245,7 @@ export class ResourceManager {
     this.battery = Math.max(0, Math.min(this.batteryMax, this.battery + this.net * HOURS_PER_SECOND * dt));
     this.backupPower = this.battery <= 0.01 && this.gen < LIFE_SUPPORT_KW;
 
-    // ── water flows ──
+    // Water flows
     const lvlE = this.effectiveLevel('electrolysis');
     const lvlA = this.effectiveLevel('algae');
     const lvlM = this.effectiveLevel('melter');
@@ -246,7 +267,7 @@ export class ResourceManager {
     this.flows.irrigation = irrig;
     this.flows.algaeWater = algaeW;
 
-    // ── oxygen & food ──
+    // Oxygen & food
     const o2Electro = electro * O2_PER_LITRE;
     const algaeTarget = lvlA > 0 && hasWater ? 0.35 + (lvlA / 3) * 0.65 : 0.08;
     this.algae += (algaeTarget - this.algae) * dt * 0.03;
@@ -259,7 +280,7 @@ export class ResourceManager {
     this.o2 = Math.min(100, this.o2 + (this.flows.o2In - CREW_O2_USE) * dt);
     this.food = Math.max(0, Math.min(80, this.food + (foodAlgae - CREW_FOOD_USE) * dt));
 
-    // ── ice melter ──
+    // Ice melter
     this.flows.waterIn = 0;
     if (lvlM > 0 && (this.storage.ice ?? 0) > 0 && this.water < BASE_WATER_CAP) {
       this.meltBuffer += MELT_ICE_PER_LEVEL * lvlM * dt;
@@ -269,11 +290,12 @@ export class ResourceManager {
         this.storage.ice = (this.storage.ice ?? 0) - 1;
         this.water = Math.min(BASE_WATER_CAP, this.water + WATER_PER_ICE);
         g.emit('water_made', WATER_PER_ICE);
-        if (g.player.inBase && Math.abs(g.player.cx - (g.base.interior.x + 350)) < 200 && Math.random() < 0.5) g.audio.splash();
+        if (g.player.inBase && Math.abs(g.player.cx - (g.base.interior.x + 350)) < 200 && Math.random() < 0.5)
+          g.audio.splash();
       }
     } else this.meltBuffer = 0;
 
-    // ── crops ──
+    // Crops
     const skylight = g.weather.sun * 0.22;
     const light = skylight + (lvlG / 3) * 0.85;
     const perBed = growing > 0 ? irrig / growing : 0;
@@ -290,22 +312,42 @@ export class ResourceManager {
       }
     }
 
-    // ── safety nets (kid-friendly) ──
+    // Safety nets (kid-friendly)
     if (this.o2 <= 4 && this.candleSol !== g.weather.sol) {
       this.candleSol = g.weather.sol;
       this.o2 += 25;
       g.toast('Emergency oxygen candles lit: +25% base O2', '#7fe3ff', 'icon_o2');
-      g.luna.say('Phew! I lit our emergency oxygen candles. The ISS carries these too! Now let\'s make more O2 with the O2 Maker.', 'alert', 3);
+      g.luna.say(
+        "Phew! I lit our emergency oxygen candles. The ISS carries these too! Now let's make more O2 with the O2 Maker.",
+        'alert',
+        3,
+      );
       g.unlockFact('o2_candles');
     }
     this.o2 = Math.max(0, this.o2);
-    if (this.o2 < 25) g.hint('o2low', 'Base air is getting low! Switch ON the O2 Maker in Base Ops and make sure we have water.', 'alert', 45, 2);
-    if (this.batteryPct < 15 && this.net < 0) g.hint('battlow', 'Battery low! Brush the solar panels clean, or switch some machines OFF in Base Ops.', 'alert', 50, 2);
-    if (this.water < 3 && (lvlE > 0 || growing > 0)) g.hint('waterlow', "We're almost out of water! Mine ice and turn on the Ice Melter.", 'alert', 60, 2);
-    if (this.food < 2) g.hint('foodlow', 'Food is running low! Harvest crops or turn on the Algae Lab.', 'alert', 70, 1);
+    if (this.o2 < 25)
+      g.hint(
+        'o2low',
+        'Base air is getting low! Switch ON the O2 Maker in Base Ops and make sure we have water.',
+        'alert',
+        45,
+        2,
+      );
+    if (this.batteryPct < 15 && this.net < 0)
+      g.hint(
+        'battlow',
+        'Battery low! Brush the solar panels clean, or switch some machines OFF in Base Ops.',
+        'alert',
+        50,
+        2,
+      );
+    if (this.water < 3 && (lvlE > 0 || growing > 0))
+      g.hint('waterlow', "We're almost out of water! Mine ice and turn on the Ice Melter.", 'alert', 60, 2);
+    if (this.food < 2)
+      g.hint('foodlow', 'Food is running low! Harvest crops or turn on the Algae Lab.', 'alert', 70, 1);
   }
 
-  // ───────────────────────── storage helpers ─────────────────────────
+  // Storage helpers
 
   /** Items available from storage + backpack. */
   have(id: ItemId): number {
@@ -323,7 +365,8 @@ export class ResourceManager {
   }
 
   addStorage(inv: Inventory): void {
-    for (const [id, n] of Object.entries(inv) as [ItemId, number][]) if (n) this.storage[id] = (this.storage[id] ?? 0) + n;
+    for (const [id, n] of Object.entries(inv) as [ItemId, number][])
+      if (n) this.storage[id] = (this.storage[id] ?? 0) + n;
   }
 
   /** Move a bag of items into base storage (fires delivery events). */
@@ -361,7 +404,7 @@ export class ResourceManager {
     this.deposit(bag, 'backpack');
   }
 
-  // ───────────────────────── fabricator ─────────────────────────
+  // Fabricator
 
   recipeState(r: RecipeDef): { built: number; canAfford: boolean; locked: boolean; maxed: boolean } {
     const built = this.upgrades[r.id] ?? 0;
@@ -433,7 +476,7 @@ export class ResourceManager {
     if (this.upgrades.rover_battery) g.rover.drainMul = 0.62;
   }
 
-  // ───────────────────────── greenhouse ─────────────────────────
+  // Greenhouse
 
   plant(k: number, crop: CropId): boolean {
     const bed = this.beds[k];

@@ -10,7 +10,10 @@ export const touch = { active: false };
 /** Is the main pointer a finger (phone, tablet)? */
 export function prefersTouch(): boolean {
   try {
-    return matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints > 0 && !matchMedia('(any-pointer: fine)').matches);
+    return (
+      matchMedia('(pointer: coarse)').matches ||
+      (navigator.maxTouchPoints > 0 && !matchMedia('(any-pointer: fine)').matches)
+    );
   } catch {
     return false;
   }
@@ -36,7 +39,9 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [
     /\b([Cc])lick(s|ed|ing)?\b/g,
     (m, c, end, offset, str) =>
-      String(str).slice(Math.max(0, Number(offset) - 3), Number(offset)) === 'it ' ? m : `${c === 'C' ? 'T' : 't'}ap${end === 'ed' ? 'ped' : end === 'ing' ? 'ping' : (end ?? '')}`,
+      String(str).slice(Math.max(0, Number(offset) - 3), Number(offset)) === 'it '
+        ? m
+        : `${c === 'C' ? 'T' : 't'}ap${end === 'ed' ? 'ped' : end === 'ing' ? 'ping' : (end ?? '')}`,
   ],
   [/\s*\/\s*SPACE\b/g, ''],
   [/\s+or press any key\b/g, ''],

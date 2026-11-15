@@ -22,7 +22,8 @@ const SAY_AS: [RegExp, string][] = [
 const KEEP_CAPS = new Set(['NASA', 'MOXIE', 'ESA', 'CSA', 'JAXA', 'ISS', 'RAD', 'MAVEN']);
 
 /** macOS joke/robot voices and the old "Eloquence" voices sound robotic: never pick them. */
-const AVOID = /bad news|bahh|bells|boing|bubbles|cellos|wobble|good news|jester|organ|superstar|whisper|zarvox|trinoids|albert|fred|junior|ralph|kathy|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|novelty/i;
+const AVOID =
+  /bad news|bahh|bells|boing|bubbles|cellos|wobble|good news|jester|organ|superstar|whisper|zarvox|trinoids|albert|fred|junior|ralph|kathy|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|novelty/i;
 
 /** Higher = sounds more natural. */
 function rank(v: SpeechSynthesisVoice): number {
@@ -52,7 +53,8 @@ class VoiceEngine {
   private volume: () => number = () => 1;
   private preferred: () => string = () => '';
   private voices: SpeechSynthesisVoice[] = [];
-  private readonly synth: SpeechSynthesis | null = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
+  private readonly synth: SpeechSynthesis | null =
+    typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
 
   configure(enabled: () => boolean, volume: () => number, preferred: () => string = () => ''): void {
     this.enabled = enabled;
@@ -98,7 +100,8 @@ class VoiceEngine {
       u.volume = Math.max(0, Math.min(1, this.volume()));
       // online voices (e.g. Google) fail without internet: fall back to a voice on this computer
       u.onerror = (e) => {
-        if (voice && !voice.localService && e.error !== 'interrupted' && e.error !== 'canceled') say(this.voices.find((v) => v.localService) ?? null);
+        if (voice && !voice.localService && e.error !== 'interrupted' && e.error !== 'canceled')
+          say(this.voices.find((v) => v.localService) ?? null);
       };
       this.synth!.speak(u);
     };

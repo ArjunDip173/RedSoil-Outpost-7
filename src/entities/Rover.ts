@@ -3,7 +3,17 @@
  * Battery, a mobile O2 tether for the suit, and a big trunk. Hop in (E) and your backpack
  * goes into the trunk; park on the landing pad and the trunk unloads into base storage.
  */
-import { LANDMARKS, ROVER_ACCEL, ROVER_CHARGE, ROVER_DRAIN, ROVER_MAX_SPEED, ROVER_TETHER_RANGE, ROVER_TRUNK_CAP, SUIT_REFILL_COST, TILE } from '../config';
+import {
+  LANDMARKS,
+  ROVER_ACCEL,
+  ROVER_CHARGE,
+  ROVER_DRAIN,
+  ROVER_MAX_SPEED,
+  ROVER_TETHER_RANGE,
+  ROVER_TRUNK_CAP,
+  SUIT_REFILL_COST,
+  TILE,
+} from '../config';
 import { type Ctx } from '../core/canvas';
 import type { Game } from '../Game';
 import type { Inventory, ItemId, RoverSave } from '../types';
@@ -94,7 +104,12 @@ export class Rover implements Body {
     if (moved > 0) g.toast(`Moved ${moved} items into the rover trunk`, '#ffd166', 'icon_rover');
     g.audio.select();
     g.emit('enter_rover');
-    g.hint('rover_tip', 'Rover controls: WASD to drive, E to hop out, R for auto-pilot back to base. Your suit breathes from the rover tank!', 'happy', 99999);
+    g.hint(
+      'rover_tip',
+      'Rover controls: WASD to drive, E to hop out, R for auto-pilot back to base. Your suit breathes from the rover tank!',
+      'happy',
+      99999,
+    );
   }
 
   exit(): void {
@@ -176,13 +191,24 @@ export class Rover implements Body {
       if ((ix || iy) && moved < 0.2) this.stuckT += dt;
       else this.stuckT = 0;
       if (this.stuckT > 2.5) {
-        g.hint('stuck', 'Stuck against a rock? Drive around it, or press R and the auto-pilot takes the rover back to the pad.', 'think', 30);
+        g.hint(
+          'stuck',
+          'Stuck against a rock? Drive around it, or press R and the auto-pilot takes the rover back to the pad.',
+          'think',
+          30,
+        );
         this.stuckT = 0;
       }
       g.player.placeAt(this.cx, this.y + this.h);
       if (moved > 0.5 && Math.random() < 0.5) g.particles.dust(this.cx - this.vx * 0.08, this.y + this.h, 1);
       g.audio.loop('rover', 1, Math.hypot(this.vx, this.vy) / ROVER_MAX_SPEED);
-      if (this.battery <= 0) g.hint('rover_flat', 'Rover battery is empty! It can only crawl now. Head back to the charging pad.', 'alert', 40);
+      if (this.battery <= 0)
+        g.hint(
+          'rover_flat',
+          'Rover battery is empty! It can only crawl now. Head back to the charging pad.',
+          'alert',
+          40,
+        );
     }
 
     if (this.onPad() && Math.hypot(this.vx, this.vy) < 5) {
