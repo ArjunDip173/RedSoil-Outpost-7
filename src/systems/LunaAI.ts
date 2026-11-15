@@ -34,7 +34,7 @@ export interface GameContext {
 
 export const MAX_QUESTION = 200;
 const MAX_ANSWER = 520;
-const TIMEOUT_MS = 25000;
+const TIMEOUT_MS = 22000; // the server gives up after 18 s
 
 /** Game-help topics: used for offline answers and given to the AI as a guide. */
 const HELP: { keys: string[]; text: string }[] = [
@@ -232,8 +232,10 @@ export class LunaAI {
   /** Ask LUNA. Uses the AI server when it answers, otherwise (or on any error) answers offline. */
   async ask(question: string, history: ChatTurn[], ctx: GameContext): Promise<LunaAnswer> {
     const q = question.trim().slice(0, MAX_QUESTION);
-    // no AI server running → friendly offline LUNA, no error messages
-    if (!this.enabled || !(await this.available())) return this.offline(q, undefined, ctx);
+    if (!this.enabled) return this.offline(q, undefined, ctx);
+    // Ask straight away (no separate "are you there?" check first: that cost a whole extra round
+    // trip per question). If the server could not be reached a moment ago, answer offline at once.
+    if (this.avail && !this.avail.ok && performance.now() - this.avail.at < 12000) return this.offline(q, undefined, ctx);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
@@ -252,6 +254,7 @@ export class LunaAI {
       const raw = json.choices?.[0]?.message?.content;
       const text = typeof raw === 'string' ? raw : Array.isArray(raw) ? raw.map((p) => (typeof p === 'object' && p && 'text' in p ? String((p as { text: unknown }).text) : '')).join(' ') : '';
       const clean = cleanAnswer(text);
+      this.avail = { ok: true, at: performance.now() };
       if (!clean) return this.offline(q, undefined, ctx);
       return { text: clean, source: 'ai' };
     } catch (e) {

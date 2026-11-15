@@ -98,7 +98,10 @@ export function openAskLuna(game: Game): void {
     game.audio.blip();
     const typing = bubble('luna', '…');
     typing.classList.add('typing');
+    // a slow answer: let the player know LUNA is still working on it
+    const slow = window.setTimeout(() => typing.isConnected && (typing.textContent = 'Thinking… 🛰'), 3000);
     const answer = await ai.ask(q, game.lunaChat, game.aiContext());
+    clearTimeout(slow);
     if (m.closed) return;
     setStatus(answer.source === 'ai');
     typing.parentElement?.remove();

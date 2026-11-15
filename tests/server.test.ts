@@ -61,16 +61,69 @@ describe('LUNA AI server', () => {
     expect(fetchMock.mock.calls.filter(([u]) => String(u).includes('/b-2:'))).toHaveLength(1);
   });
 
-  it('asks again without the thinking setting for models that reject it', async () => {
-    const bodies: { generationConfig: { thinkingConfig?: unknown } }[] = [];
+  it('steps the thinking setting down for models that reject it', async () => {
+    const levels: (string | undefined)[] = [];
     vi.stubGlobal('fetch', async (_url: string, init: RequestInit) => {
-      const b = JSON.parse(String(init.body));
-      bodies.push(b);
-      return b.generationConfig.thinkingConfig ? geminiErr(400, 'INVALID_ARGUMENT', 'Thinking level is not supported for this model.') : geminiOk('ok');
+      const level = JSON.parse(String(init.body)).generationConfig.thinkingConfig?.thinkingLevel;
+      levels.push(level);
+      return level ? geminiErr(400, 'INVALID_ARGUMENT', `Thinking level ${String(level).toUpperCase()} is not supported for this model.`) : geminiOk('ok');
     });
     const res = await ask({ GEMINI_API_KEY: 'k', MODELS: 'c-old' });
     expect((await res.json()).choices[0].message.content).toBe('ok');
-    expect(bodies.map((b) => !!b.generationConfig.thinkingConfig)).toEqual([true, false]);
+    expect(levels).toEqual(['minimal', 'low', undefined]);
+    // remembered: the next question goes straight to the setting that works
+    await ask({ GEMINI_API_KEY: 'k', MODELS: 'c-old' });
+    expect(levels).toEqual(['minimal', 'low', undefined, undefined]);
+  });
+
+  it('asks the next model too when one is slow, and answers with whichever is first', async () => {
+    vi.stubGlobal('fetch', (url: string) =>
+      url.includes('/h-slow:') ? new Promise<Response>((r) => setTimeout(() => r(geminiOk('slow answer')), 3000)) : Promise.resolve(geminiOk('fast answer')),
+    );
+    const t0 = Date.now();
+    const res = await ask({ GEMINI_API_KEY: 'k', MODELS: 'h-slow,h-fast', HEDGE_MS: '50' });
+    expect((await res.json()).choices[0].message.content).toBe('fast answer');
+    expect(res.headers.get('X-Luna-Model')).toBe('h-fast');
+    expect(Date.now() - t0).toBeLessThan(1000);
+  });
+
+  it('shares a used-up daily limit with every copy of the server', async () => {
+    const store = new Map<string, string>();
+    const STATE = { get: async (k: string) => (store.has(k) ? JSON.parse(store.get(k)!) : null), put: async (k: string, v: string) => void store.set(k, v) };
+    const perDay = () =>
+      new Response(
+        JSON.stringify({
+          error: {
+            code: 429,
+            status: 'RESOURCE_EXHAUSTED',
+            message: 'You exceeded your current quota',
+            details: [
+              { '@type': 'type.googleapis.com/google.rpc.QuotaFailure', violations: [{ quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier' }] },
+              { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '11063s' },
+            ],
+          },
+        }),
+        { status: 429 },
+      );
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', async (url: string) => {
+      calls.push(url);
+      return url.includes('/k-1:') ? perDay() : geminiOk('from k-2');
+    });
+    const env = { GEMINI_API_KEY: 'k', MODELS: 'k-1,k-2', STATE } as unknown as Record<string, string>;
+    expect((await (await ask(env)).json()).choices[0].message.content).toBe('from k-2');
+    const saved = JSON.parse(store.get('resting')!);
+    expect(saved['k-1'] - Date.now()).toBeGreaterThan(11000 * 1000);
+    // a brand-new copy of the server (empty memory) skips k-1 straight away
+    vi.resetModules();
+    const fresh = (await import('../server/index.mjs')).default as Handler;
+    calls.length = 0;
+    const res = await fresh.fetch(
+      new Request('https://x/chat/completions', { method: 'POST', headers: { 'CF-Connecting-IP': '10.9.9.9' }, body: JSON.stringify({ messages: [{ role: 'user', content: 'hi' }] }) }),
+      env,
+    );
+    expect((await res.json()).choices[0].message.content).toBe('from k-2');
+    expect(calls.some((u) => u.includes('/k-1:'))).toBe(false);
   });
 
   it('says the free Gemini limit is used up when every model is out', async () => {

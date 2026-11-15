@@ -62,7 +62,7 @@ Questions go to a small server in `server/`, a **Cloudflare Worker** on the free
 
 - The game sends LUNA's instructions, the current mission step and a few matching NASA facts with each question. The player's name is never sent.
 - The server adds its own rules (only space and game topics, kind answers, no personal information), turns on Google's safety filters and limits how many questions each player can ask per minute and per day.
-- It tries a few Gemini Flash models in turn (`MODELS` in `server/wrangler.toml`); each has its own free daily limit.
+- Answers take about 1–1.5 seconds. The free tier allows only about 20 questions per model per day, so the server tries a list of Gemini Flash models, fastest first (`MODELS` in `server/wrangler.toml`), and moves down the list as each one runs out. A small free Cloudflare KV store remembers which models are used up until when, so no copy of the server wastes time on them; if a model is slow, the next one is asked too and the first answer wins.
 - The key has no billing attached, so the server can never cost money. If the free limit runs out, or the server can't be reached, LUNA answers offline from the Science Log and handles simple chit-chat.
 
 **Set up or update the server (one command, once):**
