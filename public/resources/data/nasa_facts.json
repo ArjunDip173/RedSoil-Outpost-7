@@ -1,0 +1,754 @@
+{
+  "facts": [
+    {
+      "id": "dust_solar",
+      "source": "NASA Mars",
+      "title": "Cleaning Events",
+      "text": "Dust settling on solar panels slowly lowers their power. NASA's Spirit and Opportunity rovers got surprise 'cleaning events' when gusts of wind and dust devils blew their panels clean.",
+      "tags": [
+        "power",
+        "dust"
+      ]
+    },
+    {
+      "id": "power_tradeoff",
+      "source": "NASA",
+      "title": "The Power Budget",
+      "text": "Every spacecraft has a power budget. Engineers decide which systems get electricity first — life support always comes first, science and comfort come after.",
+      "tags": [
+        "power"
+      ]
+    },
+    {
+      "id": "subsurface_ice",
+      "source": "NASA Mars",
+      "title": "Ice Under the Soil",
+      "text": "In 2008 NASA's Phoenix lander dug a trench near the Martian north pole and found bright white water ice just a few centimetres under the soil. Days later, some of it had vanished into the thin air!",
+      "tags": [
+        "water",
+        "ice"
+      ]
+    },
+    {
+      "id": "electrolysis",
+      "source": "NASA",
+      "title": "Making Oxygen",
+      "text": "On the ISS, a machine uses electricity to split water (H2O) into oxygen to breathe and hydrogen. This is called electrolysis — the same trade-off you make at Outpost 7.",
+      "tags": [
+        "oxygen",
+        "water"
+      ]
+    },
+    {
+      "id": "moxie",
+      "source": "NASA Mars",
+      "title": "MOXIE Made Oxygen on Mars",
+      "text": "MOXIE, a toaster-sized experiment on NASA's Perseverance rover, turned carbon dioxide from the Martian air into oxygen. It made about 122 grams of oxygen from 2021 to 2023 — enough for a small dog to breathe for about 10 hours.",
+      "tags": [
+        "oxygen"
+      ]
+    },
+    {
+      "id": "radiation_shield",
+      "source": "RadLab",
+      "title": "Blocking Radiation",
+      "text": "Materials full of hydrogen, like water and plastics, are great at blocking space radiation. A few metres of Martian regolith (soil) also makes a strong shield.",
+      "tags": [
+        "radiation"
+      ]
+    },
+    {
+      "id": "rad_mars_surface",
+      "source": "RadLab",
+      "title": "Radiation on Mars",
+      "text": "The RAD instrument on NASA's Curiosity rover measured about 0.64 millisieverts (mSv) of radiation per day on the surface of Mars. On Earth, people get about 3 mSv in a whole year from nature.",
+      "tags": [
+        "radiation"
+      ]
+    },
+    {
+      "id": "rad_cruise",
+      "source": "RadLab",
+      "title": "Radiation on the Way to Mars",
+      "text": "During its trip to Mars, Curiosity's RAD measured about 1.8 mSv per day — the trip through deep space has even more radiation than the Martian surface.",
+      "tags": [
+        "radiation"
+      ]
+    },
+    {
+      "id": "rad_iss",
+      "source": "RadLab",
+      "title": "Radiation on the ISS",
+      "text": "Astronauts on the International Space Station get about as much radiation in one day as a person on Earth gets in one or two months. Earth's magnetic field still protects them a lot!",
+      "tags": [
+        "radiation"
+      ]
+    },
+    {
+      "id": "mars_no_field",
+      "source": "NASA Mars",
+      "title": "No Magnetic Shield",
+      "text": "Earth has a global magnetic field that acts like a force field against solar particles. Mars lost its global field billions of years ago, and NASA's MAVEN orbiter found the solar wind stripped away much of its air.",
+      "tags": [
+        "radiation"
+      ]
+    },
+    {
+      "id": "donki",
+      "source": "DONKI",
+      "title": "What is DONKI?",
+      "text": "DONKI stands for Database Of Notifications, Knowledge, Information. It is NASA's space-weather log, run by the Community Coordinated Modeling Center at NASA Goddard, and it tracks solar flares, CMEs and solar energetic particles.",
+      "tags": [
+        "space weather"
+      ]
+    },
+    {
+      "id": "flare_classes",
+      "source": "DONKI",
+      "title": "Flare Classes",
+      "text": "Solar flares are graded A, B, C, M and X. Each letter is 10 times stronger than the one before — so an X-class flare is 10 times stronger than an M-class flare!",
+      "tags": [
+        "space weather"
+      ]
+    },
+    {
+      "id": "sep_speed",
+      "source": "DONKI",
+      "title": "Fast Particles",
+      "text": "A coronal mass ejection (CME) usually takes 1 to 3 days to cross to Earth, but the fastest solar energetic particles (SEPs) can arrive in less than an hour. That's why early warnings matter.",
+      "tags": [
+        "space weather"
+      ]
+    },
+    {
+      "id": "solar_cycle",
+      "source": "DONKI",
+      "title": "The Sun's Cycle",
+      "text": "The Sun goes through an 11-year cycle of activity. Near 'solar maximum' there are more sunspots, flares and CMEs — the Sun reached a solar maximum in 2024.",
+      "tags": [
+        "space weather"
+      ]
+    },
+    {
+      "id": "mars_aurora",
+      "source": "NASA Mars",
+      "title": "Green Aurora on Mars",
+      "text": "After a solar storm in 2024, NASA's Perseverance rover photographed a faint green aurora in the Martian night sky — the first aurora ever seen in visible light from another planet's surface.",
+      "tags": [
+        "space weather"
+      ]
+    },
+    {
+      "id": "light_delay",
+      "source": "NASA",
+      "title": "Talking to Mars Takes Time",
+      "text": "Radio waves travel at the speed of light, but depending on where Earth and Mars are in their orbits, a message takes between about 3 and 22 minutes to cross between them. No live video calls!",
+      "tags": [
+        "comms"
+      ]
+    },
+    {
+      "id": "dsn",
+      "source": "NASA",
+      "title": "The Deep Space Network",
+      "text": "NASA talks to faraway spacecraft with the Deep Space Network: giant dish antennas in California, Spain and Australia. They are spread around the globe so one can always see the spacecraft.",
+      "tags": [
+        "comms"
+      ]
+    },
+    {
+      "id": "gravity",
+      "source": "NASA Mars",
+      "title": "Mars Gravity",
+      "text": "Gravity on Mars is only about 38% of Earth's. If you can jump 1 metre on Earth, you could jump about 2.6 metres on Mars!",
+      "tags": [
+        "mars"
+      ]
+    },
+    {
+      "id": "sol",
+      "source": "NASA Mars",
+      "title": "A Day on Mars",
+      "text": "A day on Mars is called a Sol. It lasts 24 hours, 39 minutes and 35 seconds — just a little longer than an Earth day.",
+      "tags": [
+        "mars"
+      ]
+    },
+    {
+      "id": "air",
+      "source": "NASA Mars",
+      "title": "Thin Martian Air",
+      "text": "The air on Mars is about 95% carbon dioxide and is less than 1% as thick as Earth's air. That's why astronauts always need a pressurized spacesuit outside.",
+      "tags": [
+        "mars",
+        "oxygen"
+      ]
+    },
+    {
+      "id": "cold",
+      "source": "NASA Mars",
+      "title": "Brrr!",
+      "text": "Mars averages about −60 °C. Near the equator on a summer afternoon it can reach about 20 °C, but at night it plunges far below freezing.",
+      "tags": [
+        "mars"
+      ]
+    },
+    {
+      "id": "red",
+      "source": "NASA Mars",
+      "title": "Why Mars is Red",
+      "text": "Mars is red because its rocks and dust contain lots of iron oxide — basically rust!",
+      "tags": [
+        "mars"
+      ]
+    },
+    {
+      "id": "blue_sunset",
+      "source": "NASA Mars",
+      "title": "Blue Sunsets",
+      "text": "Daytime skies on Mars look butterscotch-colored, but sunsets glow BLUE. Fine Martian dust lets blue light pass near the Sun's direction.",
+      "tags": [
+        "mars"
+      ]
+    },
+    {
+      "id": "olympus",
+      "source": "NASA Mars",
+      "title": "Olympus Mons",
+      "text": "Mars has the biggest volcano in the solar system: Olympus Mons, about 22 km tall — roughly two and a half times the height of Mount Everest.",
+      "tags": [
+        "mars"
+      ]
+    },
+    {
+      "id": "moons",
+      "source": "NASA Mars",
+      "title": "Two Tiny Moons",
+      "text": "Mars has two small, potato-shaped moons named Phobos and Deimos. Phobos is slowly spiralling closer to Mars — about 1.8 metres every 100 years.",
+      "tags": [
+        "mars"
+      ]
+    },
+    {
+      "id": "dust_storm_2018",
+      "source": "NASA Mars",
+      "title": "The Big Storm",
+      "text": "In 2018 a dust storm grew to cover the whole planet. It blocked the sunlight that NASA's solar-powered Opportunity rover needed, ending a mission planned for 90 Sols that lasted almost 15 years.",
+      "tags": [
+        "dust",
+        "power"
+      ]
+    },
+    {
+      "id": "dust_devils",
+      "source": "NASA Mars",
+      "title": "Dust Devils",
+      "text": "Dust devils on Mars can be much taller than skyscrapers. Orbiters have photographed their twisting tracks criss-crossing the ground.",
+      "tags": [
+        "dust"
+      ]
+    },
+    {
+      "id": "insight_dust",
+      "source": "NASA Mars",
+      "title": "InSight's Last Selfie",
+      "text": "NASA's InSight lander studied 'marsquakes' for four years. It retired in 2022 when dust covered its solar panels so much that it couldn't make enough power.",
+      "tags": [
+        "dust",
+        "power"
+      ]
+    },
+    {
+      "id": "sunlight",
+      "source": "NASA",
+      "title": "Weaker Sunshine",
+      "text": "Mars is farther from the Sun than Earth, so a solar panel there gets only about 43% as much sunlight.",
+      "tags": [
+        "power"
+      ]
+    },
+    {
+      "id": "kilopower",
+      "source": "NASA",
+      "title": "Kilopower",
+      "text": "In 2018 NASA tested Kilopower, a small fission reactor. Reactors like it could power a Mars base day and night — even during a global dust storm.",
+      "tags": [
+        "power"
+      ]
+    },
+    {
+      "id": "mmrtg",
+      "source": "NASA Mars",
+      "title": "Nuclear Batteries",
+      "text": "Curiosity and Perseverance don't use solar panels. They carry a nuclear battery (MMRTG) that turns heat from decaying plutonium into electricity.",
+      "tags": [
+        "power"
+      ]
+    },
+    {
+      "id": "ingenuity",
+      "source": "NASA Mars",
+      "title": "First Flight on Mars",
+      "text": "On April 19, 2021, NASA's Ingenuity helicopter made the first powered, controlled flight on another planet. It was planned for 5 flights and ended up flying 72!",
+      "tags": [
+        "mars"
+      ]
+    },
+    {
+      "id": "water_recycle",
+      "source": "NASA",
+      "title": "98% Recycled",
+      "text": "In 2023 the ISS life-support system reached about 98% water recovery — it recycles crew sweat, breath moisture and even urine back into clean drinking water.",
+      "tags": [
+        "water"
+      ]
+    },
+    {
+      "id": "o2_candles",
+      "source": "NASA",
+      "title": "Oxygen Candles",
+      "text": "As a backup, the ISS carries 'oxygen candles' — canisters that release oxygen through a chemical reaction when lit.",
+      "tags": [
+        "oxygen"
+      ]
+    },
+    {
+      "id": "veggie",
+      "source": "OSDR",
+      "title": "Space Salad",
+      "text": "On August 10, 2015, astronauts on the ISS ate lettuce grown in space for the first time, using NASA's Veggie plant growth system with red and blue LED lights.",
+      "tags": [
+        "plants"
+      ]
+    },
+    {
+      "id": "osdr",
+      "source": "OSDR",
+      "title": "Open Science for Everyone",
+      "text": "NASA's Open Science Data Repository (OSDR) shares data from space biology experiments — plants, microbes, animals and astronauts — free for anyone in the world to study.",
+      "tags": [
+        "plants",
+        "biology"
+      ]
+    },
+    {
+      "id": "lunar_soil_plants",
+      "source": "OSDR",
+      "title": "Plants in Moon Dirt",
+      "text": "In 2022 NASA-funded scientists grew small plants called Arabidopsis in real lunar soil from Apollo. They sprouted, but grew slower and more stressed than plants in Earth soil.",
+      "tags": [
+        "plants"
+      ]
+    },
+    {
+      "id": "roots",
+      "source": "OSDR",
+      "title": "Which Way is Down?",
+      "text": "In microgravity, roots can't feel which way is down. Space biology experiments show plants use light and other clues to decide where to grow.",
+      "tags": [
+        "plants"
+      ]
+    },
+    {
+      "id": "spirulina",
+      "source": "NASA",
+      "title": "Super Algae",
+      "text": "Spirulina is a tiny blue-green algae that grows fast, makes oxygen from light and carbon dioxide, and is full of protein. NASA studied it as a space food back in the 1980s.",
+      "tags": [
+        "plants",
+        "oxygen"
+      ]
+    },
+    {
+      "id": "perchlorate",
+      "source": "NASA Mars",
+      "title": "Salty Soil",
+      "text": "Phoenix discovered perchlorate salts in Martian soil. They're not good for people, so future farmers would need to wash the soil before growing plants in it.",
+      "tags": [
+        "plants",
+        "mars"
+      ]
+    },
+    {
+      "id": "csa_phoenix_snow",
+      "source": "CSA",
+      "title": "Snow on Mars!",
+      "text": "The Canadian Space Agency built the weather station on NASA's Phoenix lander. Its laser instrument saw snow falling from Martian clouds in 2008!",
+      "tags": [
+        "csa",
+        "water"
+      ]
+    },
+    {
+      "id": "csa_apxs",
+      "source": "CSA",
+      "title": "Canada on Curiosity",
+      "text": "The Alpha Particle X-ray Spectrometer (APXS) on NASA's Curiosity rover was provided by the Canadian Space Agency. It tells scientists which chemical elements are in a rock.",
+      "tags": [
+        "csa"
+      ]
+    },
+    {
+      "id": "csa_canadarm",
+      "source": "CSA",
+      "title": "Canadarm2",
+      "text": "Canadarm2 is a 17-metre robotic arm built by Canada for the International Space Station. It catches visiting cargo ships and moves astronauts during spacewalks.",
+      "tags": [
+        "csa"
+      ]
+    },
+    {
+      "id": "csa_hansen",
+      "source": "CSA",
+      "title": "Canadian to the Moon",
+      "text": "Canadian Space Agency astronaut Jeremy Hansen is part of the Artemis II crew — the first crewed mission around the Moon since 1972 — making him the first Canadian to travel to the Moon.",
+      "tags": [
+        "csa"
+      ]
+    },
+    {
+      "id": "chapea",
+      "source": "NASA",
+      "title": "Practice Mars on Earth",
+      "text": "In NASA's CHAPEA project, volunteers lived for a whole year inside a 3D-printed pretend Mars habitat in Houston to practice growing food, fixing equipment and handling long delays.",
+      "tags": [
+        "habitat"
+      ]
+    },
+    {
+      "id": "spacesuit",
+      "source": "NASA",
+      "title": "Your Personal Spaceship",
+      "text": "A spacesuit is like a tiny spaceship. It provides oxygen, removes carbon dioxide, keeps the right pressure and temperature, and protects from dust and tiny meteoroids.",
+      "tags": [
+        "eva"
+      ]
+    },
+    {
+      "id": "safer",
+      "source": "NASA",
+      "title": "SAFER Jetpack",
+      "text": "Spacewalking astronauts wear a small jetpack called SAFER. If they ever float away from the station, they can use it to fly back.",
+      "tags": [
+        "eva"
+      ]
+    },
+    {
+      "id": "valles",
+      "source": "NASA Mars",
+      "title": "Grand Canyon x 10",
+      "text": "Valles Marineris is a canyon system on Mars about 4,000 km long — it would stretch across the whole United States!",
+      "tags": [
+        "mars"
+      ]
+    },
+    {
+      "id": "meteorite",
+      "source": "NASA Mars",
+      "title": "A Meteorite on Mars",
+      "text": "In 2005 the Opportunity rover found 'Heat Shield Rock', a basketball-sized iron meteorite — the first meteorite ever identified on another planet.",
+      "tags": [
+        "geology"
+      ]
+    },
+    {
+      "id": "sulfur",
+      "source": "NASA Mars",
+      "title": "Yellow Surprise",
+      "text": "In 2024 NASA's Curiosity rover drove over a rock, cracked it open and found bright yellow crystals of pure sulfur — something never seen on Mars before.",
+      "tags": [
+        "geology"
+      ]
+    },
+    {
+      "id": "lava_tubes",
+      "source": "NASA Mars",
+      "title": "Lava Tube Shelters",
+      "text": "Orbiters have spotted holes on Mars that may lead into underground lava tubes — tunnels left by ancient lava flows. Their thick rock roofs could one day shelter astronauts from radiation.",
+      "tags": [
+        "radiation",
+        "mars"
+      ]
+    }
+  ],
+  "quiz": [
+    {
+      "id": "q_gravity",
+      "q": "How strong is gravity on Mars compared to Earth?",
+      "options": [
+        "About 10%",
+        "About 38%",
+        "About 90%"
+      ],
+      "answer": 1,
+      "explain": "Mars gravity is about 38% of Earth's — everything feels much lighter there!",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "q_sol",
+      "q": "What do we call a day on Mars?",
+      "options": [
+        "A Sol",
+        "A Moon",
+        "A Rover"
+      ],
+      "answer": 0,
+      "explain": "A Sol lasts 24 hours, 39 minutes and 35 seconds.",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "q_red",
+      "q": "Why is Mars red?",
+      "options": [
+        "It is very hot",
+        "Its dust contains rust (iron oxide)",
+        "It is covered in lava"
+      ],
+      "answer": 1,
+      "explain": "Iron oxide — rust — gives Mars its red color.",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "q_shield",
+      "q": "Which of these is a GREAT radiation shield?",
+      "options": [
+        "Water",
+        "Glass windows",
+        "Air"
+      ],
+      "answer": 0,
+      "explain": "Water is full of hydrogen, which is excellent at blocking space radiation.",
+      "source": "RadLab"
+    },
+    {
+      "id": "q_donki",
+      "q": "What does NASA's DONKI keep track of?",
+      "options": [
+        "Donkeys on farms",
+        "Space weather like solar flares",
+        "Rocket fuel prices"
+      ],
+      "answer": 1,
+      "explain": "DONKI is NASA's space-weather database: flares, CMEs and solar particles.",
+      "source": "DONKI"
+    },
+    {
+      "id": "q_flare",
+      "q": "Which solar flare class is the strongest?",
+      "options": [
+        "C-class",
+        "M-class",
+        "X-class"
+      ],
+      "answer": 2,
+      "explain": "X-class flares are the strongest — 10 times stronger than M-class.",
+      "source": "DONKI"
+    },
+    {
+      "id": "q_electro",
+      "q": "Electrolysis splits water into which two gases?",
+      "options": [
+        "Oxygen and hydrogen",
+        "Helium and neon",
+        "Carbon dioxide and steam"
+      ],
+      "answer": 0,
+      "explain": "H2O becomes oxygen (O2) and hydrogen (H2).",
+      "source": "NASA"
+    },
+    {
+      "id": "q_night",
+      "q": "How much power do solar panels make at night?",
+      "options": [
+        "A lot",
+        "Half",
+        "None"
+      ],
+      "answer": 2,
+      "explain": "No sunlight, no solar power! Batteries keep the base running at night.",
+      "source": "NASA"
+    },
+    {
+      "id": "q_delay",
+      "q": "How long can a radio message take to get from Mars to Earth?",
+      "options": [
+        "Up to about 22 minutes",
+        "1 second",
+        "3 days"
+      ],
+      "answer": 0,
+      "explain": "Between about 3 and 22 minutes, depending on where the planets are.",
+      "source": "NASA"
+    },
+    {
+      "id": "q_moons",
+      "q": "What are the names of Mars's two moons?",
+      "options": [
+        "Io and Europa",
+        "Phobos and Deimos",
+        "Luna and Sol"
+      ],
+      "answer": 1,
+      "explain": "Phobos and Deimos are small, lumpy moons.",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "q_ice",
+      "q": "Where is most of the water on Mars today?",
+      "options": [
+        "In big lakes",
+        "Frozen as ice",
+        "In the clouds"
+      ],
+      "answer": 1,
+      "explain": "Mars's water is mostly frozen — in polar caps and underground ice.",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "q_lettuce",
+      "q": "What vegetable did ISS astronauts eat from their space garden in 2015?",
+      "options": [
+        "Carrots",
+        "Red romaine lettuce",
+        "Broccoli"
+      ],
+      "answer": 1,
+      "explain": "They grew red romaine lettuce in NASA's Veggie system.",
+      "source": "OSDR"
+    },
+    {
+      "id": "q_csa",
+      "q": "Which country built Canadarm2 for the Space Station?",
+      "options": [
+        "Canada",
+        "Brazil",
+        "Egypt"
+      ],
+      "answer": 0,
+      "explain": "The Canadian Space Agency provided Canadarm2!",
+      "source": "CSA"
+    },
+    {
+      "id": "q_sunset",
+      "q": "What color are sunsets on Mars?",
+      "options": [
+        "Green",
+        "Blue",
+        "Purple"
+      ],
+      "answer": 1,
+      "explain": "Martian dust makes sunsets glow blue.",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "q_air",
+      "q": "The air on Mars is mostly made of...",
+      "options": [
+        "Oxygen",
+        "Carbon dioxide",
+        "Nitrogen"
+      ],
+      "answer": 1,
+      "explain": "About 95% carbon dioxide — not breathable for us.",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "q_volcano",
+      "q": "What is the name of the giant volcano on Mars?",
+      "options": [
+        "Olympus Mons",
+        "Mount Fuji",
+        "Big Red"
+      ],
+      "answer": 0,
+      "explain": "Olympus Mons is the biggest volcano in the solar system.",
+      "source": "NASA Mars"
+    }
+  ],
+  "samples": [
+    {
+      "id": "hematite",
+      "name": "Hematite 'Blueberries'",
+      "text": "Little round balls of hematite found by Opportunity in 2004. They form in water — a clue that Mars was once wet!",
+      "color": "#5a5a6e",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "gypsum",
+      "name": "Gypsum Vein",
+      "text": "A bright white mineral vein. Opportunity found one called 'Homestake' in 2011 — water once flowed through cracks here.",
+      "color": "#f2efe6",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "olivine",
+      "name": "Olivine Sand",
+      "text": "Green volcanic crystals. Olivine breaks down in water, so finding lots of it means some places stayed dry for a very long time.",
+      "color": "#9be36a",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "jarosite",
+      "name": "Jarosite",
+      "text": "A yellow-brown mineral that forms in salty, acidic water. Opportunity found it at Meridiani Planum.",
+      "color": "#c9a23a",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "silica",
+      "name": "Opaline Silica",
+      "text": "Spirit found nearly pure silica in 2007 — a sign of ancient hot springs or steam vents.",
+      "color": "#e8f1ff",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "mudstone",
+      "name": "Lake Mudstone",
+      "text": "Curiosity found mudstone in Gale Crater — layer after layer of mud from an ancient lake that could have supported tiny life.",
+      "color": "#8c6a58",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "clay",
+      "name": "Clay Minerals",
+      "text": "Clays form when rock sits in water for a long time. They are a top target for finding signs of ancient life.",
+      "color": "#b98b6a",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "carbonate",
+      "name": "Carbonate Rock",
+      "text": "Perseverance explores Jezero Crater, an old lake with a river delta, where carbonate minerals formed in water.",
+      "color": "#d9c7a4",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "basalt",
+      "name": "Volcanic Basalt",
+      "text": "Dark rock from cooled lava. Most of the Martian surface is made of basalt from its ancient volcanoes.",
+      "color": "#4b3a3a",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "sulfur",
+      "name": "Sulfur Crystals",
+      "text": "In 2024 Curiosity cracked open a rock and found bright yellow crystals of pure sulfur — a first on Mars!",
+      "color": "#f4e04d",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "perchlorate",
+      "name": "Perchlorate Salt",
+      "text": "Salts discovered by Phoenix. They can help water stay liquid in the cold, but must be cleaned out of soil before farming.",
+      "color": "#f0d7d0",
+      "source": "NASA Mars"
+    },
+    {
+      "id": "polar_ice",
+      "name": "Polar Ice Core",
+      "text": "Layers of ice and dust at the poles record Mars's climate history, a bit like tree rings.",
+      "color": "#e8f6ff",
+      "source": "NASA Mars"
+    }
+  ]
+}

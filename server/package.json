@@ -1,0 +1,15 @@
+{
+  "name": "outpost7-luna-server",
+  "version": "2.0.0",
+  "private": true,
+  "description": "LUNA's AI server for Red Soil: Outpost 7 (a Cloudflare Worker that forwards questions to Gemini's free tier).",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "bash deploy.sh"
+  },
+  "devDependencies": {
+    "wrangler": "4.156.0"
+  }
+}

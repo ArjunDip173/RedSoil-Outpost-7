@@ -1,0 +1,603 @@
+{
+  "intro": [
+    {
+      "who": "LUNA",
+      "mood": "happy",
+      "text": "Beep-boop! Welcome to Mars, {name}! I'm LUNA, your helper drone."
+    },
+    {
+      "who": "LUNA",
+      "mood": "sad",
+      "text": "A big dust storm hit our base. The solar panels are dusty and the radio dish is broken."
+    },
+    {
+      "who": "LUNA",
+      "mood": "alert",
+      "text": "Earth can't hear us! Let's fix Outpost 7, one step at a time, and then CALL HOME."
+    },
+    {
+      "who": "LUNA",
+      "mood": "happy",
+      "text": "Walk with WASD or the arrow keys. Press E to use things. Follow the yellow arrow!"
+    }
+  ],
+  "missions": [
+    {
+      "id": 1,
+      "code": "M1",
+      "title": "First Steps on Red Soil",
+      "patch": "patch_m1",
+      "summary": "Suit up safely and brush the dust off the solar panels.",
+      "lesson": "Dust blocks sunlight. Dirty solar panels make less power — the Opportunity rover once got a big boost when the wind blew its panels clean!",
+      "onStart": [
+        "dust_panels"
+      ],
+      "briefing": [
+        {
+          "who": "LUNA",
+          "mood": "alert",
+          "text": "Mission 1! Red dust covers our solar panels, so they make almost no power."
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "Go to the AIRLOCK (bottom-left room) and press E. Astronauts always do a safety check first."
+        },
+        {
+          "who": "LUNA",
+          "mood": "happy",
+          "text": "Outside, stand by a solar panel and press E to brush it clean."
+        }
+      ],
+      "objectives": [
+        {
+          "id": "suit",
+          "text": "Pass the Airlock safety checklist",
+          "event": "airlock_exit",
+          "count": 1,
+          "target": "airlock",
+          "hint": "The Airlock is the bottom-left room of the base. Stand by the yellow-striped door and press E."
+        },
+        {
+          "id": "clean",
+          "text": "Brush dust off 3 solar panels",
+          "event": "panel_cleaned",
+          "count": 3,
+          "target": "panels",
+          "hint": "The solar panels are just below the base. Stand next to one and press E."
+        },
+        {
+          "id": "back",
+          "text": "Go back inside the base",
+          "event": "enter_base",
+          "count": 1,
+          "ordered": true,
+          "target": "airlock_out",
+          "hint": "Walk back to the airlock door and press E."
+        }
+      ],
+      "complete": [
+        {
+          "who": "LUNA",
+          "mood": "wow",
+          "text": "Woo-hoo! Clean panels catch more sunlight, so we get more POWER!"
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "Real fact: little whirlwinds once blew the dust off NASA's Mars rovers!"
+        }
+      ],
+      "fact": "dust_solar",
+      "rewards": {
+        "xp": 120,
+        "items": {
+          "seed_lettuce": 2
+        }
+      }
+    },
+    {
+      "id": 2,
+      "code": "M2",
+      "title": "Power to the Outpost",
+      "patch": "patch_m2",
+      "summary": "Fix the power unit and switch on the greenhouse lights.",
+      "lesson": "Every machine needs power, but the Sun only gives so much. Engineers choose what gets power first — that's a trade-off!",
+      "onStart": [
+        "break_pdu"
+      ],
+      "briefing": [
+        {
+          "who": "LUNA",
+          "mood": "alert",
+          "text": "Mission 2! The storm jumbled the wires in our Power Unit, the PDU."
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "The PDU is the yellow box in the COMMAND room. Press E and match the wires."
+        },
+        {
+          "who": "LUNA",
+          "mood": "happy",
+          "text": "Then use the Mission Console to switch the Greenhouse lights ON."
+        }
+      ],
+      "objectives": [
+        {
+          "id": "fix",
+          "text": "Repair the PDU wiring",
+          "event": "pdu_repaired",
+          "count": 1,
+          "target": "pdu",
+          "hint": "The PDU is the yellow box with sparks on the top wall of the Command room. Press E next to it."
+        },
+        {
+          "id": "ops",
+          "text": "Open Base Ops at the Mission Console",
+          "event": "opened_ops",
+          "count": 1,
+          "target": "console",
+          "hint": "The Mission Console is the big screen in the Command Module. Press E there."
+        },
+        {
+          "id": "lights",
+          "text": "Switch ON the Greenhouse lights",
+          "state": "greenhouse_on",
+          "target": "console",
+          "hint": "In Base Ops, press the big ON button for Greenhouse Lights."
+        }
+      ],
+      "complete": [
+        {
+          "who": "LUNA",
+          "mood": "wow",
+          "text": "Power is flowing! You're a real power engineer."
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "At night there is no sun. Then the battery keeps the base running until morning."
+        }
+      ],
+      "fact": "power_tradeoff",
+      "rewards": {
+        "xp": 150,
+        "items": {
+          "iron": 4,
+          "basalt": 3
+        }
+      }
+    },
+    {
+      "id": 3,
+      "code": "M3",
+      "title": "Ice, Ice, Mars-y",
+      "patch": "patch_m3",
+      "summary": "Scan for buried ice, dig it up and melt it into water.",
+      "lesson": "Mars has lots of water — but it's frozen underground! Robots like Phoenix dug up real Martian ice in 2008.",
+      "onStart": [
+        "ice_hint"
+      ],
+      "briefing": [
+        {
+          "who": "LUNA",
+          "mood": "alert",
+          "text": "Mission 3! Our water tank is low, but there is ICE hiding under the soil!"
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "Go outside and press the SCAN button. Buried ice will glow blue."
+        },
+        {
+          "who": "LUNA",
+          "mood": "happy",
+          "text": "Hold the mouse on the blue ground to dig it up, then bring it home and melt it."
+        }
+      ],
+      "objectives": [
+        {
+          "id": "scan",
+          "text": "Scan for ice outside",
+          "event": "scan",
+          "count": 1,
+          "target": "ice",
+          "hint": "You must be outside. Press the SCAN button (or Q)."
+        },
+        {
+          "id": "mine",
+          "text": "Mine 10 ice chunks",
+          "event": "mine_ice",
+          "count": 10,
+          "target": "ice",
+          "hint": "Glowing blue ground has ice. Pick the Mining Laser in your tool bar and hold the mouse on it."
+        },
+        {
+          "id": "deliver",
+          "text": "Bring the ice back to the base",
+          "event": "deposit_ice",
+          "count": 10,
+          "target": "airlock_out",
+          "hint": "Walk back in through the airlock. Your backpack empties by itself."
+        },
+        {
+          "id": "melt",
+          "text": "Switch ON the Ice Melter in Base Ops",
+          "state": "melter_on",
+          "target": "console",
+          "hint": "At the Mission Console, press ON for the Ice Melter."
+        },
+        {
+          "id": "water",
+          "text": "Make 30 litres of clean water",
+          "event": "water_made",
+          "count": 30,
+          "target": "melter",
+          "hint": "Keep the Ice Melter ON. Hold the FAST button to speed things up!"
+        }
+      ],
+      "complete": [
+        {
+          "who": "LUNA",
+          "mood": "wow",
+          "text": "Splash! Fresh water from Martian ice. Water is the most important thing on Mars!"
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "Astronauts on the Space Station recycle almost all their water, even sweat!"
+        }
+      ],
+      "fact": "subsurface_ice",
+      "rewards": {
+        "xp": 180,
+        "items": {
+          "seed_potato": 2,
+          "seed_tomato": 1
+        }
+      }
+    },
+    {
+      "id": 4,
+      "code": "M4",
+      "title": "Split It or Sip It?",
+      "patch": "patch_m4",
+      "summary": "Share the water: oxygen to breathe, or water for the plants?",
+      "lesson": "Water can be split into oxygen to breathe, or given to plants to grow food. A good base needs BOTH, so you choose the balance.",
+      "onStart": [
+        "give_seeds"
+      ],
+      "briefing": [
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "Mission 4! Water can become OXYGEN to breathe, or help PLANTS grow food."
+        },
+        {
+          "who": "LUNA",
+          "mood": "happy",
+          "text": "Plant 3 seeds in the Greenhouse trays. Stand by a tray and press E."
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "Then slide the WATER VALVE in Base Ops so the plants get a drink."
+        }
+      ],
+      "objectives": [
+        {
+          "id": "plant",
+          "text": "Plant 3 seeds in the Greenhouse",
+          "event": "plant",
+          "count": 3,
+          "target": "beds",
+          "hint": "The Greenhouse is in the middle of the base. Stand by an empty tray and press E."
+        },
+        {
+          "id": "valve",
+          "text": "Set the Water Valve in Base Ops",
+          "event": "valve_set",
+          "count": 1,
+          "target": "console",
+          "hint": "At the Mission Console, open the WATER tab and drag the slider."
+        },
+        {
+          "id": "harvest",
+          "text": "Harvest 2 ripe crops",
+          "event": "harvest",
+          "count": 2,
+          "target": "beds",
+          "hint": "Ripe plants sparkle. Press E next to them. Hold FAST to make them grow quicker!"
+        }
+      ],
+      "complete": [
+        {
+          "who": "LUNA",
+          "mood": "wow",
+          "text": "Fresh air AND fresh food! You balanced the water like a NASA engineer."
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "Fun fact: NASA's MOXIE machine made real oxygen on Mars!"
+        }
+      ],
+      "fact": "electrolysis",
+      "rewards": {
+        "xp": 200,
+        "items": {
+          "regolith": 6
+        }
+      }
+    },
+    {
+      "id": 5,
+      "code": "M5",
+      "title": "Solar Storm Shelter",
+      "patch": "patch_m5",
+      "summary": "A solar flare is coming! Build shielding and take cover.",
+      "lesson": "Mars has no global magnetic field and a thin atmosphere, so space radiation reaches the ground. Thick walls of regolith or water block it.",
+      "onStart": [
+        "prep_flare"
+      ],
+      "briefing": [
+        {
+          "who": "DONKI",
+          "mood": "alert",
+          "text": "SPACE WEATHER ALERT! A big flare on the Sun is sending radiation to Mars."
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "Let's make the Storm Shelter wall thicker. Build bricks at the Fabricator."
+        },
+        {
+          "who": "LUNA",
+          "mood": "happy",
+          "text": "Then go outside to the RIGHT side of the base and click the 8 glowing squares."
+        },
+        {
+          "who": "LUNA",
+          "mood": "alert",
+          "text": "When the flare comes, hide inside the Storm Shelter room. I'll warn you!"
+        }
+      ],
+      "objectives": [
+        {
+          "id": "bricks",
+          "text": "Craft 8 bricks at the Fabricator",
+          "event": "craft_brick",
+          "count": 8,
+          "target": "fabricator",
+          "hint": "The Fabricator is the 3D printer in the Algae Lab. Press E there and pick BUILD."
+        },
+        {
+          "id": "roof",
+          "text": "Fill all 8 shield slots by the shelter wall",
+          "state": "shelter_full",
+          "target": "shelter_roof",
+          "hint": "Go to the RIGHT side of the base. Click each glowing square while holding bricks."
+        },
+        {
+          "id": "hide",
+          "text": "Ride out the solar flare in the shelter",
+          "event": "flare_sheltered",
+          "count": 1,
+          "target": "shelter",
+          "hint": "When the red alert starts, go into the Storm Shelter room (bottom-right) and wait."
+        }
+      ],
+      "complete": [
+        {
+          "who": "LUNA",
+          "mood": "wow",
+          "text": "The flare is over and you're safe! Thick walls blocked the radiation."
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "NASA's Curiosity rover measures radiation on Mars to help design shelters like yours."
+        }
+      ],
+      "fact": "radiation_shield",
+      "rewards": {
+        "xp": 250,
+        "items": {
+          "crystal": 3,
+          "iron": 4
+        }
+      }
+    },
+    {
+      "id": 6,
+      "code": "M6",
+      "title": "Call Home",
+      "patch": "patch_m6",
+      "summary": "Drive the rover, collect antenna parts, fix the dish and contact Earth.",
+      "lesson": "Radio signals travel at the speed of light, but Mars is so far away that a message takes between 3 and 22 minutes to reach Earth!",
+      "onStart": [
+        "spawn_parts"
+      ],
+      "briefing": [
+        {
+          "who": "LUNA",
+          "mood": "alert",
+          "text": "Final mission! Fix the big radio dish and CALL EARTH."
+        },
+        {
+          "who": "LUNA",
+          "mood": "think",
+          "text": "The storm scattered 3 dish parts far away. Take the ROVER and follow the yellow arrow."
+        },
+        {
+          "who": "LUNA",
+          "mood": "happy",
+          "text": "The rover is parked left of the base. Press E to hop in. GO HOME drives you back!"
+        }
+      ],
+      "objectives": [
+        {
+          "id": "drive",
+          "text": "Hop into the Mars rover",
+          "event": "enter_rover",
+          "count": 1,
+          "target": "rover",
+          "hint": "The rover is parked on the pad to the LEFT of the base. Press E next to it."
+        },
+        {
+          "id": "parts",
+          "text": "Collect 3 antenna parts",
+          "event": "antenna_part",
+          "count": 3,
+          "target": "nearest_part",
+          "hint": "Follow the yellow arrow. Just touch the glowing parts."
+        },
+        {
+          "id": "reach",
+          "text": "Reach the Deep Space Antenna",
+          "event": "reach_antenna",
+          "count": 1,
+          "target": "antenna",
+          "hint": "The dish is far up and to the right. Open the MAP to see it."
+        },
+        {
+          "id": "repair",
+          "text": "Repair the antenna wiring",
+          "event": "antenna_repaired",
+          "count": 1,
+          "target": "antenna",
+          "hint": "Stand next to the antenna and press E."
+        },
+        {
+          "id": "point",
+          "text": "Point the dish at Earth",
+          "event": "earth_contact",
+          "count": 1,
+          "target": "antenna",
+          "hint": "Press E at the antenna again and turn the dish toward the blue Earth."
+        }
+      ],
+      "complete": [
+        {
+          "who": "CAPCOM",
+          "mood": "happy",
+          "text": "Outpost 7, this is Mission Control. We hear you loud and clear! Great work, {name}!"
+        },
+        {
+          "who": "LUNA",
+          "mood": "wow",
+          "text": "We did it! We can talk to Earth again!"
+        }
+      ],
+      "fact": "light_delay",
+      "rewards": {
+        "xp": 400
+      }
+    }
+  ],
+  "bounties": [
+    {
+      "id": "b_ice",
+      "text": "Mine {n} ice chunks",
+      "event": "mine_ice",
+      "min": 8,
+      "max": 20,
+      "xp": 60,
+      "target": "ice"
+    },
+    {
+      "id": "b_iron",
+      "text": "Mine {n} hematite iron",
+      "event": "mine_iron",
+      "min": 4,
+      "max": 10,
+      "xp": 70
+    },
+    {
+      "id": "b_harvest",
+      "text": "Harvest {n} crops",
+      "event": "harvest",
+      "min": 2,
+      "max": 5,
+      "xp": 70,
+      "target": "beds"
+    },
+    {
+      "id": "b_sample",
+      "text": "Brush up {n} science samples",
+      "event": "sample",
+      "min": 1,
+      "max": 3,
+      "xp": 90
+    },
+    {
+      "id": "b_panels",
+      "text": "Clean {n} solar panels",
+      "event": "panel_cleaned",
+      "min": 3,
+      "max": 6,
+      "xp": 50,
+      "target": "panels"
+    },
+    {
+      "id": "b_drive",
+      "text": "Drive the rover {n} metres",
+      "event": "drive",
+      "min": 150,
+      "max": 400,
+      "xp": 60,
+      "target": "rover"
+    },
+    {
+      "id": "b_flag",
+      "text": "Plant {n} explorer flags far from base",
+      "event": "flag",
+      "min": 1,
+      "max": 3,
+      "xp": 50
+    },
+    {
+      "id": "b_craft",
+      "text": "Build {n} upgrades or brick batches",
+      "event": "craft",
+      "min": 2,
+      "max": 4,
+      "xp": 60,
+      "target": "fabricator"
+    },
+    {
+      "id": "b_crystal",
+      "text": "Mine {n} olivine crystals (try the lava tube cave)",
+      "event": "mine_crystal",
+      "min": 2,
+      "max": 5,
+      "xp": 90
+    },
+    {
+      "id": "b_dig",
+      "text": "Dig {n} pits with the Mining Laser",
+      "event": "dig",
+      "min": 5,
+      "max": 15,
+      "xp": 60
+    }
+  ],
+  "graduation": [
+    {
+      "who": "CAPCOM",
+      "mood": "happy",
+      "text": "Mission Control here. Outpost 7 has power, water, air, food, a shelter and a radio!"
+    },
+    {
+      "who": "LUNA",
+      "mood": "wow",
+      "text": "You graduated, {name}! You're a Junior Astronaut. Here is your certificate!"
+    },
+    {
+      "who": "LUNA",
+      "mood": "happy",
+      "text": "Mission Control will send BONUS JOBS in the top-right corner. Keep exploring!"
+    }
+  ]
+}

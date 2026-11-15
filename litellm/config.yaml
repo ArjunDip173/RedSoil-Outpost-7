@@ -1,0 +1,23 @@
+# Optional: run LUNA's AI through a local LiteLLM proxy instead of the cloud server (server/).
+# Start it with:  bash litellm/start.sh   (http://localhost:4000, this computer only)
+# Then in the game: Settings → Advanced → AI server = http://localhost:4000
+# The Google key comes from server/.env; start.sh sets GEMINI_API_BASE for the kind of key.
+
+model_list:
+  # fast, short answers for kids (thinking turned down)
+  - model_name: luna
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
+      api_base: os.environ/GEMINI_API_BASE
+      api_key: os.environ/GEMINI_API_KEY
+      reasoning_effort: minimal
+  # backup if the preview model is busy or retired
+  - model_name: luna-backup
+    litellm_params:
+      model: gemini/gemini-3.5-flash
+      api_base: os.environ/GEMINI_API_BASE
+      api_key: os.environ/GEMINI_API_KEY
+      reasoning_effort: low
+
+router_settings:
+  fallbacks: [{ "luna": ["luna-backup"] }]

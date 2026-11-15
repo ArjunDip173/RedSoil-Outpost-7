@@ -1,0 +1,118 @@
+# Red Soil: Outpost 7
+
+A top-down pixel-art game where kids aged 7–12 train as junior astronauts on Mars: they keep a small base alive by managing power, water, air, food and radiation, then fix the radio and call Earth.
+
+Developed by **SideLoaders** for the **2026 NASA Space Apps Challenge**: *Build a Junior Astronaut Mission Trainer*.
+
+## Play
+
+Double-click **`RedSoil-Outpost7.html`**. It opens in any modern browser and contains the whole game (code, art, sound and mission data), so it also works offline. Only LUNA's AI answers need the internet; without it she answers from the game's built-in Science Log.
+
+Online, the same file is served by GitHub Pages (see [Put it on GitHub](#put-it-on-github)). Players need no key or setup: LUNA's AI works in both.
+
+## How to play
+
+| Key | What it does |
+| --- | --- |
+| W A S D / arrows | Walk (or drive the rover) |
+| E | Use the thing you are next to |
+| Mouse (hold) | Use your tool: brush, dig, build |
+| 1–4 / click the tool bar | Pick a tool (tools appear as the missions need them) |
+| Esc | Menu |
+
+Big buttons in the bottom-right do everything else: **Watch** (Tab) for all your stats, **Ask LUNA** (T), **Map** (M), **Scan** (Q, outside), **Base Ops** (B, inside), **Go Home** (R, in the rover) and **Fast** (hold inside the base to speed up time).
+
+## The six training missions
+
+| Mission | What happens | What it teaches |
+| --- | --- | --- |
+| 1. First Steps on Red Soil | Airlock safety checklist, brush dust off the solar panels | Spacewalk safety; dust blocks sunlight |
+| 2. Power to the Outpost | Rewire the power unit, switch on the greenhouse lights | Every machine needs power; the Sun only gives so much |
+| 3. Ice, Ice, Mars-y | Scan for buried ice, dig it up, melt it | Mars has water, frozen underground |
+| 4. Split It or Sip It? | Plant seeds, share water between oxygen and plants | Water can become air (electrolysis) or food |
+| 5. Solar Storm Shelter | Build a brick shield wall, hide from a solar flare | Space radiation and how rock and water block it |
+| 6. Call Home | Drive the rover, find antenna parts, aim the dish at Earth | Radio signals take minutes to cross to Earth |
+
+After Mission 6 the player graduates and gets a printable certificate signed by SideLoaders, and Mission Control keeps sending bonus jobs.
+
+## Made for young players
+
+- Short, simple instructions; LUNA reads them aloud (browser speech, can be turned off) and only talks when it matters.
+- Big pixel text with a text-size setting, a hologram watch instead of a busy top bar, one message at a time.
+- Auto power: kids just switch machines on or off. Older players can turn on Expert power in Settings.
+- Flashing warnings for low battery, air, water and food, radiation and solar flares, plus a "time to head back" warning with an arrow home.
+- No long waits during training (nights are skipped, crops grow faster, and the Fast button speeds up time).
+- If something goes wrong, the med-evac screen explains what happened and what to try next.
+
+## Ask LUNA (AI)
+
+Questions go to a small server in `server/`, a **Cloudflare Worker** on the free plan. It keeps the Google key private and asks **Gemini** (Google AI Studio's free tier) for a short answer. The key never goes into the game, so the game can be shared publicly.
+
+- The game sends LUNA's instructions, the current mission step and a few matching NASA facts with each question. The player's name is never sent.
+- The server adds its own rules (only space and game topics, kind answers, no personal information), turns on Google's safety filters and limits how many questions each player can ask per minute and per day.
+- It tries a few Gemini Flash models in turn (`MODELS` in `server/wrangler.toml`); each has its own free daily limit.
+- The key has no billing attached, so the server can never cost money. If the free limit runs out, or the server can't be reached, LUNA answers offline from the Science Log and handles simple chit-chat.
+
+**Set up or update the server (one command, once):**
+
+```bash
+bash server/deploy.sh
+```
+
+It asks for a free Google AI Studio key (make one at https://aistudio.google.com/apikey; it is saved privately in `server/.env`), opens the Cloudflare sign-in page (a free account, no credit card), deploys the server, asks LUNA a test question, then writes the server's address into `src/config.ts` and rebuilds `RedSoil-Outpost7.html`. To change the key later, run `bash server/set-key.sh`, then `bash server/deploy.sh` again.
+
+For a local alternative, `litellm/` contains a LiteLLM proxy setup that the game can use too (Settings → Advanced).
+
+## Put it on GitHub
+
+1. Run `bash server/deploy.sh` first, so `RedSoil-Outpost7.html` points at your AI server.
+2. Create an empty repository on github.com, then from this folder:
+   ```bash
+   git init -b main
+   git add .
+   git commit -m "Red Soil: Outpost 7"
+   git remote add origin https://github.com/<your-name>/<repo>.git
+   git push -u origin main
+   ```
+   `.gitignore` keeps `server/.env` (your key), `node_modules/` and build folders out of the repository.
+3. On GitHub: **Settings → Pages → Build and deployment → Deploy from a branch → `main` / `(root)`**. After a minute the game is live at `https://<your-name>.github.io/<repo>/` (the page opens `RedSoil-Outpost7.html` by itself).
+
+## Project structure
+
+```
+src/
+  main.ts           start-up, screens (loading → menu → intro → game) and the frame loop
+  Game.ts           one play session: world, entities, systems, update and draw order
+  config.ts         all tunable numbers (power, oxygen, radiation, crops, tools, recipes)
+  types.ts          shared types
+  core/             sprite sheets, audio, input, saving, read-aloud voice, canvas helpers
+  world/            the tile map, the habitat and objects in the world
+  entities/         the player, the rover and LUNA
+  systems/          missions, resources, weather and radiation, lighting, particles, AI chat
+  ui/               HUD, windows, menus and the intro cutscene
+  assets/sprites/   sprite sheets (PNG) with frame positions (JSON)
+  assets/audio/     sound effects (WAV) and music (MP3)
+public/resources/data/   missions.json and nasa_facts.json (all mission text and facts)
+server/             LUNA's AI server (a Cloudflare Worker) and its deploy script
+litellm/            optional local AI proxy
+tests/              automated checks (Vitest)
+scripts/package.sh  builds a clean submission zip
+```
+
+Mission text and facts live in JSON, so teachers can edit missions without touching code. Characters are drawn once in neutral marker colours and recoloured at load time to match the player's chosen suit, skin and hair colours.
+
+## Development
+
+```bash
+npm install
+npm run dev       # play at http://localhost:5173 while editing
+npm test          # data and logic checks
+npm run build     # type-check, then rebuild RedSoil-Outpost7.html
+npm run package   # build + clean zip in release/ (no keys, no node_modules)
+```
+
+Built with TypeScript, Vite and the HTML5 Canvas. The build inlines everything into one HTML file so it can be submitted and opened without a server.
+
+## Science sources
+
+NASA DONKI (space weather alerts), Curiosity's RAD instrument and ISS dosimetry (radiation), NASA OSDR (space biology and plant growth), the Canadian Space Agency (Canadarm2, Phoenix's weather station, Curiosity's APXS) and NASA's Mars missions (Phoenix, Spirit, Opportunity, Curiosity, Perseverance, InSight, MAVEN, Ingenuity). Gameplay numbers are simplified for learning. This is a hackathon project, not an official NASA product.
