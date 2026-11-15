@@ -8,8 +8,10 @@
  */
 import { BASE_WATER_CAP, CROPS, ITEMS, LANDMARKS, O, PACK_CAP, SOL_DOSE_BUDGET, TILE, TOOLS } from '../config';
 import { type Ctx, rect } from '../core/canvas';
+import { forTouch, touch } from '../core/touch';
 import type { Game } from '../Game';
 import { el, icon, spriteCanvas } from './Dom';
+import { TouchControls } from './TouchControls';
 
 const FONT = '8px "Press Start 2P", monospace';
 
@@ -80,6 +82,8 @@ export class Hud {
   /** One message at a time: toasts wait here while another message is showing. */
   private pending: { text: string; color: string; icon?: string; age: number }[] = [];
   private actions: { def: ActionDef; btn: HTMLButtonElement; shown: boolean }[] = [];
+  /** Joystick and buttons for phones and tablets. */
+  private touchUi: TouchControls;
   private game: Game;
 
   constructor(game: Game, root: HTMLElement) {
@@ -95,6 +99,14 @@ export class Hud {
     root.append(this.tracker, this.toastBox, this.prompt, this.toolHint, this.banner, this.watch, this.actionBar);
     this.buildActions();
     this.buildWatch();
+    this.touchUi = new TouchControls(game, root);
+    game.input.isUiAt = (x, y) => this.isTapTarget(x, y);
+    // on a touchscreen the "[USE] …" label itself can be tapped
+    this.prompt.addEventListener('pointerdown', (e) => {
+      if (!touch.active || game.ui.blocking) return;
+      e.preventDefault();
+      game.input.tapKey('e');
+    });
   }
 
   /** Big on-screen buttons, so kids don't have to remember the keyboard shortcuts. */
@@ -176,6 +188,7 @@ export class Hud {
 
   destroy(): void {
     for (const n of [this.tracker, this.toastBox, this.prompt, this.toolHint, this.banner, this.watch, this.actionBar]) n.remove();
+    this.touchUi.destroy();
   }
 
   // ───────────────────────── hologram watch ─────────────────────────
@@ -292,7 +305,7 @@ export class Hud {
     const node = el('div', 'toast');
     node.style.borderColor = color;
     if (icon && this.game.art.has(icon)) node.appendChild(spriteCanvas(this.game.art.get(icon), 2));
-    const t = el('span', '', text);
+    const t = el('span', '', forTouch(text));
     t.style.color = color;
     node.appendChild(t);
     this.toastBox.appendChild(node);
@@ -305,6 +318,12 @@ export class Hud {
     const inR = (r: { x: number; y: number; w: number; h: number }) => mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h;
     if (inR(this.hotbarRect) || inR(this.minimapRect)) return true;
     return mx < 96 && my > this.H - 70;
+  }
+
+  /** HUD widgets a finger taps (tool bar, minimap): a touch there must not start the joystick. */
+  isTapTarget(mx: number, my: number): boolean {
+    const inR = (r: { x: number; y: number; w: number; h: number }) => r.w > 0 && mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h;
+    return inR(this.hotbarRect) || inR(this.minimapRect) || this.buttons.some(inR);
   }
 
   handleClick(mx: number, my: number): boolean {
@@ -337,6 +356,7 @@ export class Hud {
 
   update(dt: number): void {
     this.updateActions();
+    this.touchUi.update();
     // one message at a time: show the next waiting message only when nothing else is
     for (const q of this.pending) q.age += dt;
     this.pending = this.pending.filter((q) => q.age < 12);
@@ -475,6 +495,8 @@ export class Hud {
     const tool = TOOLS[p.hotbar];
     if (!['laser', 'brick', 'regolith', 'ice'].includes(tool.id)) return;
     if (this.isOverUi(game.input.mouseX, game.input.mouseY)) return;
+    // on a touchscreen the target square only shows while a finger is on the ground
+    if (touch.active && !game.input.mouseDown) return;
     const { tx, ty } = p.pickTile(game.input.worldX + game.camX, game.input.worldY + game.camY);
     const inReach = Math.hypot(tx * TILE + 8 - p.cx, ty * TILE + 8 - (p.cy - 6)) <= 4.5 * TILE;
     const valid = tool.id === 'laser' ? game.map.canMine(tx, ty) : game.map.canPlace(tx, ty);
@@ -658,7 +680,7 @@ export class Hud {
     for (const f of game.objects.flags) mark(f.x, f.y - 8, game.profile.suitColor);
     const p = game.player;
     if (Math.sin(time * 6) > 0) mark(p.cx, p.cy, '#ffffff', 'YOU');
-    this.text(g, 'MAP · press M to close', W / 2, H - 16, '#ffd166', 'center');
+    this.text(g, forTouch('MAP · press M to close'), W / 2, H - 16, '#ffd166', 'center');
   }
 
   /** When the goal is off-screen, an arrow at the screen edge points to it. */
@@ -713,7 +735,7 @@ export class Hud {
     // only the current mission step (keeps the screen calm)
     const mm = game.missions;
     const m = mm.active;
-    const key = m ? `${m.id}|${m.objectives.map((o) => `${mm.value(o)}`).join(',')}` : `b|${mm.bounties.map((b) => `${b.id}${b.have}`).join(',')}`;
+    const key = `${touch.active}|` + (m ? `${m.id}|${m.objectives.map((o) => `${mm.value(o)}`).join(',')}` : `b|${mm.bounties.map((b) => `${b.id}${b.have}`).join(',')}`);
     if (key !== this.trackerKey) {
       this.trackerKey = key;
       this.tracker.innerHTML = '';
@@ -723,7 +745,7 @@ export class Hud {
         this.tracker.appendChild(el('div', 'tr-title', `MISSION ${m.id} · ${m.title}`));
         if (cur) {
           const n = cur.count ?? 1;
-          this.tracker.appendChild(el('div', 'tr-obj cur', `▶ ${cur.text}${n > 1 ? ` (${Math.floor(mm.value(cur))}/${n})` : ''}`));
+          this.tracker.appendChild(el('div', 'tr-obj cur', `▶ ${forTouch(cur.text)}${n > 1 ? ` (${Math.floor(mm.value(cur))}/${n})` : ''}`));
         }
         this.tracker.appendChild(el('div', 'tr-step', `Step ${idx + 1} of ${m.objectives.length}`));
       } else if (mm.bounties.length) {
@@ -736,7 +758,7 @@ export class Hud {
     const it = game.focus;
     if (it && !game.ui.blocking && !this.bigMap) {
       this.prompt.classList.remove('hidden');
-      this.prompt.textContent = `[E] ${it.label}`;
+      this.prompt.textContent = `${touch.active ? '[USE]' : '[E]'} ${it.label}`;
       const x = (it.x - game.camX) * game.scale;
       const y = (it.y - game.camY) * game.scale;
       const w = this.prompt.offsetWidth;
@@ -746,18 +768,18 @@ export class Hud {
     if (this.toolHintT > 0 && !game.rover.driving && !game.ui.blocking) {
       const t = TOOLS[game.player.hotbar];
       const extra = t.id === 'seeds' ? ` — ${CROPS[game.player.seed].name}` : t.uses ? ` (${ITEMS[t.uses].name})` : '';
-      this.toolHint.textContent = `${t.name}${extra}: ${t.hint}`;
+      this.toolHint.textContent = `${t.name}${extra}: ${forTouch(t.hint)}`;
       this.toolHint.classList.remove('hidden');
       this.toolHint.style.bottom = `${30 * game.hudScale}px`;
     } else this.toolHint.classList.add('hidden');
     // flashing warning banner: the most important problem first
     const top = this.alerts[0];
-    const aKey = top ? `${top.id}|${top.level}|${top.text}|${this.alerts.length}` : '';
+    const aKey = top ? `${top.id}|${top.level}|${top.text}|${this.alerts.length}|${touch.active}` : '';
     if (aKey !== this.alertKey) {
       this.alertKey = aKey;
       if (top) {
         this.banner.className = `banner ${top.level}`;
-        this.banner.replaceChildren(icon(top.icon, 2), document.createTextNode(top.text + (this.alerts.length > 1 ? `  +${this.alerts.length - 1}` : '')));
+        this.banner.replaceChildren(icon(top.icon, 2), document.createTextNode(forTouch(top.text) + (this.alerts.length > 1 ? `  +${this.alerts.length - 1}` : '')));
       } else this.banner.className = 'banner hidden';
     }
     this.banner.classList.toggle('hidden', !top || game.ui.blocking || this.bigMap);

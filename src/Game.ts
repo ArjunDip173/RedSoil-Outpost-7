@@ -7,6 +7,7 @@ import type { AudioEngine } from './core/AudioEngine';
 import type { InputManager } from './core/InputManager';
 import { type Ctx } from './core/canvas';
 import { type Sprites } from './core/Sprites';
+import { touch } from './core/touch';
 import type { StorageManager } from './core/StorageManager';
 import { LunaDrone } from './entities/LunaDrone';
 import { Player } from './entities/Player';
@@ -332,7 +333,7 @@ export class Game {
     return {
       mission: m ? `Mission ${m.id} of 6, "${m.title}"` : 'All training missions are done; the player is doing bonus jobs',
       objective: obj ? obj.text : 'explore Mars and complete Mission Control bounties',
-      status: `Base air ${Math.round(r.o2)}%, water ${Math.round(r.water)} L, food ${Math.floor(r.food)} meals, battery ${Math.round(r.batteryPct)}%. It is ${this.weather.isNight ? 'night' : 'day'} on Sol ${this.weather.sol}. The player is ${this.locationLabel().toLowerCase()}.`,
+      status: `Base air ${Math.round(r.o2)}%, water ${Math.round(r.water)} L, food ${Math.floor(r.food)} meals, battery ${Math.round(r.batteryPct)}%. It is ${this.weather.isNight ? 'night' : 'day'} on Sol ${this.weather.sol}. The player is ${this.locationLabel().toLowerCase()}.${touch.active ? ' The player is on a touchscreen (phone or tablet): they walk with the joystick on the left side of the screen, tap the USE button instead of pressing E, hold RUN to sprint, touch and hold a spot to use their tool there, and tap the on-screen buttons instead of keys.' : ''}`,
     };
   }
 

@@ -2,6 +2,7 @@
  * The "Ask LUNA" chat window (button or T). Shows whether LUNA is online (AI answers) or
  * offline (answers from the Science Log).
  */
+import { forTouch } from '../core/touch';
 import type { Game } from '../Game';
 import { MAX_QUESTION } from '../systems/LunaAI';
 import { button, el, spriteCanvas } from './Dom';
@@ -60,7 +61,7 @@ export function openAskLuna(game: Game): void {
 
   const bubble = (who: 'you' | 'luna', text: string, note?: string, source?: 'ai' | 'offline') => {
     const row = el('div', `ask-msg ${who}`);
-    const b = el('div', 'ask-bubble', text);
+    const b = el('div', 'ask-bubble', who === 'luna' ? forTouch(text) : text);
     row.appendChild(b);
     if (who === 'luna' && source) row.appendChild(el('div', 'ask-src', source === 'ai' ? 'AI answer · check big facts with a grown-up' : 'From LUNA’s Science Log'));
     if (note) row.appendChild(el('div', 'ask-note', note));

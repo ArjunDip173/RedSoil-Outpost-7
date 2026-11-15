@@ -2,6 +2,7 @@
  * LUNA, the floating AI helper. Follows the player, speaks in a typewriter
  * speech bubble, gives hints and safety warnings, shares NASA facts and pops quiz questions.
  */
+import { forTouch } from '../core/touch';
 import { voice } from '../core/Voice';
 import { type Ctx } from '../core/canvas';
 import type { Game } from '../Game';
@@ -69,6 +70,7 @@ export class LunaDrone {
    */
   say(text: string, mood: LunaMood = 'happy', priority = 1): void {
     if (priority <= 0 && !this.game.settings.lunaChatty) return;
+    text = forTouch(text);
     const s: Speech = { text, mood, priority, shown: 0, life: 3.2 + text.length * 0.055 };
     if (!this.speech || priority > this.speech.priority) {
       if (this.speech && this.speech.shown < this.speech.text.length) this.queue.unshift(this.speech);

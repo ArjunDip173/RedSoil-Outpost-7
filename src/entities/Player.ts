@@ -149,13 +149,9 @@ export class Player implements Body {
       return;
     }
 
-    let ix = (input.right ? 1 : 0) - (input.left ? 1 : 0);
-    let iy = (input.down ? 1 : 0) - (input.up ? 1 : 0);
+    // keys or the touch joystick (a small push walks slowly)
+    const { x: ix, y: iy } = input.axis();
     const moving = ix !== 0 || iy !== 0;
-    if (ix && iy) {
-      ix *= Math.SQRT1_2;
-      iy *= Math.SQRT1_2;
-    }
     this.sprinting = moving && input.isDown('shift') && this.jet > 1;
     const speed = WALK_SPEED * (this.sprinting ? SPRINT_MULT * this.sprintBoost : 1);
     const k = Math.min(1, (ACCEL * dt) / Math.max(1, speed));

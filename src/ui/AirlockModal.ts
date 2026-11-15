@@ -3,6 +3,7 @@
  * just like real astronauts do. Ends with the airlock depressurizing to Mars pressure.
  */
 import { SOL_DOSE_BUDGET } from '../config';
+import { forTouch } from '../core/touch';
 import type { Game } from '../Game';
 import { button, el, spriteCanvas } from './Dom';
 
@@ -26,14 +27,14 @@ export function openAirlockModal(game: Game, onExit: () => void): void {
       key: 'helmet',
       icon: 'portrait_player',
       label: () => 'Helmet on and locked',
-      detail: () => 'Click to twist the helmet ring until it clicks.',
+      detail: () => forTouch('Click to twist the helmet ring until it clicks.'),
       check: () => true,
     },
     {
       key: 'o2',
       icon: 'icon_o2',
       label: () => `Suit O2 tank: ${Math.round((p.o2 / p.o2Max) * 100)}%`,
-      detail: () => (p.o2 / p.o2Max >= 0.9 ? 'Tank is full. Good to go!' : `Click to refill from base air (base O2: ${Math.round(game.res.o2)}%).`),
+      detail: () => (p.o2 / p.o2Max >= 0.9 ? 'Tank is full. Good to go!' : forTouch(`Click to refill from base air (base O2: ${Math.round(game.res.o2)}%).`)),
       check: () => {
         if (p.o2 / p.o2Max < 0.9) game.refillSuitAtStation(true);
         return p.o2 / p.o2Max >= 0.5;
@@ -72,7 +73,7 @@ export function openAirlockModal(game: Game, onExit: () => void): void {
     },
   ];
 
-  const intro = el('p', 'muted', 'Click each check. When everything is green, cycle the airlock!');
+  const intro = el('p', 'muted', forTouch('Click each check. When everything is green, cycle the airlock!'));
   const list = el('div', 'checklist');
   const cycle = button('CYCLE AIRLOCK ▶', () => runCycle(), 'btn primary big');
   cycle.disabled = true;

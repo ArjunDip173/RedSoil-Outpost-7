@@ -3,6 +3,7 @@
  * shown while sprites bake and mission data loads. Ends with "press any key"
  * (which also unlocks Web Audio in the browser).
  */
+import { touch } from '../core/touch';
 import { el } from './Dom';
 
 export class LoadingScreen {
@@ -26,7 +27,7 @@ export class LoadingScreen {
     const bar = el('div', 'boot-bar');
     this.fill = el('div', 'boot-fill');
     bar.appendChild(this.fill);
-    this.press = el('div', 'boot-press hidden', '▶ PRESS ANY KEY OR CLICK TO START ◀');
+    this.press = el('div', 'boot-press hidden', touch.active ? '▶ TAP TO START ◀' : '▶ PRESS ANY KEY OR CLICK TO START ◀');
     this.root.append(head, this.logEl, bar, this.press);
     host.appendChild(this.root);
     this.spin();

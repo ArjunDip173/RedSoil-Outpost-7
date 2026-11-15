@@ -35,6 +35,12 @@ body {
   font-family: var(--body);
   font-size: calc(22px * var(--ts));
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  /* no double-tap zoom on phones; windows that scroll still scroll */
+  touch-action: manipulation;
+  overscroll-behavior: none;
 }
 
 #app {
@@ -49,6 +55,8 @@ body {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   cursor: crosshair;
+  /* the game handles every touch on the playfield itself (joystick, tools) */
+  touch-action: none;
 }
 
 #ui-root {
@@ -2042,4 +2050,203 @@ code {
   bottom: 12px;
   font-size: calc(18px * var(--ts));
   color: rgba(232, 236, 242, 0.6);
+}
+
+/* ───────────── touch controls (phones and tablets) ───────────── */
+.touch-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --stick: 56px;
+}
+.touch-stick {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--stick) * 2);
+  height: calc(var(--stick) * 2);
+  border-radius: 50%;
+  background: rgba(18, 10, 14, 0.35);
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.35), 0 0 0 2px rgba(0, 0, 0, 0.35);
+}
+/* resting joystick: shows where to put your thumb */
+.touch-stick.ghost {
+  left: max(14px, calc(17vw - var(--stick)));
+  top: calc(52% - var(--stick));
+  opacity: 0.55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.touch-knob {
+  width: var(--stick);
+  height: var(--stick);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe7a8, var(--gold) 45%, #c48a1f);
+  box-shadow: 0 3px 0 #6b4a10, 0 0 0 2px #000;
+}
+.touch-knob.live {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.touch-stick-label {
+  position: absolute;
+  top: -24px;
+  font-family: var(--title);
+  font-size: 10px;
+  color: #fff;
+  text-shadow: 0 2px 0 #000;
+  letter-spacing: 1px;
+}
+.touch-btn {
+  pointer-events: auto;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-family: var(--title);
+  text-shadow: 0 2px 0 #000;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.touch-btn.down {
+  transform: translateY(3px) scale(0.96);
+}
+.touch-use {
+  right: 104px;
+  bottom: 16px;
+  width: 96px;
+  height: 96px;
+  padding: 6px;
+  background: rgba(40, 26, 32, 0.8);
+  box-shadow: 0 0 0 3px #6a4a3a, 0 4px 0 #000;
+}
+.touch-use.ready {
+  background: rgba(193, 68, 14, 0.92);
+  box-shadow: 0 0 0 3px var(--gold), 0 4px 0 #000, 0 0 18px rgba(255, 209, 102, 0.6);
+  animation: use-pulse 0.9s ease-in-out infinite;
+}
+@keyframes use-pulse {
+  50% {
+    box-shadow: 0 0 0 3px var(--gold), 0 4px 0 #000, 0 0 30px rgba(255, 209, 102, 0.95);
+  }
+}
+.touch-key {
+  font-size: 22px;
+  line-height: 1;
+}
+.touch-use-label {
+  max-width: 84px;
+  font-size: 8px;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.touch-run {
+  right: 120px;
+  bottom: 128px;
+  width: 64px;
+  height: 64px;
+  background: rgba(31, 77, 107, 0.82);
+  box-shadow: 0 0 0 3px #7fe3ff, 0 4px 0 #000;
+}
+.touch-run.down {
+  background: rgba(47, 125, 209, 0.95);
+}
+.touch-run-label {
+  font-size: 10px;
+}
+/* on a touchscreen the yellow "[USE] …" label can be tapped too */
+body.touch .prompt {
+  pointer-events: auto;
+  cursor: pointer;
+}
+/* keyboard letters on the HUD buttons mean nothing on a touchscreen */
+body.touch .act-key {
+  display: none;
+}
+/* short screens (phones held sideways): smaller HUD buttons so they all fit */
+@media (max-height: 560px) {
+  .action-bar {
+    right: 8px;
+    bottom: 8px;
+    gap: 5px;
+  }
+  .act-btn {
+    width: 64px;
+    min-height: 0;
+    padding: 4px 2px;
+    border-radius: 8px;
+  }
+  .act-icon .ico {
+    width: 24px;
+    height: 24px;
+  }
+  .act-label {
+    font-size: 13px;
+  }
+  /* the mission box sits left of the button column */
+  .tracker {
+    right: 80px;
+    top: 6px;
+    width: min(300px, 38vw);
+    padding: 5px 9px 6px;
+    font-size: calc(18px * var(--ts));
+  }
+  .touch-use {
+    right: 88px;
+    bottom: 10px;
+    width: 84px;
+    height: 84px;
+  }
+  .touch-run {
+    right: 100px;
+    bottom: 104px;
+    width: 58px;
+    height: 58px;
+  }
+}
+/* phones held upright: the pixel view is too small, so ask to turn the phone */
+.rotate-hint {
+  display: none;
+}
+@media (orientation: portrait) and (max-width: 700px) {
+  body.touch .rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: rgba(18, 10, 10, 0.94);
+    color: var(--text);
+    text-align: center;
+    font-size: 26px;
+    pointer-events: auto;
+  }
+}
+.rotate-icon {
+  font-size: 56px;
+  animation: rotate-wiggle 1.6s ease-in-out infinite;
+}
+@keyframes rotate-wiggle {
+  50% {
+    transform: rotate(-90deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .touch-use.ready,
+  .rotate-icon {
+    animation: none;
+  }
 }

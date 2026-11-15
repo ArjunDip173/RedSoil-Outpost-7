@@ -22,6 +22,18 @@ Online, the same file is served by GitHub Pages (see [Put it on GitHub](#put-it-
 
 Big buttons in the bottom-right do everything else: **Watch** (Tab) for all your stats, **Ask LUNA** (T), **Map** (M), **Scan** (Q, outside), **Base Ops** (B, inside), **Go Home** (R, in the rover) and **Fast** (hold inside the base to speed up time).
 
+**On a phone or tablet** the touch controls appear by themselves (hold a phone sideways):
+
+| Touch | What it does |
+| --- | --- |
+| Thumb on the left side | A joystick appears under it: drag to walk or drive (a small push walks slowly) |
+| Touch and hold a spot | Use your tool there: brush, dig, build |
+| **E · USE** button | Use the thing you are next to; it lights up and says what it will do (the yellow label can be tapped too) |
+| **RUN** (hold) | Sprint |
+| Tap the tool bar | Pick a tool |
+
+The game's instructions switch to touch words too ("tap USE" instead of "press E"). Clicking with a mouse switches back to keyboard and mouse.
+
 ## The six training missions
 
 | Mission | What happens | What it teaches |

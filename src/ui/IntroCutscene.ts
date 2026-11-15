@@ -7,6 +7,7 @@
  */
 import type { AudioEngine } from '../core/AudioEngine';
 import { makeCanvas, rect } from '../core/canvas';
+import { forTouch } from '../core/touch';
 import type { Sprites } from '../core/Sprites';
 import { el } from './Dom';
 
@@ -41,7 +42,7 @@ export function playIntro(host: HTMLElement, art: Sprites, audio: AudioEngine, p
     const root = el('div', 'intro');
     const [canvas, g] = makeCanvas(W, H);
     canvas.className = 'intro-canvas';
-    const skip = el('div', 'intro-skip', 'Click or press any key to skip');
+    const skip = el('div', 'intro-skip', forTouch('Click or press any key to skip'));
     root.append(canvas, skip);
     host.appendChild(root);
 

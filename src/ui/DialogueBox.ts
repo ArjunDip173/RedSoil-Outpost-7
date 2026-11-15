@@ -2,6 +2,7 @@
  * Mission briefings: portrait, speaker name and typewriter text.
  * Advance with click, Space, Enter or E.
  */
+import { forTouch } from '../core/touch';
 import { voice } from '../core/Voice';
 import type { AudioEngine } from '../core/AudioEngine';
 import { type Sprites } from '../core/Sprites';
@@ -44,7 +45,7 @@ export class DialogueBox {
     const right = el('div', 'dlg-main');
     this.name = el('div', 'dlg-name');
     this.text = el('div', 'dlg-text');
-    this.more = el('div', 'dlg-more', '▼ click / SPACE');
+    this.more = el('div', 'dlg-more', forTouch('▼ click / SPACE'));
     right.append(this.name, this.text, this.more);
     this.root.append(this.portrait, right);
     host.appendChild(this.root);
@@ -63,7 +64,7 @@ export class DialogueBox {
       onDone?.();
       return;
     }
-    this.lines = lines;
+    this.lines = lines.map((l) => ({ ...l, text: forTouch(l.text) }));
     this.i = 0;
     this.done = onDone;
     this.active = true;
@@ -93,7 +94,7 @@ export class DialogueBox {
       if (this.shown >= t.length) {
         clearInterval(this.timer);
         this.more.style.visibility = 'visible';
-        this.more.textContent = this.i < this.lines.length - 1 ? '▼ click / SPACE' : '✔ click / SPACE to continue';
+        this.more.textContent = forTouch(this.i < this.lines.length - 1 ? '▼ click / SPACE' : '✔ click / SPACE to continue');
       }
     }, 22);
   }

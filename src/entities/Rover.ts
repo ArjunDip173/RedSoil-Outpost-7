@@ -143,12 +143,7 @@ export class Rover implements Body {
     let ix = 0;
     let iy = 0;
     if (this.driving) {
-      ix = (input.right ? 1 : 0) - (input.left ? 1 : 0);
-      iy = (input.down ? 1 : 0) - (input.up ? 1 : 0);
-      if (ix && iy) {
-        ix *= Math.SQRT1_2;
-        iy *= Math.SQRT1_2;
-      }
+      ({ x: ix, y: iy } = input.axis());
       if (input.pressed('r')) this.autopilotHome();
     }
     const maxV = ROVER_MAX_SPEED * (this.battery > 0 ? 1 : 0.3);
