@@ -15,3 +15,7 @@ server/.env
 
 # Cloudflare's local build files
 .wrangler/
+
+# team notes stay on our computers; only the SI disclosure is public
+For Developers/*
+!For Developers/SI_DISCLOSURE.md

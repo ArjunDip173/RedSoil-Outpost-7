@@ -1,7 +1,7 @@
 # How we used Super Intelligence (SI)
 
-Red Soil: Outpost 7 was made by team **SideLoaders** (Arjun Dip Shrestha, Hardik Lamichhane, Aatish Karki, Aayushman
-Nidhi Tiwari and Sunny Kumar Gupta) for the 2026 NASA Space Apps Challenge. We used SI tools while building it, and
+Red Soil: Outpost 7 was made by team **SideLoaders** (Arjun Dip Shrestha, Hardik Lamichhane, Aatish Karki and Sunny Kumar
+Gupta) for the 2026 NASA Space Apps Challenge. We used SI tools while building it, and
 this page explains where and how, as the Space Apps rules ask.
 
 ## In short
@@ -46,6 +46,6 @@ this page explains where and how, as the Space Apps rules ask.
 ## Facts and safety
 
 The science facts in the game come from NASA and Canadian Space Agency sources and are listed in the in-game Science
-Log and in [SUBMISSION.md](SUBMISSION.md). LUNA's AI answers are told to stay on space and the game, to keep answers
+Log and in the README's [Science sources](../README.md#science-sources). LUNA's AI answers are told to stay on space and the game, to keep answers
 short and kind, and never to ask for personal information. The server also turns on Google's safety filters and limits
 how many questions each player can ask.
